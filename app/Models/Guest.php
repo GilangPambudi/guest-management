@@ -7,6 +7,8 @@ class Guest extends Model
 {
     protected $fillable = [
         'guest_name',
+        'guest_id_qr_code',
+        'guest_gender',
         'guest_category',
         'guest_contact',
         'guest_address',

@@ -20,7 +20,7 @@ class CoupleController extends Controller
     public function index()
     {
         $breadcrumb = (object)[
-            'title' => 'Liust of Couple',
+            'title' => 'List of Couple',
             'list' => ['Home', 'Couple']
         ];
 
@@ -35,16 +35,13 @@ class CoupleController extends Controller
 
     public function list(Request $request)
     {
-        $couple = Couple::select('couple_id', 'couple_name', 'couple_alias');
+        $couple = Couple::select('couple_id', 'couple_name', 'couple_gender', 'couple_alias', 'is_groom', 'is_bride');
         return DataTables::of($couple)
             ->addIndexColumn() // Tambahkan nomor urut
             ->addColumn('action', function ($couple) {
-                $btn = '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id .
-                    '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id .
-                    '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id .
-                    '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
+                $btn = '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -61,6 +58,7 @@ class CoupleController extends Controller
         $validator = Validator::make($request->all(), [
             'couple_name' => 'required',
             'couple_alias' => 'required',
+            'couple_gender' => 'required|in:Male,Female',
         ]);
 
         if ($validator->fails()) {

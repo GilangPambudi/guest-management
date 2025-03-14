@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guest;
+use App\Models\Couple;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -33,6 +35,17 @@ class HomeController extends Controller
         ];
 
         $activeMenu = 'dashboard';
-        return view('home', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        $totalGuests = Guest::count();
+        $groom = Couple::where('is_groom', true)->first();
+        $bride = Couple::where('is_bride', true)->first();
+
+        return view('home', [
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'activeMenu' => $activeMenu,
+            'totalGuests' => $totalGuests,
+            'groom' => $groom,
+            'bride' => $bride
+        ]);
     }
 }

@@ -1,18 +1,17 @@
-aravel/SKRIPSI/skripsi-manajemen-tamu/resources/views/couple/edit_ajax.blade.php
 @empty($couple)
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Error</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger">
-                    <h5><i class="icon fas fa-ban"></i> Kesalahan!!!</h5>
-                    Data yang anda cari tidak ditemukan
+                    <h5><i class="icon fas fa-ban"></i> Error!!!</h5>
+                    The data you are looking for was not found
                 </div>
-                <a href="{{ url('/couple') }}" class="btn btn-warning">Kembali</a>
+                <a href="{{ url('/couple') }}" class="btn btn-warning">Back</a>
             </div>
         </div>
     </div>
@@ -28,20 +27,38 @@ aravel/SKRIPSI/skripsi-manajemen-tamu/resources/views/couple/edit_ajax.blade.php
                             aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Couple Name</label>
-                        <input value="{{ $couple->couple_name }}" type="text" name="couple_name" id="couple_name" class="form-control" required>
-                        <small id="error-couple_name" class="error-text form-text text-danger"></small>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Name</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $couple->couple_name }}" type="text" name="couple_name" id="couple_name"
+                                class="form-control" required>
+                            <small id="error-couple_name" class="error-text form-text text-danger"></small>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Couple Alias</label>
-                        <input value="{{ $couple->couple_alias }}" type="text" name="couple_alias" id="couple_alias" class="form-control" required>
-                        <small id="error-couple_alias" class="error-text form-text text-danger"></small>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Alias</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $couple->couple_alias }}" type="text" name="couple_alias" id="couple_alias"
+                                class="form-control" required>
+                            <small id="error-couple_alias" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Gender</label>
+                        <div class="col-sm-9">
+                            <select name="couple_gender" id="couple_gender" class="form-control" required>
+                                <option value="Male" {{ $couple->couple_gender == 'Male' ? 'selected' : '' }}>Male
+                                </option>
+                                <option value="Female" {{ $couple->couple_gender == 'Female' ? 'selected' : '' }}>Female
+                                </option>
+                            </select>
+                            <small id="error-couple_gender" class="error-text form-text text-danger"></small>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" data-dismiss="modal" class="btn btn-warning">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </div>
@@ -59,7 +76,10 @@ aravel/SKRIPSI/skripsi-manajemen-tamu/resources/views/couple/edit_ajax.blade.php
                         required: true,
                         minlength: 3,
                         maxlength: 255
-                    }
+                    },
+                    couple_gender: {
+                        required: true,
+                    },
                 },
                 submitHandler: function(form) {
                     $.ajax({

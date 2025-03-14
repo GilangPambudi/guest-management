@@ -11,15 +11,28 @@
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Couple Name</label>
                     <div class="col-sm-9">
-                        <input value="" type="text" name="couple_name" id="couple_name" class="form-control" required>
+                        <input value="" type="text" name="couple_name" id="couple_name" class="form-control"
+                            required>
                         <small id="error-couple_name" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Couple Alias</label>
                     <div class="col-sm-9">
-                        <input value="" type="text" name="couple_alias" id="couple_alias" class="form-control" required>
+                        <input value="" type="text" name="couple_alias" id="couple_alias" class="form-control"
+                            required>
                         <small id="error-couple_alias" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Couple Gender</label>
+                    <div class="col-sm-9">
+                        <select name="couple_gender" id="couple_gender" class="form-control" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        <small id="error-couple_gender" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
             </div>
@@ -44,7 +57,10 @@
                     required: true,
                     minlength: 3,
                     maxlength: 255
-                }
+                },
+                couple_gender: {
+                    required: true,
+                },
             },
             submitHandler: function(form) {
                 $.ajax({
@@ -80,7 +96,7 @@
                         });
                     }
                 });
-                return false;
+                return false; // Prevent standard form submission
             },
             errorElement: 'span',
             errorPlacement: function(error, element) {

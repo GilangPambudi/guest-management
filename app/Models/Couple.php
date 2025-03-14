@@ -12,5 +12,6 @@ class Couple extends Model
     protected $fillable = [
         'couple_name',
         'couple_alias',
+        'couple_gender',
     ];
 }

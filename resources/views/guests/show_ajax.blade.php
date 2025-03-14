@@ -6,33 +6,61 @@
                     aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
-            <div class="form-group">
-                <label for="guest_name">Guest Name</label>
-                <input type="text" class="form-control" id="guest_name" value="{{ $guest->guest_name }}" readonly>
+            <div class="form-group row">
+                <label for="guest_id_qr_code" class="col-sm-4 col-form-label">ID</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_id_qr_code" value="{{ $guest->guest_id_qr_code }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_category">Guest Category</label>
-                <input type="text" class="form-control" id="guest_category" value="{{ $guest->guest_category }}" readonly>
+            <div class="form-group row">
+                <label for="guest_name" class="col-sm-4 col-form-label">Guest Name</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_name" value="{{ $guest->guest_name }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_contact">Guest Contact</label>
-                <input type="text" class="form-control" id="guest_contact" value="{{ $guest->guest_contact }}" readonly>
+            <div class="form-group row">
+                <label for="guest_category" class="col-sm-4 col-form-label">Guest Category</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_category" value="{{ $guest->guest_category }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_address">Guest Address</label>
-                <input type="text" class="form-control" id="guest_address" value="{{ $guest->guest_address }}" readonly>
+            <div class="form-group row">
+                <label for="guest_contact" class="col-sm-4 col-form-label">Guest Contact</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_contact" value="{{ $guest->guest_contact }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_qr_code">Guest QR Code</label>
-                <input type="text" class="form-control" id="guest_qr_code" value="{{ $guest->guest_qr_code }}" readonly>
+            <div class="form-group row">
+                <label for="guest_address" class="col-sm-4 col-form-label">Guest Address</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_address" value="{{ $guest->guest_address }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_attendance_status">Guest Attendance Status</label>
-                <input type="text" class="form-control" id="guest_attendance_status" value="{{ $guest->guest_attendance_status }}" readonly>
+            <div class="form-group row">
+                <label for="guest_qr_code" class="col-sm-4 col-form-label">Guest QR Code</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_qr_code" value="{{ $guest->guest_qr_code }}"
+                        readonly>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="guest_invitation_status">Guest Invitation Status</label>
-                <input type="text" class="form-control" id="guest_invitation_status" value="{{ $guest->guest_invitation_status }}" readonly>
+            <div class="form-group row">
+                <label for="guest_attendance_status" class="col-sm-4 col-form-label">Guest Attendance Status</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_attendance_status"
+                        value="{{ $guest->guest_attendance_status }}" readonly>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="guest_invitation_status" class="col-sm-4 col-form-label">Guest Invitation Status</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="guest_invitation_status"
+                        value="{{ $guest->guest_invitation_status }}" readonly>
+                </div>
             </div>
         </div>
         <div class="modal-footer">

@@ -15,7 +15,9 @@ return new class extends Migration
 
         Schema::create('guests', function (Blueprint $table) {
             $table->id('guest_id');
+            $table->string('guest_id_qr_code', 255);
             $table->string('guest_name', 255);
+            $table->enum('guest_gender', ["Male", "Female"]);
             $table->string('guest_category', 255);
             $table->string('guest_contact', 255);
             $table->string('guest_address', 255);
@@ -24,6 +26,7 @@ return new class extends Migration
             $table->enum('guest_invitation_status', ["Sent", "Opened", "-"]);
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('user_id')->on('users');
+            $table->timestamps();
         });
 
         Schema::enableForeignKeyConstraints();

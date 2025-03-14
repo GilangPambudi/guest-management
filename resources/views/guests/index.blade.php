@@ -1,44 +1,48 @@
 @extends('layouts.template')
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-    <div class="card-header ">
-        <div class="card-tools">
-            <button onclick="modalAction('{{ url('/guests/import') }}')" class="btn btn-success"><i
-                class="fa fa-download"></i> Import Guests</button>
-            <button onclick="modalAction('{{ url('/guests/create_ajax') }}')" class="btn btn-primary">Add
-                Guest</button>
+    <div class="card card-outline card-primary">
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        <div class="card-header ">
+            <div class="card-tools">
+                <button onclick="modalAction('{{ url('/guests/import') }}')" class="btn btn-success"><i
+                        class="fa fa-download"></i> Import Guests</button>
+                <button onclick="modalAction('{{ url('/guests/create_ajax') }}')" class="btn btn-primary">Add
+                    Guest</button>
+            </div>
         </div>
-    </div>
 
-    <div class="card-body">
-        <table class="table table-bordered table-sm table-hover table-striped" id="guest-table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Contact</th>
-                    <th>Address</th>
-                    <th>QR Code</th>
-                    <th>Attendance Status</th>
-                    <th>Invitation Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
+        <div class="card-body">
+            <table class="table table-bordered table-sm table-hover table-striped" id="guest-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        {{-- <th>ID</th> --}}
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Category</th>
+                        <th>Contact</th>
+                        <th>Address</th>
+                        {{-- <th>QR Code</th> --}}
+                        <th>Attendance Status</th>
+                        <th>Invitation Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
 
-    <!-- Modal -->
-    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <!-- Konten modal akan dimuat di sini -->
+        <!-- Modal -->
+        <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <!-- Konten modal akan dimuat di sini -->
+                </div>
             </div>
         </div>
     </div>
@@ -62,20 +66,28 @@
             $('#guest-table').DataTable({
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: {
                     url: "{{ url('guests/list') }}",
                     type: "POST",
                 },
-                columns: [
-                    {
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
                     },
+                    // {
+                    //     data: 'guest_id_qr_code',
+                    //     name: 'guest_id_qr_code'
+                    // },
                     {
                         data: 'guest_name',
                         name: 'guest_name'
+                    },
+                    {
+                        data: 'guest_gender',
+                        name: 'guest_gender'
                     },
                     {
                         data: 'guest_category',
@@ -92,10 +104,10 @@
                             return data.length > 20 ? data.substr(0, 20) + '...' : data;
                         }
                     },
-                    {
-                        data: 'guest_qr_code',
-                        name: 'guest_qr_code'
-                    },
+                    // {
+                    //     data: 'guest_qr_code',
+                    //     name: 'guest_qr_code'
+                    // },
                     {
                         data: 'guest_attendance_status',
                         name: 'guest_attendance_status'

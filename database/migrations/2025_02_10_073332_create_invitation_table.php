@@ -18,6 +18,10 @@ return new class extends Migration
             $table->unsignedBigInteger('guest_id');
             $table->foreign('guest_id')->references('guest_id')->on('guests');
             $table->string('wedding_name', 255);
+            $table->unsignedBigInteger('groom_id');
+            $table->foreign('groom_id')->references('couple_id')->on('couples');
+            $table->unsignedBigInteger('bride_id');
+            $table->foreign('bride_id')->references('couple_id')->on('couples');
             $table->date('wedding_date');
             $table->timestamp('wedding_time_start');
             $table->timestamp('wedding_time_end');

@@ -20,12 +20,12 @@ class GuestController extends Controller
     public function index()
     {
         $breadcrumb = (object)[
-            'title' => 'List of guests',
+            'title' => 'List of Guest',
             'list' => ['Home', 'Guests']
         ];
 
         $page = (object)[
-            'title' => 'List of guests'
+            'title' => 'List of Guests'
         ];
 
         $activeMenu = 'guests';
@@ -35,7 +35,7 @@ class GuestController extends Controller
 
     public function list(Request $request)
     {
-        $guest = Guest::select('guest_id', 'guest_name', 'guest_category', 'guest_contact', 'guest_address', 'guest_qr_code', 'guest_attendance_status', 'guest_invitation_status');
+        $guest = Guest::select('guest_id', 'guest_name', 'guest_id_qr_code', 'guest_gender', 'guest_category', 'guest_contact', 'guest_address', 'guest_qr_code', 'guest_attendance_status', 'guest_invitation_status');
         return DataTables::of($guest)
             ->addIndexColumn() // Tambahkan nomor urut
             ->addColumn('action', function ($guest) {
@@ -57,8 +57,10 @@ class GuestController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
+            'guest_id_qr_code' => 'required',
+            'guest_gender' => 'required|in:Male,Female',
             'guest_category' => 'required',
-            'guest_contact' => 'required',
+            'guest_contact' => 'required|unique:guests,guest_contact',
             'guest_address' => 'required',
             'guest_qr_code' => 'required',
             'guest_attendance_status' => 'required',
@@ -73,6 +75,14 @@ class GuestController extends Controller
         Guest::create($request->all());
 
         return response()->json(['success' => 'Guest created successfully.']);
+    }
+
+    // Mengecek apakah nomor sudah terdaftar atau belum
+    public function check_contact(Request $request)
+    {
+        $guest_contact = $request->input('guest_contact');
+        $exists = Guest::where('guest_contact', $guest_contact)->exists();
+        return response()->json(!$exists);
     }
 
     public function show_ajax($id)
@@ -92,6 +102,8 @@ class GuestController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
+            'guest_id_qr_code' => 'required',
+            'guest_gender' => 'required|in:Male,Female',
             'guest_category' => 'required',
             'guest_contact' => 'required',
             'guest_address' => 'required',
@@ -169,12 +181,14 @@ class GuestController extends Controller
                     if ($row > 1) {
                         $insert[] = [
                             'guest_name' => $value['A'],
-                            'guest_category' => $value['B'],
-                            'guest_contact' => $value['C'],
-                            'guest_address' => $value['D'],
-                            'guest_qr_code' => $value['E'],
-                            'guest_attendance_status' => $value['F'],
-                            'guest_invitation_status' => $value['G'],
+                            'guest_id_qr_code' => $value['B'],
+                            'guest_gender' => $value['C'],
+                            'guest_category' => $value['D'],
+                            'guest_contact' => $value['E'],
+                            'guest_address' => $value['F'],
+                            'guest_qr_code' => $value['G'],
+                            'guest_attendance_status' => $value['H'],
+                            'guest_invitation_status' => $value['I'],
                             'user_id' => Auth::user()->user_id,
                             'created_at' => now(),
                         ];
@@ -184,7 +198,8 @@ class GuestController extends Controller
                     Guest::insertOrIgnore($insert);
                     return response()->json([
                         'status' => true,
-                        'message' => 'Data berhasil diimport'
+                        'message' => 'Data berhasil diimport',
+                        'refresh' => true // Add this line to indicate that the datatable should be refreshed
                     ]);
                 } else {
                     return response()->json([

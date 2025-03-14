@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id('couple_id');
             $table->string('couple_name');
             $table->string('couple_alias');
+            $table->enum('couple_gender', ["Male", "Female"]);
+            $table->boolean('is_groom')->default(false);
+            $table->boolean('is_bride')->default(false);
             $table->timestamps();
         });
     }

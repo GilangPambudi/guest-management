@@ -33,12 +33,16 @@
                     </div>
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
-                            <th class="text-right col-3">Couple Name:</th>
+                            <th class="text-right col-3">Name:</th>
                             <td class="col-9">{{ $couple->couple_name }}</td>
                         </tr>
                         <tr>
-                            <th class="text-right col-3">Couple Alias:</th>
+                            <th class="text-right col-3">Alias:</th>
                             <td class="col-9">{{ $couple->couple_alias }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right col-3">Gender:</th>
+                            <td class="col-9">{{ $couple->couple_gender }}</td>
                         </tr>
                     </table>
                 </div>

@@ -31,6 +31,7 @@ Route::group(['prefix' => 'guests', 'middleware' => 'auth'], function () {
     Route::post('/list', [GuestController::class, 'list']);
     Route::get('/import', [GuestController::class, 'import']);
     Route::post('/import_ajax', [GuestController::class, 'import_process']);
+    Route::post('/check-contact', [GuestController::class, 'check_contact']);
     Route::get('/{id}/show_ajax', [GuestController::class, 'show_ajax']);
     Route::get('/create_ajax', [GuestController::class, 'create_ajax']);
     Route::post('/store_ajax', [GuestController::class, 'store_ajax']);

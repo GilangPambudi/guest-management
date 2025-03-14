@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Guest Management</title>
+    <title>QREW</title>
+    <link rel="icon" href="{{ asset('logoQR-transparent.png') }}" type="image/png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -23,6 +24,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.0.1/css/fixedColumns.dataTables.min.css">
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -40,20 +42,7 @@
 
             <!-- Main content -->
             <section class="content">
-
-                <!-- Default box -->
-                <div class="card card-outline card-primary">
                     @yield('content')
-                    {{-- <div class="card-header">
-                        <h3 class="card-title">Title</h3>
-                    </div> --}}
-                    {{-- <div class="card-body">
-                        
-                    </div> --}}
-                    <!-- /.card-body -->
-                </div>
-                <!-- /.card -->
-
             </section>
             <!-- /.content -->
         </div>
@@ -86,6 +75,8 @@
     <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/4.0.1/js/dataTables.fixedColumns.min.js"></script>
+    <!-- ...existing code... -->
 
 
     <!-- jquery-validation -->

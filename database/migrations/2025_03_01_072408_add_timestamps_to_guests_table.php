@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 class AddTimestampsToGuestsTable extends Migration
 {
-    public function up()
-    {
-        Schema::table('guests', function (Blueprint $table) {
-            $table->timestamps();
-        });
-    }
+    // public function up()
+    // {
+    //     Schema::table('guests', function (Blueprint $table) {
+    //         $table->timestamps();
+    //     });
+    // }
 
-    public function down()
-    {
-        Schema::table('guests', function (Blueprint $table) {
-            $table->dropTimestamps();
-        });
-    }
+    // public function down()
+    // {
+    //     Schema::table('guests', function (Blueprint $table) {
+    //         $table->dropTimestamps();
+    //     });
+    // }
 }
