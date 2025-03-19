@@ -65,26 +65,14 @@
                         success: function(response) {
                             if (response.success) {
                                 $('#myModal').modal('hide');
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: response.message
-                                });
+                                toastr.success('Name successfully deleted', 'Success', { positionClass: 'toast-bottom-right' });
                                 $('#couple-table').DataTable().ajax.reload();
                             } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error Occurred',
-                                    text: response.message
-                                });
+                                toastr.error(response.message, 'Error', { positionClass: 'toast-bottom-right' });
                             }
                         },
                         error: function(response) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error Occurred',
-                                text: 'Failed to delete couple'
-                            });
+                            toastr.error('Failed to delete couple', 'Error', { positionClass: 'toast-bottom-right' });
                         }
                     });
                     return false;

@@ -29,8 +29,8 @@
                     <!-- small box -->
                     <div class="small-box bg-primary">
                         <div class="inner">
-                            <h3> 1 </h3>
-                            <p>Total Confirmed Attendance</p>
+                            <h3>{{ $totalAttendance }}</h3>
+                            <p>Confirmed Attendance</p>
                         </div>
                         <div class="icon">
                             <i class="ion ion-stats-bars"></i>

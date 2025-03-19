@@ -33,6 +33,10 @@
                     </div>
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
+                            <th class="text-right col-3">Guest ID:</th>
+                            <td class="col-9">{{ $guest->guest_id_qr_code }}</td>
+                        </tr>
+                        <tr>
                             <th class="text-right col-3">Guest Name:</th>
                             <td class="col-9">{{ $guest->guest_name }}</td>
                         </tr>
@@ -47,10 +51,6 @@
                         <tr>
                             <th class="text-right col-3">Guest Address:</th>
                             <td class="col-9">{{ $guest->guest_address }}</td>
-                        </tr>
-                        <tr>
-                            <th class="text-right col-3">Guest QR Code:</th>
-                            <td class="col-9">{{ $guest->guest_qr_code }}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Guest Attendance Status:</th>

@@ -19,6 +19,8 @@ class CoupleController extends Controller
 
     public function index()
     {
+        $title = 'Couple';
+
         $breadcrumb = (object)[
             'title' => 'List of Couple',
             'list' => ['Home', 'Couple']
@@ -30,7 +32,7 @@ class CoupleController extends Controller
 
         $activeMenu = 'couple';
 
-        return view('couple.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        return view('couple.index', [ 'title' => $title, 'breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
     }
 
     public function list(Request $request)
@@ -39,8 +41,8 @@ class CoupleController extends Controller
         return DataTables::of($couple)
             ->addIndexColumn() // Tambahkan nomor urut
             ->addColumn('action', function ($couple) {
-                $btn = '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                // $btn = '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn = '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/couple/' . $couple->couple_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
             })

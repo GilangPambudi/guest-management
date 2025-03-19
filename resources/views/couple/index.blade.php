@@ -10,7 +10,7 @@
         @endif
         <div class="card-header">
             <div class="card-tools">
-                <button onclick="modalAction('{{ url('couple/create_ajax') }}')" class="btn btn-primary">Add
+                <button onclick="modalAction('{{ url('couple/create_ajax') }}')" class="btn btn-primary"> Add
                     Name</button>
             </div>
         </div>
@@ -21,8 +21,8 @@
                     <tr>
                         <th>No</th>
                         <th>Name</th>
-                        <th>Gender</th>
                         <th>Alias</th>
+                        <th>Gender</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -73,12 +73,12 @@
                         name: 'couple_name'
                     },
                     {
-                        data: 'couple_gender',
-                        name: 'couple_gender'
-                    },
-                    {
                         data: 'couple_alias',
                         name: 'couple_alias'
+                    },
+                    {
+                        data: 'couple_gender',
+                        name: 'couple_gender'
                     },
                     {
                         data: 'action',

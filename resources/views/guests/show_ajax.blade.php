@@ -44,8 +44,13 @@
             <div class="form-group row">
                 <label for="guest_qr_code" class="col-sm-4 col-form-label">Guest QR Code</label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" id="guest_qr_code" value="{{ $guest->guest_qr_code }}"
-                        readonly>
+                    <button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#qrCodeCollapse"
+                        aria-expanded="false" aria-controls="qrCodeCollapse">
+                        Show QR Code
+                    </button>
+                    <div class="collapse mt-2" id="qrCodeCollapse">
+                        <img src="{{ asset($guest->guest_qr_code) }}" alt="Guest QR Code" class="img-fluid">
+                    </div>
                 </div>
             </div>
             <div class="form-group row">

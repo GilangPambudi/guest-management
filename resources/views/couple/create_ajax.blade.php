@@ -70,30 +70,27 @@
                     success: function(response) {
                         if (response.success) {
                             $('#myModal').modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Name Added',
-                                text: response.message
-                            });
+                            toastr.options = {
+                                "positionClass": "toast-bottom-right"
+                            };
+                            toastr.success('Name successfully added', 'Success');
                             $('#couple-table').DataTable().ajax.reload();
                         } else {
                             $('.error-text').text('');
                             $.each(response.errors, function(prefix, val) {
                                 $('#error-' + prefix).text(val[0]);
                             });
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Something Wrong',
-                                text: response.message
-                            });
+                            toastr.options = {
+                                "positionClass": "toast-bottom-right"
+                            };
+                            toastr.error(response.message, 'Error');
                         }
                     },
                     error: function(response) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Something Wrong',
-                            text: 'Failed to add couple'
-                        });
+                        toastr.options = {
+                            "positionClass": "toast-bottom-right"
+                        };
+                        toastr.error('Failed to add couple', 'Error');
                     }
                 });
                 return false; // Prevent standard form submission

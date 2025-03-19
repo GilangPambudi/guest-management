@@ -71,14 +71,6 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">Guest QR Code</label>
-                        <div class="col-sm-9">
-                            <input value="{{ $guest->guest_qr_code }}" type="text" name="guest_qr_code" id="guest_qr_code"
-                                class="form-control" required>
-                            <small id="error-guest_qr_code" class="error-text form-text text-danger"></small>
-                        </div>
-                    </div>
-                    <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Guest Attendance Status</label>
                         <div class="col-sm-9">
                             <select name="guest_attendance_status" id="guest_attendance_status" class="form-control" required>
@@ -135,9 +127,6 @@
                         required: true,
                         minlength: 3,
                         maxlength: 255
-                    },
-                    guest_qr_code: {
-                        required: true,
                     },
                     guest_attendance_status: {
                         required: true

@@ -25,6 +25,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $title = 'Dashboard';
+
         $breadcrumb = (object)[
             'title' => 'Dashboard',
             'list' => ['Home', 'Dashboard']
@@ -36,14 +38,17 @@ class HomeController extends Controller
 
         $activeMenu = 'dashboard';
         $totalGuests = Guest::count();
+        $totalAttendance = Guest::where('guest_attendance_status', 'Yes')->count();
         $groom = Couple::where('is_groom', true)->first();
         $bride = Couple::where('is_bride', true)->first();
 
         return view('home', [
+            'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
             'totalGuests' => $totalGuests,
+            'totalAttendance' => $totalAttendance,
             'groom' => $groom,
             'bride' => $bride
         ]);

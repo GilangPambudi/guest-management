@@ -11,8 +11,10 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.6",
         "phpoffice/phpspreadsheet": "^2.3",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "yajra/laravel-datatables": "11.0",
-        "yajra/laravel-datatables-oracle": "11"
+        "yajra/laravel-datatables-oracle": "11",
+        "ext-imagick": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

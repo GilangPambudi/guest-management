@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('Quick Response Elegant Wedding', 'Laravel'),
+    'name' => env('Quick Response Elegant Wedding', 'Quick Response Elegant Wedding'),
 
     /*
     |--------------------------------------------------------------------------

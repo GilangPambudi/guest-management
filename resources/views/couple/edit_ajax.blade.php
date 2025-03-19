@@ -89,10 +89,8 @@
                         success: function(response) {
                             if (response.success) {
                                 $('#myModal').modal('hide');
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: response.message
+                                toastr.success('Name successfully updated', 'Success', {
+                                    positionClass: 'toast-bottom-right'
                                 });
                                 $('#couple-table').DataTable().ajax.reload();
                             } else {
@@ -100,10 +98,8 @@
                                 $.each(response.errors, function(prefix, val) {
                                     $('#error-' + prefix).text(val[0]);
                                 });
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Something Wrong',
-                                    text: response.message
+                                toastr.error(response.message, 'Error', {
+                                    positionClass: 'toast-bottom-right'
                                 });
                             }
                         }
