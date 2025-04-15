@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
-use App\Models\Couple;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;

@@ -24,12 +24,12 @@
                     <tr>
                         <th>No</th>
                         <th>Wedding Name</th>
-                        <th>Wedding Date</th>
-                        <th>Wedding Start</th>
-                        <th>Wedding End</th>
-                        <th>Wedding Venue</th>
-                        <th>Wedding Location</th>
-                        <th>Wedding Maps</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Venue</th>
+                        <th>Location</th>
+                        <th>Maps URL</th>
                         <th>Action</th>
                     </tr>
                 </thead>

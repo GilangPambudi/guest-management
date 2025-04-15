@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
-use App\Models\Couple;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
 
@@ -48,7 +47,7 @@ class HomeController extends Controller
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
-            'totalInvitation' => $totalAttendance,
+            'totalInvitation' => $totalInvitation,
             'totalGuests' => $totalGuests,
             'totalAttendance' => $totalAttendance,
         ]);

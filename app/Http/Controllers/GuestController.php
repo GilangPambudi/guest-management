@@ -12,7 +12,6 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Models\Couple;
 use App\Models\Invitation;
 
 class GuestController extends Controller
@@ -79,7 +78,8 @@ class GuestController extends Controller
         return DataTables::of($guest)
             ->addIndexColumn()
             ->addColumn('action', function ($guest) {
-                $btn = '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm">Copy ID</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
@@ -319,22 +319,40 @@ class GuestController extends Controller
 
     public function invitation_letter($guest_id_qr_code)
     {
-        // Cari tamu berdasarkan guest_id_qr_code
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
-
         if (!$guest) {
-            // Jika tamu tidak ditemukan, tampilkan halaman 404
-            abort(404, 'Guest not found');
+            dd('Guest not found');
         }
 
-        // Ambil data undangan pertama
-        $invitation = Invitation::with(['groom', 'bride'])->first();
+        $invitation = Invitation::where('invitation_id', $guest->invitation_id)->first();
+        if (!$invitation) {
+            dd('Invitation not found');
+        }
 
-        $groom = $invitation && $invitation->groom ? $invitation->groom->couple_name : 'Groom';
-        $bride = $invitation && $invitation->bride ? $invitation->bride->couple_name : 'Bride';
+        // Ambil data groom dan bride dari undangan
+        $groomName = $invitation->groom_name;
+        $brideName = $invitation->bride_name;
+        $weddingDate = $invitation->wedding_date;
+        $weddingTimeStart = $invitation->wedding_time_start;
+        $weddingTimeEnd = $invitation->wedding_time_end;
+        $weddingVenue = $invitation->wedding_venue;
+        $weddingLocation = $invitation->wedding_location;
+        $weddingMaps = $invitation->wedding_maps;
+        $weddingImage = $invitation->wedding_image;
 
-        // Tampilkan view dengan data tamu, groom, dan bride
-        return view('guests.invitation_letter', compact('guest', 'groom', 'bride'));
+        // Tampilkan view dengan data undangan
+        return view('guests.invitation_letter', [
+            'guest' => $guest,
+            'groomName' => $groomName,
+            'brideName' => $brideName,
+            'weddingDate' => $weddingDate,
+            'weddingTimeStart' => $weddingTimeStart,
+            'weddingTimeEnd' => $weddingTimeEnd,
+            'weddingVenue' => $weddingVenue,
+            'weddingLocation' => $weddingLocation,
+            'weddingMaps' => $weddingMaps,
+            'weddingImage' => $weddingImage
+        ]);
     }
 
     public function welcome_gate($guest_id_qr_code)

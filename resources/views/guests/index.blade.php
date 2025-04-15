@@ -61,7 +61,7 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>ID</th>
+                        {{-- <th>ID</th> --}}
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Category</th>
@@ -70,7 +70,7 @@
                         <th>Attendance Status</th>
                         <th>Arrival Time</th>
                         <th>Invitation Status</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
             </table>
@@ -104,6 +104,9 @@
             tempInput.select();
             document.execCommand("copy");
             document.body.removeChild(tempInput);
+            toastr.options = {
+                "positionClass": "toast-bottom-right",
+            };
             toastr.success('Copied to clipboard!');
         }
 
@@ -135,11 +138,11 @@
                         orderable: false,
                         searchable: false
                     },
-                    {
-                        data: 'guest_id_qr_code',
-                        name: 'guest_id_qr_code',
-                        className: 'text-nowrap'
-                    },
+                    // {
+                    //     data: 'guest_id_qr_code',
+                    //     name: 'guest_id_qr_code',
+                    //     className: 'text-nowrap'
+                    // },
                     {
                         data: 'guest_name',
                         name: 'guest_name',

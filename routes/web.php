@@ -50,4 +50,4 @@ Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
 });
 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
-Route::get('/invitation/{guest_id_qr_code}', [GuestController::class, 'invitation_letter']);
+Route::get('/invitation-letter/{guest_id_qr_code}', [GuestController::class, 'invitation_letter']);
