@@ -11,7 +11,8 @@
                 <div class="col-md-6 text-center">
                     <div class="mb-4">
                         <button id="cameraModeBtn" class="btn btn-primary" onclick="switchToCameraMode()">Use Camera</button>
-                        <button id="manualModeBtn" class="btn btn-secondary d-none" onclick="switchToManualMode()">Use Manual Scanner</button>
+                        <button id="manualModeBtn" class="btn btn-secondary d-none" onclick="switchToManualMode()">Use
+                            Manual Scanner</button>
                     </div>
                     <div id="cameraScanner" style="display: none;">
                         <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
@@ -22,10 +23,11 @@
                 <div class="col-md-6 text-center">
                     <div id="manualScanner">
                         <form id="scanForm">
-                            <input type="text" id="manualScanInput" class="form-control mb-3" placeholder="Scan QR Code here" autofocus>
+                            <input type="text" id="manualScanInput" class="form-control mb-3"
+                                placeholder="Scan QR Code here" autofocus>
                             <div class="d-flex justify-content-center">
-                                <button type="button" class="btn btn-success mr-2" onclick="handleManualScan()">Submit</button>
-                                <a href="{{ url('/home') }}" class="btn btn-primary">Back to Home</a>
+                                <a href="{{ url('/guests') }}" class="btn btn-secondary mr-2">Back</a>
+                                <button type="button" class="btn btn-primary" onclick="handleManualScan()">Submit</button>
                             </div>
                         </form>
                     </div>
@@ -86,7 +88,7 @@
         // Fungsi yang dieksekusi ketika QR Code berhasil dipindai
         function onScanSuccess(decodedText, decodedResult) {
             // Redirect ke link hasil scan
-            window.location.href = decodedText;
+            window.location.href = `/welcome-gate/${decodedText}`;
 
             // Membersihkan area scan setelah action di atas
             if (html5QRCodeScanner) {
@@ -98,13 +100,26 @@
         function handleManualScan() {
             const input = document.getElementById('manualScanInput').value;
             if (input) {
-                // Redirect ke link hasil scan dengan prefix /invitation/
-                window.location.href = `/invitation/${input}`;
+                // Kirim permintaan ke backend untuk mencatat waktu kedatangan
+                fetch(`/welcome-gate/${input}`, {
+                        method: 'GET',
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = `/welcome-gate/${input}`;
+                        } else {
+                            alert('Guest not found or an error occurred.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing the scan.');
+                    });
             }
         }
 
         // Default ke mode manual saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             switchToManualMode();
         });
     </script>

@@ -12,7 +12,8 @@
             <div class="card-tools">
                 <button onclick="modalAction('{{ url('/invitation/import') }}')" class="btn btn-success"><i
                         class="fa fa-download"></i> Import Invitations</button>
-                <button onclick="modalAction('{{ url('/invitation/create_ajax') }}')" class="btn btn-primary">Add
+                <button onclick="modalAction('{{ url('/invitation/create_ajax') }}')" class="btn btn-primary"><i
+                    class="fa fa-plus-circle"></i> Add
                     Invitation</button>
             </div>
         </div>
@@ -23,13 +24,12 @@
                     <tr>
                         <th>No</th>
                         <th>Wedding Name</th>
-                        <th>Groom</th>
-                        <th>Bride</th>
                         <th>Wedding Date</th>
-                        <th>Wedding Time Start</th>
-                        <th>Wedding Time End</th>
-                        <th>Location</th>
-                        <th>Status</th>
+                        <th>Wedding Start</th>
+                        <th>Wedding End</th>
+                        <th>Wedding Venue</th>
+                        <th>Wedding Location</th>
+                        <th>Wedding Maps</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -70,8 +70,7 @@
                     url: "{{ url('invitation/list') }}",
                     type: "POST",
                 },
-                columns: [
-                    {
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -82,35 +81,53 @@
                         name: 'wedding_name'
                     },
                     {
-                        data: 'groom_id',
-                        name: 'groom_id'
-                    },
-                    {
-                        data: 'bride_id',
-                        name: 'bride_id'
-                    },
-                    {
                         data: 'wedding_date',
-                        name: 'wedding_date'
+                        name: 'wedding_date',
+                        render: function(data, type, row) {
+                            const date = new Date(data);
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const year = date.getFullYear();
+                            return `${day}/${month}/${year}`;
+                        }
                     },
                     {
                         data: 'wedding_time_start',
-                        name: 'wedding_time_start'
+                        name: 'wedding_time_start',
+                        render: function(data, type, row) {
+                            const date = new Date(`1970-01-01T${data}Z`);
+                            const hours = String(date.getUTCHours()).padStart(2, '0');
+                            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                            return `${hours}:${minutes}`;
+                        }
                     },
                     {
                         data: 'wedding_time_end',
-                        name: 'wedding_time_end'
+                        name: 'wedding_time_end',
+                        render: function(data, type, row) {
+                            const date = new Date(`1970-01-01T${data}Z`);
+                            const hours = String(date.getUTCHours()).padStart(2, '0');
+                            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                            return `${hours}:${minutes}`;
+                        }
                     },
                     {
-                        data: 'location',
-                        name: 'location',
+                        data: 'wedding_venue',
+                        name: 'wedding_venue'
+                    },
+                    {
+                        data: 'wedding_location',
+                        name: 'wedding_location',
                         render: function(data, type, row) {
                             return data.length > 20 ? data.substr(0, 20) + '...' : data;
                         }
                     },
                     {
-                        data: 'status',
-                        name: 'status'
+                        data: 'wedding_maps',
+                        name: 'wedding_maps',
+                        render: function(data, type, row) {
+                            return `<a href="${data}" target="_blank">View Map</a>`;
+                        }
                     },
                     {
                         data: 'action',

@@ -116,10 +116,23 @@
                 }
             },
             submitHandler: function(form) {
-                var timestamp = Date.now();
-                var guestName = $("#guest_name").val().replace(/\s+/g, '-').toLowerCase();
-                $("#guest_id_qr_code").val(timestamp + '-' + guestName);
-                $("#guest_qr_code").val(timestamp + '-' + guestName);
+                var timestamp = Date.now(); // Ambil timestamp
+                var cuidValue = cuid().slice(0, 8); // Ambil 8 karakter pertama dari cuid
+                var guestName = $("#guest_name").val().replace(/\s+/g, '-').toLowerCase(); // Format nama
+                var guestIdQrCode = `${timestamp}-${cuidValue}-${guestName}`; // Gabungkan format
+
+                $("#guest_id_qr_code").val(guestIdQrCode); // Set nilai ke input hidden
+                $("#guest_qr_code").val(guestIdQrCode);
+
+                // Tampilkan SweetAlert loading
+                Swal.fire({
+                    title: 'Loading...',
+                    text: 'Generating QR Code and processing your request. Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 $.ajax({
                     url: form.action,

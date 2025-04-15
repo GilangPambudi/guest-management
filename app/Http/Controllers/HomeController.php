@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\Couple;
+use App\Models\Invitation;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -37,20 +38,19 @@ class HomeController extends Controller
         ];
 
         $activeMenu = 'dashboard';
+        $totalInvitation = Invitation::count();
         $totalGuests = Guest::count();
         $totalAttendance = Guest::where('guest_attendance_status', 'Yes')->count();
-        $groom = Couple::where('is_groom', true)->first();
-        $bride = Couple::where('is_bride', true)->first();
+    
 
         return view('home', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
+            'totalInvitation' => $totalAttendance,
             'totalGuests' => $totalGuests,
             'totalAttendance' => $totalAttendance,
-            'groom' => $groom,
-            'bride' => $bride
         ]);
     }
 }

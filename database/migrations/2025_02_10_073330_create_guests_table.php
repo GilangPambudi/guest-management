@@ -22,8 +22,9 @@ return new class extends Migration
             $table->string('guest_contact', 255);
             $table->string('guest_address', 255);
             $table->string('guest_qr_code', 255);
-            $table->enum('guest_attendance_status', ["Yes", "No", "Pending", "-"]);
-            $table->enum('guest_invitation_status', ["Sent", "Opened", "-"]);
+            $table->string('guest_attendance_status', 255)->default('-');
+            $table->string('guest_arrival_time', 255)->default('-');
+            $table->string('guest_invitation_status', 255)->default('-');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('user_id')->on('users');
             $table->timestamps();

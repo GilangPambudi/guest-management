@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ class Guest extends Model
         'guest_qr_code',
         'guest_attendance_status',
         'guest_invitation_status',
+        'guest_arrival_time',
         'user_id',
     ];
 
@@ -23,5 +25,10 @@ class Guest extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function invitation()
+    {
+        return $this->belongsTo(Invitation::class, 'event_id', 'event_id');
     }
 }

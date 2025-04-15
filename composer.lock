@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b72524a1ff48103510ea787b27c740d4",
+    "content-hash": "4c4d8397d0243a2f0c45a4985a3fa14d",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -119,6 +119,52 @@
                 }
             ],
             "time": "2025-02-28T13:11:00+00:00"
+        },
+        {
+            "name": "calicastle/cuid",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CaliCastle/cuid.git",
+                "reference": "de6ea3ae7a71209a44b9536408e0a72c35ca98fc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CaliCastle/cuid/zipball/de6ea3ae7a71209a44b9536408e0a72c35ca98fc",
+                "reference": "de6ea3ae7a71209a44b9536408e0a72c35ca98fc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CaliCastle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cali Castle",
+                    "email": "cali@calicastle.com"
+                }
+            ],
+            "description": "A CUID generator",
+            "keywords": [
+                "Unique ID",
+                "collision free id",
+                "cuid",
+                "uuid"
+            ],
+            "support": {
+                "issues": "https://github.com/CaliCastle/cuid/issues",
+                "source": "https://github.com/CaliCastle/cuid/tree/v2.0.0"
+            },
+            "time": "2021-03-19T07:45:28+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -9449,7 +9495,8 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "ext-imagick": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"

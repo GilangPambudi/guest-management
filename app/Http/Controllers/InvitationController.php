@@ -8,6 +8,7 @@ use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class InvitationController extends Controller
 {
@@ -29,18 +30,37 @@ class InvitationController extends Controller
 
         $activeMenu = 'invitation';
 
-        return view('invitation.index', ['title' => $title, 'breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        // Ambil semua data invitation
+        $invitations = Invitation::all();
+
+        return view('invitation.index', [
+            'title' => $title,
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'activeMenu' => $activeMenu,
+            'invitations' => $invitations
+        ]);
     }
 
     public function list(Request $request)
     {
-        $invitation = Invitation::select('invitation_id', 'guest_id', 'wedding_name', 'groom_id', 'bride_id', 'wedding_date', 'wedding_time_start', 'wedding_time_end', 'location', 'status', 'opened_at');
+        $invitation = Invitation::select(
+            'invitation_id',
+            'wedding_name',
+            'wedding_date',
+            'wedding_time_start',
+            'wedding_time_end',
+            'wedding_venue',
+            'wedding_location',
+            'wedding_maps',
+        );
+
         return DataTables::of($invitation)
-            ->addIndexColumn() // Tambahkan nomor urut
-            ->addColumn('action', function ($invitation) {
-                $btn = '<button onclick="modalAction(\'' . url('/invitation/' . $invitation->invitation_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation->invitation_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
+            ->addIndexColumn()
+            ->addColumn('action', function ($event) {
+                $btn = '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">View</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -49,32 +69,129 @@ class InvitationController extends Controller
 
     public function create_ajax()
     {
-        $grooms = Couple::where('couple_gender', 'Male')->get();
-        $brides = Couple::where('couple_gender', 'Female')->get();
         $guests = Guest::all();
-        return view('invitation.create_ajax', compact('grooms', 'brides', 'guests'));
+        return view('invitation.create_ajax');
     }
 
     public function store_ajax(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'guest_id' => 'required|exists:guests,guest_id',
-            'wedding_name' => 'required',
-            'groom_id' => 'required|exists:couple,couple_id',
-            'bride_id' => 'required|exists:couple,couple_id',
+            'wedding_name' => 'required|string|max:255',
+            'groom_name' => 'required|string|max:255',
+            'bride_name' => 'required|string|max:255',
+            'groom_alias' => 'nullable|string|max:50',
+            'bride_alias' => 'nullable|string|max:50',
             'wedding_date' => 'required|date',
             'wedding_time_start' => 'required|date_format:H:i',
-            'wedding_time_end' => 'required|date_format:H:i',
-            'location' => 'required',
-            'status' => 'required|in:Pending,Confirmed,Cancelled',
+            'wedding_time_end' => 'required|date_format:H:i|after:wedding_time_start',
+            'wedding_venue' => 'required|string|max:255',
+            'wedding_location' => 'required|string|max:255',
+            'wedding_maps' => 'nullable|url',
+            'wedding_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()]);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        Invitation::create($request->all());
+        $data = $request->all();
+
+        // Handle file upload for wedding_image
+        if ($request->hasFile('wedding_image')) {
+            $file = $request->file('wedding_image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/wedding_images'), $filename);
+            $data['wedding_image'] = 'uploads/wedding_images/' . $filename;
+        }
+
+        Invitation::create($data);
 
         return response()->json(['success' => 'Invitation created successfully.']);
+    }
+
+    public function show_ajax($id)
+    {
+        $invitation = Invitation::find($id);
+        if ($invitation) {
+            $invitation->wedding_time_start = Carbon::parse($invitation->wedding_time_start)->format('H:i');
+            $invitation->wedding_time_end = Carbon::parse($invitation->wedding_time_end)->format('H:i');
+        }
+        return view('invitation.show_ajax', ['invitation' => $invitation]);
+    }
+
+    public function edit_ajax($id)
+    {
+        $invitation = Invitation::find($id);
+
+        // Format waktu menjadi hh:mm
+        if ($invitation) {
+            $invitation->wedding_time_start = Carbon::parse($invitation->wedding_time_start)->format('H:i');
+            $invitation->wedding_time_end = Carbon::parse($invitation->wedding_time_end)->format('H:i');
+        }
+
+        return view('invitation.edit_ajax', ['invitation' => $invitation]);
+    }
+
+    public function update_ajax(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'wedding_name' => 'required|string|max:255',
+            'groom_name' => 'required|string|max:255',
+            'bride_name' => 'required|string|max:255',
+            'wedding_date' => 'required|date',
+            'wedding_time_start' => 'required|date_format:H:i',
+            'wedding_time_end' => 'required|date_format:H:i|after:wedding_time_start',
+            'wedding_venue' => 'required|string|max:255',
+            'wedding_location' => 'required|string|max:255',
+            'wedding_maps' => 'nullable|url',
+            'wedding_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $invitation = Invitation::find($id);
+        $data = $request->all();
+
+        // Handle file upload for wedding_image
+        if ($request->hasFile('wedding_image')) {
+            // Hapus gambar lama jika ada
+            if ($invitation->wedding_image && file_exists(public_path($invitation->wedding_image))) {
+                unlink(public_path($invitation->wedding_image));
+            }
+
+            // Simpan gambar baru
+            $file = $request->file('wedding_image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/wedding_images'), $filename);
+            $data['wedding_image'] = 'uploads/wedding_images/' . $filename;
+        }
+
+        $invitation->update($data);
+
+        return response()->json(['success' => 'Invitation updated successfully.']);
+    }
+
+    public function confirm_ajax($id)
+    {
+        $invitation = Invitation::find($id);
+        return view('invitation.confirm_ajax')->with('invitation', $invitation);
+    }
+
+    public function delete_ajax($id)
+    {
+        $invitation = Invitation::find($id);
+
+        if ($invitation) {
+            // Hapus file gambar jika ada
+            if ($invitation->wedding_image && file_exists(public_path($invitation->wedding_image))) {
+                unlink(public_path($invitation->wedding_image));
+            }
+
+            $invitation->delete();
+        }
+
+        return response()->json(['success' => 'Invitation deleted successfully.']);
     }
 }

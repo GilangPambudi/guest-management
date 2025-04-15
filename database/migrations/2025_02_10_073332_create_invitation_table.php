@@ -15,19 +15,25 @@ return new class extends Migration
 
         Schema::create('invitation', function (Blueprint $table) {
             $table->id('invitation_id');
-            $table->foreign('guest_id')->references('guest_id')->on('guests');
             $table->string('wedding_name', 255);
-            $table->unsignedBigInteger('groom_id');
-            $table->foreign('groom_id')->references('couple_id')->on('couples');
-            $table->unsignedBigInteger('bride_id');
-            $table->foreign('bride_id')->references('couple_id')->on('couples');
+            $table->string('groom_name', 255);
+            $table->string('bride_name', 255);
+            $table->string('groom_alias', 255);
+            $table->string('bride_alias', 255);
             $table->date('wedding_date');
-            $table->timestamp('wedding_time_start');
-            $table->timestamp('wedding_time_end');
-            $table->string('location', 255);
+            $table->time('wedding_time_start');
+            $table->time('wedding_time_end');
+            $table->string('wedding_venue', 255);
+            $table->string('wedding_location', 255);
+            $table->string('wedding_maps', 255);
+            $table->string('wedding_image', 255)->nullable();
+            $table->timestamps();
         });
 
-        Schema::enableForeignKeyConstraints();
+        Schema::table('guests', function (Blueprint $table) {
+            $table->unsignedBigInteger('event_id')->nullable();
+            $table->foreign('event_id')->references('event_id')->on('wedding_events')->onDelete('cascade');
+        });
     }
 
     /**
@@ -35,6 +41,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('guests', function (Blueprint $table) {
+            $table->dropForeign(['event_id']);
+            $table->dropColumn('event_id');
+        });
+
         Schema::dropIfExists('invitation');
     }
 };

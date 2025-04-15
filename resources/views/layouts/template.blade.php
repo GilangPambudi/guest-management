@@ -91,6 +91,9 @@
     <!-- Toastr -->
     <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
 
+    <!-- CUID -->
+    <script src="https://cdn.jsdelivr.net/npm/cuid@3.0.0/dist/cuid.min.js"></script>
+
     <!-- AdminLTE App -->
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
     <script>

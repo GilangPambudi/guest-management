@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use CaliCastle\Cuid;
 use App\Models\Guest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\Couple;
+use App\Models\Invitation;
 
 class GuestController extends Controller
 {
@@ -76,8 +79,7 @@ class GuestController extends Controller
         return DataTables::of($guest)
             ->addIndexColumn()
             ->addColumn('action', function ($guest) {
-                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm">Copy ID</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn = '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
@@ -95,7 +97,6 @@ class GuestController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
-            'guest_id_qr_code' => 'required',
             'guest_gender' => 'required|in:Male,Female',
             'guest_category' => 'required',
             'guest_contact' => 'required|unique:guests,guest_contact',
@@ -109,19 +110,25 @@ class GuestController extends Controller
             return response()->json(['errors' => $validator->errors()]);
         }
 
-        // Generate QR Code
-        $guestIdQrCode = $request->input('guest_id_qr_code');
-        $qrCodePath = 'qr/guests/' . $guestIdQrCode . '.png';
+        // Generate guest_id_qr_code
+        $cuidValue = Cuid::make();
+        $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
+        $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
 
-        // Gunakan library QR Code untuk menghasilkan QR Code dalam bentuk string
+        // Generate QR Code
+        $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
         $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
 
-        // Simpan QR Code ke storage menggunakan Storage facade
+        // Simpan QR Code ke storage
         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
-        // Simpan path QR Code ke database
-        $request->merge(['guest_qr_code' => 'storage/' . $qrCodePath]);
+        // Tambahkan guest_id_qr_code dan guest_qr_code ke request
+        $request->merge([
+            'guest_id_qr_code' => $guestIdQrCode,
+            'guest_qr_code' => "storage/{$qrCodePath}",
+        ]);
 
+        // Simpan data tamu ke database
         Guest::create($request->all());
 
         return response()->json(['success' => 'Guest created successfully.']);
@@ -177,20 +184,20 @@ class GuestController extends Controller
                 Storage::disk('public')->delete(str_replace('storage/', '', $guest->guest_qr_code));
             }
 
-            // Generate guest_id_qr_code baru berdasarkan nama baru
-            $timestamp = now()->timestamp;
+            // Generate guest_id_qr_code baru
+            $cuidValue = Cuid::make();
             $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
-            $guestIdQrCode = $timestamp . '-' . $guestNameSlug;
+            $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
 
             // Generate QR Code baru
-            $qrCodePath = 'qr/guests/' . $guestIdQrCode . '.png';
+            $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
             $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
             Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
-            // Simpan guest_id_qr_code dan path QR Code baru ke request
+            // Tambahkan guest_id_qr_code dan guest_qr_code ke request
             $request->merge([
                 'guest_id_qr_code' => $guestIdQrCode,
-                'guest_qr_code' => 'storage/' . $qrCodePath,
+                'guest_qr_code' => "storage/{$qrCodePath}",
             ]);
         }
 
@@ -255,6 +262,7 @@ class GuestController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
+
             $file = $request->file('file_guests');
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
@@ -262,26 +270,27 @@ class GuestController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray(null, false, true, true);
             $insert = [];
+
             if (count($data) > 1) {
                 foreach ($data as $row => $value) {
                     if ($row > 1) {
-                        $timestamp = now()->timestamp;
-                        $guestName = str_replace(' ', '-', strtolower($value['A']));
-                        $guest_id_qr_code = $timestamp . '-' . $guestName;
+                        $cuidValue = Cuid::make();
+                        $guestNameSlug = str_replace(' ', '-', strtolower($value['A']));
+                        $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
 
                         // Generate QR Code
-                        $qrCodePath = 'qr/guests/' . $guest_id_qr_code . '.png';
-                        $qrCodeContent = QrCode::format('png')->size(300)->generate($guest_id_qr_code);
+                        $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
+                        $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
                         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
                         $insert[] = [
                             'guest_name' => $value['A'],
-                            'guest_id_qr_code' => $guest_id_qr_code,
+                            'guest_id_qr_code' => $guestIdQrCode,
                             'guest_gender' => $value['B'],
                             'guest_category' => $value['C'],
                             'guest_contact' => $value['D'],
                             'guest_address' => $value['E'],
-                            'guest_qr_code' => 'storage/' . $qrCodePath,
+                            'guest_qr_code' => "storage/{$qrCodePath}",
                             'guest_attendance_status' => '-',
                             'guest_invitation_status' => '-',
                             'user_id' => Auth::user()->user_id,
@@ -289,12 +298,13 @@ class GuestController extends Controller
                         ];
                     }
                 }
+
                 if (count($insert) > 0) {
                     Guest::insertOrIgnore($insert);
                     return response()->json([
                         'status' => true,
                         'message' => 'Data successfully imported',
-                        'refresh' => true // Add this line to indicate that the datatable should be refreshed
+                        'refresh' => true // Indikasi bahwa datatable perlu di-refresh
                     ]);
                 } else {
                     return response()->json([
@@ -307,7 +317,7 @@ class GuestController extends Controller
         return redirect('/');
     }
 
-    public function show_qr_code($guest_id_qr_code)
+    public function invitation_letter($guest_id_qr_code)
     {
         // Cari tamu berdasarkan guest_id_qr_code
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
@@ -317,8 +327,33 @@ class GuestController extends Controller
             abort(404, 'Guest not found');
         }
 
+        // Ambil data undangan pertama
+        $invitation = Invitation::with(['groom', 'bride'])->first();
+
+        $groom = $invitation && $invitation->groom ? $invitation->groom->couple_name : 'Groom';
+        $bride = $invitation && $invitation->bride ? $invitation->bride->couple_name : 'Bride';
+
+        // Tampilkan view dengan data tamu, groom, dan bride
+        return view('guests.invitation_letter', compact('guest', 'groom', 'bride'));
+    }
+
+    public function welcome_gate($guest_id_qr_code)
+    {
+        // Cari tamu berdasarkan guest_id_qr_code
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
+
+        if (!$guest) {
+            // Jika tamu tidak ditemukan, tampilkan halaman 404
+            abort(404, 'Guest not found');
+        }
+
+        // Perbarui waktu kedatangan tamu
+        $guest->update([
+            'guest_arrival_time' => now()->format('Y-m-d H:i:s'), // Format waktu saat ini
+        ]);
+
         // Tampilkan view dengan QR Code
-        return view('guests.show_qr', compact('guest'));
+        return view('guests.welcome_gate', compact('guest'));
     }
 
     public function scanner()

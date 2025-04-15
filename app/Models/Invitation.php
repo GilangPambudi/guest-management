@@ -11,32 +11,22 @@ class Invitation extends Model
     protected $primaryKey = 'invitation_id';
 
     protected $fillable = [
-        'guest_id',
         'wedding_name',
-        'groom_id',
-        'bride_id',
+        'groom_name',
+        'bride_name',
+        'groom_alias',
+        'bride_alias',
         'wedding_date',
         'wedding_time_start',
         'wedding_time_end',
-        'location',
-        'status',
-        'opened_at',
+        'wedding_venue',
+        'wedding_location',
+        'wedding_maps',
+        'wedding_image',
     ];
 
-    public $timestamps = false;
-
-    public function guest()
+    public function guests()
     {
-        return $this->belongsTo(Guest::class, 'guest_id', 'guest_id');
-    }
-
-    public function groom()
-    {
-        return $this->belongsTo(Couple::class, 'groom_id', 'couple_id');
-    }
-
-    public function bride()
-    {
-        return $this->belongsTo(Couple::class, 'bride_id', 'couple_id');
+        return $this->hasMany(Guest::class, 'event_id', 'invitation_id');
     }
 }

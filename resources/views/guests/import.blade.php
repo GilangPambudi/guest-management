@@ -3,7 +3,7 @@
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Import Data Guests</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Import Guests</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
             </div>
@@ -15,18 +15,19 @@
                     <small id="error-kategori_id" class="error-text form-text text-danger"></small>
                 </div>
                 <div class="form-group">
-                    <label>Pilih File</label>
+                    <label>Select File</label>
                     <input type="file" name="file_guests" id="file_guests" class="form-control" required>
                     <small id="error-file_guests" class="error-text form-text text-danger"></small>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
+                <button type="button" data-dismiss="modal" class="btn btn-warning">Cancel</button>
                 <button type="submit" class="btn btn-primary">Upload</button>
             </div>
         </div>
     </div>
 </form>
+
 <script>
     $(document).ready(function() {
         $("#form-import").validate({
@@ -38,6 +39,17 @@
             },
             submitHandler: function(form) {
                 var formData = new FormData(form);
+
+                // Tampilkan SweetAlert loading
+                Swal.fire({
+                    title: 'Uploading...',
+                    text: 'Please wait while we process your file.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
                     url: form.action,
                     type: form.method,
@@ -45,25 +57,37 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        // Tutup SweetAlert loading
+                        Swal.close();
+
                         if (response.status) {
-                            $('#myModal').modal('hide');
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Berhasil',
+                                title: 'Data Imported',
                                 text: response.message
                             });
                             $('#guest-table').DataTable().ajax.reload();
+                            $('#myModal').modal('hide');
                         } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Import Failed',
+                                text: response.message
+                            });
                             $('.error-text').text('');
                             $.each(response.msgField, function(prefix, val) {
                                 $('#error-' + prefix).text(val[0]);
                             });
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Terjadi Kesalahan',
-                                text: response.message
-                            });
                         }
+                    },
+                    error: function() {
+                        // Tutup SweetAlert loading jika terjadi error
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred during the import process.'
+                        });
                     }
                 });
                 return false;

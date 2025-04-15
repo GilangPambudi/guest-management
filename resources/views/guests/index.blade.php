@@ -1,4 +1,3 @@
-<!-- filepath: d:\Github\Laravel\SKRIPSI\skripsi-manajemen-tamu\resources\views\guests\index.blade.php -->
 @extends('layouts.template')
 
 @section('content')
@@ -69,6 +68,7 @@
                         <th>Contact</th>
                         <th>Address</th>
                         <th>Attendance Status</th>
+                        <th>Arrival Time</th>
                         <th>Invitation Status</th>
                         <th>Action</th>
                     </tr>
@@ -168,6 +168,14 @@
                     {
                         data: 'guest_attendance_status',
                         name: 'guest_attendance_status'
+                    },
+                    {
+                        data: 'guest_arrival_time',
+                        name: 'guest_arrival_time',
+                        render: function(data, type, row) {
+                            return data ? moment(data).format('DD/MM/YYYY HH:mm:ss') : '-';
+                        },
+                        className: 'text-nowrap'
                     },
                     {
                         data: 'guest_invitation_status',
