@@ -26,7 +26,7 @@ class Invitation extends Model
     ];
 
     public function guests()
-    {
-        return $this->hasMany(Guest::class, 'event_id', 'invitation_id');
-    }
+{
+    return $this->hasMany(Guest::class, 'invitation_id', 'invitation_id');
+}
 }

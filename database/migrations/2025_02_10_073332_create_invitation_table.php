@@ -29,11 +29,6 @@ return new class extends Migration
             $table->string('wedding_image', 255)->nullable();
             $table->timestamps();
         });
-
-        Schema::table('guests', function (Blueprint $table) {
-            $table->unsignedBigInteger('event_id')->nullable();
-            $table->foreign('event_id')->references('event_id')->on('wedding_events')->onDelete('cascade');
-        });
     }
 
     /**
@@ -41,10 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('guests', function (Blueprint $table) {
-            $table->dropForeign(['event_id']);
-            $table->dropColumn('event_id');
-        });
 
         Schema::dropIfExists('invitation');
     }

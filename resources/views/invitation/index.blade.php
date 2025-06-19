@@ -10,8 +10,6 @@
         @endif
         <div class="card-header ">
             <div class="card-tools">
-                <button onclick="modalAction('{{ url('/invitation/import') }}')" class="btn btn-success"><i
-                        class="fa fa-download"></i> Import Invitations</button>
                 <button onclick="modalAction('{{ url('/invitation/create_ajax') }}')" class="btn btn-primary"><i
                     class="fa fa-plus-circle"></i> Add
                     Invitation</button>

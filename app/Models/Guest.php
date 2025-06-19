@@ -18,6 +18,7 @@ class Guest extends Model
         'guest_invitation_status',
         'guest_arrival_time',
         'user_id',
+        'invitation_id', // Tambahkan ini
     ];
 
     protected $primaryKey = 'guest_id';
@@ -29,6 +30,6 @@ class Guest extends Model
 
     public function invitation()
     {
-        return $this->belongsTo(Invitation::class, 'event_id', 'event_id');
+        return $this->belongsTo(Invitation::class, 'invitation_id', 'invitation_id');
     }
 }

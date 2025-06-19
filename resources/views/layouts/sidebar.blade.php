@@ -19,7 +19,7 @@
                 data-accordion="false">
                 <li class="nav-item">
                     <a href="{{ url('/home') }}" class="nav-link {{ $activeMenu == 'dashboard' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <i class="nav-icon fas fa-home"></i>
                         <p>
                             Dashboard
                         </p>
@@ -34,14 +34,14 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="{{ url('/guests') }}" class="nav-link {{ $activeMenu == 'guests' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users"></i>
                         <p>
                             Guests
                         </p>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a href="#" class="nav-link {{ request()->is('kanban') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-circle"></i>

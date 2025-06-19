@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use CaliCastle\Cuid;
 use App\Models\Guest;
-use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
@@ -12,72 +11,43 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\Invitation;
 
 class GuestController extends Controller
 {
+
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Display a listing of guests for specific invitation.
-     */
-    public function index($invitation_id)
+    public function index()
     {
-        $invitation = Invitation::findOrFail($invitation_id);
-
-        // Get dynamic filter data from database
-        $categories = Guest::where('invitation_id', $invitation_id)
-            ->distinct()
-            ->pluck('guest_category')
-            ->filter()
-            ->sort()
-            ->values();
-
-        $genders = Guest::where('invitation_id', $invitation_id)
-            ->distinct()
-            ->pluck('guest_gender')
-            ->filter()
-            ->sort()
-            ->values();
-
-        $attendanceStatuses = Guest::where('invitation_id', $invitation_id)
-            ->distinct()
-            ->pluck('guest_attendance_status')
-            ->filter()
-            ->sort()
-            ->values();
-
-        $invitationStatuses = Guest::where('invitation_id', $invitation_id)
-            ->distinct()
-            ->pluck('guest_invitation_status')
-            ->filter()
-            ->sort()
-            ->values();
-
         $title = 'Guests';
 
         $breadcrumb = (object)[
-            'title' => 'List of Guests - ' . $invitation->wedding_name,
-            'list' => ['Home', 'Invitations', 'Guests']
+            'title' => 'List of Guest',
+            'list' => ['Home', 'Guests']
         ];
 
         $page = (object)[
-            'title' => 'List of Guests - ' . $invitation->wedding_name
+            'title' => 'List of Guests'
         ];
 
-        $activeMenu = 'invitation';
+        $activeMenu = 'guests';
+
+        // Ambil data filter dari database
+        $categories = Guest::select('guest_category')->distinct()->pluck('guest_category');
+        $genders = Guest::select('guest_gender')->distinct()->pluck('guest_gender');
+        $attendanceStatuses = Guest::select('guest_attendance_status')->distinct()->pluck('guest_attendance_status');
+        $invitationStatuses = Guest::select('guest_invitation_status')->distinct()->pluck('guest_invitation_status');
 
         return view('guests.index', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
-            'invitation' => $invitation,
             'categories' => $categories,
             'genders' => $genders,
             'attendanceStatuses' => $attendanceStatuses,
@@ -85,59 +55,45 @@ class GuestController extends Controller
         ]);
     }
 
-    public function list(Request $request, $invitation_id)
+    public function list(Request $request)
     {
-        $guests = Guest::select(
-            'guest_id',
-            'guest_name',
-            'guest_id_qr_code',
-            'guest_gender',  
-            'guest_category',
-            'guest_contact',
-            'guest_address',
-            'guest_qr_code',
-            'guest_attendance_status',
-            'guest_arrival_time',
-            'guest_invitation_status'
-        )->where('invitation_id', $invitation_id);
+        $guest = Guest::select('guest_id', 'guest_name', 'guest_id_qr_code', 'guest_gender', 'guest_category', 'guest_contact', 'guest_address', 'guest_qr_code', 'guest_attendance_status', 'guest_invitation_status');
 
-        // Apply filters
-        if ($request->has('category') && $request->category != '') {
-            $guests->where('guest_category', $request->category);
+        if ($request->category) {
+            $guest->where('guest_category', $request->category);
         }
 
-        if ($request->has('gender') && $request->gender != '') {
-            $guests->where('guest_gender', $request->gender);
+        if ($request->gender) {
+            $guest->where('guest_gender', $request->gender);
         }
 
-        if ($request->has('attendance_status') && $request->attendance_status != '') {
-            $guests->where('guest_attendance_status', $request->attendance_status);
+        if ($request->attendance_status) {
+            $guest->where('guest_attendance_status', $request->attendance_status);
         }
 
-        if ($request->has('invitation_status') && $request->invitation_status != '') {
-            $guests->where('guest_invitation_status', $request->invitation_status);
+        if ($request->invitation_status) {
+            $guest->where('guest_invitation_status', $request->invitation_status);
         }
 
-        return DataTables::of($guests)
+        return DataTables::of($guest)
             ->addIndexColumn()
-            ->addColumn('action', function ($guest) use ($invitation_id) {
+            ->addColumn('action', function ($guest) {
                 $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm">Copy ID</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
             })
             ->rawColumns(['action'])
             ->make(true);
     }
 
-    public function create_ajax($invitation_id)
+    public function create_ajax()
     {
-        $invitation = Invitation::findOrFail($invitation_id);
-        return view('guests.create_ajax', ['invitation' => $invitation]);
+        return view('guests.create_ajax');
     }
 
-    public function store_ajax(Request $request, $invitation_id)
+    public function store_ajax(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
@@ -147,6 +103,7 @@ class GuestController extends Controller
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
             'guest_invitation_status' => 'required',
+            'user_id' => 'required|exists:users,user_id',
         ]);
 
         if ($validator->fails()) {
@@ -165,15 +122,14 @@ class GuestController extends Controller
         // Simpan QR Code ke storage
         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
-        // Prepare data
-        $data = $request->all();
-        $data['guest_id_qr_code'] = $guestIdQrCode;
-        $data['guest_qr_code'] = "storage/{$qrCodePath}";
-        $data['user_id'] = Auth::id();
-        $data['invitation_id'] = $invitation_id;
+        // Tambahkan guest_id_qr_code dan guest_qr_code ke request
+        $request->merge([
+            'guest_id_qr_code' => $guestIdQrCode,
+            'guest_qr_code' => "storage/{$qrCodePath}",
+        ]);
 
         // Simpan data tamu ke database
-        Guest::create($data);
+        Guest::create($request->all());
 
         return response()->json(['success' => 'Guest created successfully.']);
     }
@@ -186,19 +142,20 @@ class GuestController extends Controller
         return response()->json(!$exists);
     }
 
-    public function show_ajax($invitation_id, $id)
+    public function show_ajax($id)
     {
-        $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
-        return view('guests.show_ajax', ['guest' => $guest]);
+        $guest = Guest::find($id);
+
+        return view('guests.show_ajax')->with('guest', $guest);
     }
 
-    public function edit_ajax($invitation_id, $id)
+    public function edit_ajax($id)
     {
-        $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
+        $guest = Guest::find($id);
         return view('guests.edit_ajax', ['guest' => $guest]);
     }
 
-    public function update_ajax(Request $request, $invitation_id, $id)
+    public function update_ajax(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
@@ -214,7 +171,11 @@ class GuestController extends Controller
             return response()->json(['errors' => $validator->errors()]);
         }
 
-        $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
+        $guest = Guest::find($id);
+
+        if (!$guest) {
+            return response()->json(['error' => 'Guest not found.'], 404);
+        }
 
         // Periksa apakah guest_name diubah
         if ($guest->guest_name !== $request->input('guest_name')) {
@@ -246,16 +207,16 @@ class GuestController extends Controller
         return response()->json(['success' => 'Guest updated successfully.']);
     }
 
-    public function confirm_ajax($invitation_id, $id)
+    public function confirm_ajax($id)
     {
-        $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
-        return view('guests.confirm_ajax', ['guest' => $guest]);
+        $guest = Guest::find($id);
+        return view('guests.confirm_ajax')->with('guest', $guest);
     }
 
-    public function delete_ajax($invitation_id, $id)
+    public function delete_ajax($id)
     {
         if (request()->ajax()) {
-            $guest = Guest::where('invitation_id', $invitation_id)->find($id);
+            $guest = Guest::find($id);
             if ($guest) {
                 // Hapus file QR Code dari storage jika ada
                 if ($guest->guest_qr_code && Storage::disk('public')->exists(str_replace('storage/', '', $guest->guest_qr_code))) {
@@ -282,13 +243,12 @@ class GuestController extends Controller
         ]);
     }
 
-    public function import($invitation_id)
+    public function import()
     {
-        $invitation = Invitation::findOrFail($invitation_id);
-        return view('guests.import', ['invitation' => $invitation]);
+        return view('guests.import');
     }
 
-    public function import_process(Request $request, $invitation_id)
+    public function import_process(Request $request)
     {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
@@ -334,7 +294,6 @@ class GuestController extends Controller
                             'guest_attendance_status' => '-',
                             'guest_invitation_status' => '-',
                             'user_id' => Auth::user()->user_id,
-                            'invitation_id' => $invitation_id,
                             'created_at' => now(),
                         ];
                     }
@@ -345,7 +304,7 @@ class GuestController extends Controller
                     return response()->json([
                         'status' => true,
                         'message' => 'Data successfully imported',
-                        'refresh' => true
+                        'refresh' => true // Indikasi bahwa datatable perlu di-refresh
                     ]);
                 } else {
                     return response()->json([
@@ -358,86 +317,19 @@ class GuestController extends Controller
         return redirect('/');
     }
 
-    /**
-     * Download Excel template
-     */
-    public function template($invitation_id)
-    {
-        $invitation = Invitation::findOrFail($invitation_id);
-        
-        // Path ke template file yang ada
-        $templatePath = public_path('template_guests.xlsx');
-        
-        // Generate filename dengan nama wedding
-        $filename = 'guest_template_' . str_replace([' ', '&', '/'], ['_', 'and', '_'], $invitation->wedding_name) . '.xlsx';
-        
-        // Cek apakah file template exists
-        if (file_exists($templatePath)) {
-            // Jika file template ada, gunakan file tersebut
-            return response()->download($templatePath, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ]);
-        } else {
-            // Fallback: buat template baru jika file tidak ada
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            
-            // Set headers
-            $sheet->setCellValue('A1', 'Guest Name');
-            $sheet->setCellValue('B1', 'Gender');
-            $sheet->setCellValue('C1', 'Category');
-            $sheet->setCellValue('D1', 'Contact');
-            $sheet->setCellValue('E1', 'Address');
-            
-            // Add sample data
-            $sheet->setCellValue('A2', 'John Doe');
-            $sheet->setCellValue('B2', 'Male');
-            $sheet->setCellValue('C2', 'VIP');
-            $sheet->setCellValue('D2', '08123456789');
-            $sheet->setCellValue('E2', 'Jl. Example Street No. 123');
-            
-            $sheet->setCellValue('A3', 'Jane Smith');
-            $sheet->setCellValue('B3', 'Female');
-            $sheet->setCellValue('C3', 'Regular');
-            $sheet->setCellValue('D3', '08987654321');
-            $sheet->setCellValue('E3', 'Jl. Sample Road No. 456');
-            
-            // Style headers
-            $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-            $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-            $sheet->getStyle('A1:E1')->getFill()->getStartColor()->setRGB('CCE5FF');
-            
-            // Auto size columns
-            foreach (range('A', 'E') as $col) {
-                $sheet->getColumnDimension($col)->setAutoSize(true);
-            }
-            
-            $writer = new Xlsx($spreadsheet);
-            
-            // Set headers untuk download
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-            
-            $writer->save('php://output');
-            exit;
-        }
-    }
-
-    // QR Code Methods
     public function invitation_letter($guest_id_qr_code)
     {
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
         if (!$guest) {
-            abort(404, 'Guest not found');
+            dd('Guest not found');
         }
 
         $invitation = Invitation::where('invitation_id', $guest->invitation_id)->first();
         if (!$invitation) {
-            abort(404, 'Invitation not found');
+            dd('Invitation not found');
         }
 
-        // Ambil data dari undangan
+        // Ambil data groom dan bride dari undangan
         $groomName = $invitation->groom_name;
         $brideName = $invitation->bride_name;
         $weddingDate = $invitation->wedding_date;
@@ -448,6 +340,7 @@ class GuestController extends Controller
         $weddingMaps = $invitation->wedding_maps;
         $weddingImage = $invitation->wedding_image;
 
+        // Tampilkan view dengan data undangan
         return view('guests.invitation_letter', [
             'guest' => $guest,
             'groomName' => $groomName,
@@ -468,41 +361,40 @@ class GuestController extends Controller
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
 
         if (!$guest) {
+            // Jika tamu tidak ditemukan, tampilkan halaman 404
             abort(404, 'Guest not found');
         }
 
-        // Perbarui waktu kedatangan tamu dan status kehadiran
+        // Perbarui waktu kedatangan tamu
         $guest->update([
-            'guest_attendance_status' => 'Yes',
-            'guest_arrival_time' => now()->format('Y-m-d H:i:s'),
+            'guest_arrival_time' => now()->format('Y-m-d H:i:s'), // Format waktu saat ini
         ]);
 
+        // Tampilkan view dengan QR Code
         return view('guests.welcome_gate', compact('guest'));
     }
 
-    public function scanner($invitation_id)
+    public function scanner()
     {
-        $invitation = Invitation::findOrFail($invitation_id);
-
         $title = 'Guest Scanner';
 
         $breadcrumb = (object)[
-            'title' => 'Guest Scanner - ' . $invitation->wedding_name,
-            'list' => ['Home', 'Invitations', 'Guests', 'Scanner']
+            'title' => 'Guest Scanner',
+            'list' => ['Home', 'Guests', 'Scanner']
         ];
 
         $page = (object)[
-            'title' => 'Guest Scanner - ' . $invitation->wedding_name
+            'title' => 'Guest Scanner'
         ];
 
-        $activeMenu = 'invitation';
+        $activeMenu = 'guests';
+
 
         return view('guests.scanner', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
-            'activeMenu' => $activeMenu,
-            'invitation' => $invitation
+            'activeMenu' => $activeMenu
         ]);
     }
 }

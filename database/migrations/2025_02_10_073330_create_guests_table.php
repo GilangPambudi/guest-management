@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::disableForeignKeyConstraints();
@@ -26,16 +23,15 @@ return new class extends Migration
             $table->string('guest_arrival_time', 255)->default('-');
             $table->string('guest_invitation_status', 255)->default('-');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('invitation_id'); // Tambahkan ini
             $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('invitation_id')->references('invitation_id')->on('invitation')->onDelete('cascade');
             $table->timestamps();
         });
 
         Schema::enableForeignKeyConstraints();
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('guests');

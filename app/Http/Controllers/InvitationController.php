@@ -60,6 +60,7 @@ class InvitationController extends Controller
                 $btn = '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">View</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
+                $btn .= '<a href="' . url('/invitation/' . $event->invitation_id . '/guests') . '" class="btn btn-success btn-sm">Manage Guests</a> ';
                 return $btn;
             })
             ->rawColumns(['action'])
