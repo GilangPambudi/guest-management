@@ -29,8 +29,8 @@ class InvitationController extends Controller
 
         $activeMenu = 'invitation';
 
-        // Ambil semua data invitation
-        $invitations = Invitation::all();
+        // Ambil semua data invitation dengan relasi guests untuk counting
+        $invitations = Invitation::withCount('guests')->get();
 
         return view('invitation.index', [
             'title' => $title,

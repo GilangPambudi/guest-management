@@ -88,14 +88,13 @@ class GuestController extends Controller
     public function list(Request $request, $invitation_id)
     {
         $guests = Guest::select(
-            'guest_id',
-            'guest_name',
+            'guest_id', // Tambahkan guest_id untuk checkbox
             'guest_id_qr_code',
-            'guest_gender',  
+            'guest_name',
+            'guest_gender',
             'guest_category',
             'guest_contact',
             'guest_address',
-            'guest_qr_code',
             'guest_attendance_status',
             'guest_arrival_time',
             'guest_invitation_status'
@@ -123,7 +122,6 @@ class GuestController extends Controller
             ->addColumn('action', function ($guest) use ($invitation_id) {
                 $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm">Copy ID</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
                 return $btn;
             })
@@ -131,10 +129,149 @@ class GuestController extends Controller
             ->make(true);
     }
 
+    // Method untuk bulk actions
+    public function bulkAction(Request $request, $invitation_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'action' => 'required|in:delete,mark_sent,mark_pending',
+            'guest_ids' => 'required|array|min:1',
+            'guest_ids.*' => 'integer|exists:guests,guest_id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid request data',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $action = $request->input('action');
+        $guestIds = $request->input('guest_ids');
+
+        // Pastikan semua guest_ids milik invitation yang benar
+        $validGuestIds = Guest::where('invitation_id', $invitation_id)
+            ->whereIn('guest_id', $guestIds)
+            ->pluck('guest_id')
+            ->toArray();
+
+        if (count($validGuestIds) !== count($guestIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Some selected guests do not belong to this invitation'
+            ], 422);
+        }
+
+        try {
+            switch ($action) {
+                case 'delete':
+                    return $this->bulkDelete($invitation_id, $validGuestIds);
+
+                case 'mark_sent':
+                    return $this->bulkUpdateInvitationStatus($invitation_id, $validGuestIds, 'Sent');
+
+                case 'mark_pending':
+                    return $this->bulkUpdateInvitationStatus($invitation_id, $validGuestIds, 'Pending');
+
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid action'
+                    ], 422);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while processing the request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function bulkDelete($invitation_id, $guestIds)
+    {
+        $guests = Guest::where('invitation_id', $invitation_id)
+            ->whereIn('guest_id', $guestIds)
+            ->get();
+
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($guests as $guest) {
+            try {
+                // Hapus file QR Code dari storage jika ada
+                if ($guest->guest_qr_code && Storage::disk('public')->exists(str_replace('storage/', '', $guest->guest_qr_code))) {
+                    Storage::disk('public')->delete(str_replace('storage/', '', $guest->guest_qr_code));
+                }
+
+                // Hapus data tamu dari database
+                $guest->delete();
+                $deletedCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Failed to delete guest {$guest->guest_name}: " . $e->getMessage();
+            }
+        }
+
+        if ($deletedCount > 0) {
+            $message = "{$deletedCount} guest(s) successfully deleted";
+            if (!empty($errors)) {
+                $message .= ", but some errors occurred: " . implode(', ', $errors);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No guests were deleted. Errors: ' . implode(', ', $errors)
+            ], 500);
+        }
+    }
+
+    private function bulkUpdateInvitationStatus($invitation_id, $guestIds, $status)
+    {
+        $updatedCount = Guest::where('invitation_id', $invitation_id)
+            ->whereIn('guest_id', $guestIds)
+            ->update(['guest_invitation_status' => $status]);
+
+        if ($updatedCount > 0) {
+            return response()->json([
+                'success' => true,
+                'message' => "{$updatedCount} guest(s) invitation status updated to '{$status}'"
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No guests were updated'
+            ], 500);
+        }
+    }
+
     public function create_ajax($invitation_id)
     {
         $invitation = Invitation::findOrFail($invitation_id);
         return view('guests.create_ajax', ['invitation' => $invitation]);
+    }
+
+    // Mengecek apakah nomor sudah terdaftar atau belum
+    public function check_contact(Request $request, $invitation_id)
+    {
+        $guest_contact = $request->input('guest_contact');
+        $guest_id = $request->input('guest_id'); // For edit mode
+
+        // Check if contact exists in ANY invitation (global check)
+        $query = Guest::where('guest_contact', $guest_contact);
+
+        // Exclude current guest when editing
+        if ($guest_id) {
+            $query->where('guest_id', '!=', $guest_id);
+        }
+
+        $exists = $query->exists();
+
+        // Return true if contact is available (doesn't exist), false if taken
+        return response()->json(!$exists);
     }
 
     public function store_ajax(Request $request, $invitation_id)
@@ -176,14 +313,6 @@ class GuestController extends Controller
         Guest::create($data);
 
         return response()->json(['success' => 'Guest created successfully.']);
-    }
-
-    // Mengecek apakah nomor sudah terdaftar atau belum
-    public function check_contact(Request $request)
-    {
-        $guest_contact = $request->input('guest_contact');
-        $exists = Guest::where('guest_contact', $guest_contact)->exists();
-        return response()->json(!$exists);
     }
 
     public function show_ajax($invitation_id, $id)
@@ -364,13 +493,13 @@ class GuestController extends Controller
     public function template($invitation_id)
     {
         $invitation = Invitation::findOrFail($invitation_id);
-        
+
         // Path ke template file yang ada
         $templatePath = public_path('template_guests.xlsx');
-        
+
         // Generate filename dengan nama wedding
         $filename = 'guest_template_' . str_replace([' ', '&', '/'], ['_', 'and', '_'], $invitation->wedding_name) . '.xlsx';
-        
+
         // Cek apakah file template exists
         if (file_exists($templatePath)) {
             // Jika file template ada, gunakan file tersebut
@@ -381,44 +510,44 @@ class GuestController extends Controller
             // Fallback: buat template baru jika file tidak ada
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            
+
             // Set headers
             $sheet->setCellValue('A1', 'Guest Name');
             $sheet->setCellValue('B1', 'Gender');
             $sheet->setCellValue('C1', 'Category');
             $sheet->setCellValue('D1', 'Contact');
             $sheet->setCellValue('E1', 'Address');
-            
+
             // Add sample data
             $sheet->setCellValue('A2', 'John Doe');
             $sheet->setCellValue('B2', 'Male');
             $sheet->setCellValue('C2', 'VIP');
             $sheet->setCellValue('D2', '08123456789');
             $sheet->setCellValue('E2', 'Jl. Example Street No. 123');
-            
+
             $sheet->setCellValue('A3', 'Jane Smith');
             $sheet->setCellValue('B3', 'Female');
             $sheet->setCellValue('C3', 'Regular');
             $sheet->setCellValue('D3', '08987654321');
             $sheet->setCellValue('E3', 'Jl. Sample Road No. 456');
-            
+
             // Style headers
             $sheet->getStyle('A1:E1')->getFont()->setBold(true);
             $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
             $sheet->getStyle('A1:E1')->getFill()->getStartColor()->setRGB('CCE5FF');
-            
+
             // Auto size columns
             foreach (range('A', 'E') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
-            
+
             $writer = new Xlsx($spreadsheet);
-            
+
             // Set headers untuk download
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
-            
+
             $writer->save('php://output');
             exit;
         }
@@ -461,6 +590,43 @@ class GuestController extends Controller
             'weddingImage' => $weddingImage
         ]);
     }
+
+    public function update_attendance_ajax(Request $request, $guest_id_qr_code)
+    {
+        $validator = Validator::make($request->all(), [
+            'attendance_status' => 'required|in:Yes,No,-'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid attendance status'
+            ], 422);
+        }
+
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
+
+        if (!$guest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Guest not found'
+            ], 404);
+        }
+
+        $newStatus = $request->attendance_status;
+
+        // Hanya update status kehadiran, arrival time tidak diubah di sini
+        $guest->update([
+            'guest_attendance_status' => $newStatus
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance status updated successfully',
+            'new_status' => $newStatus
+        ]);
+    }
+
 
     public function welcome_gate($guest_id_qr_code)
     {

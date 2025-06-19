@@ -1,0 +1,243 @@
+@empty($guest)
+    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <h5><i class="icon fas fa-ban"></i> Error!!!</h5>
+                    The data you are looking for was not found
+                </div>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Back</button>
+            </div>
+        </div>
+    </div>
+@else
+    <div id="modal-master" class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Guest Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Guest Information -->
+                    <div class="col-md-8">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <th class="text-right col-4">Guest ID:</th>
+                                <td class="col-8">
+                                    <code>{{ $guest->guest_id_qr_code }}</code>
+                                    <button onclick="copyToClipboard('{{ $guest->guest_id_qr_code }}')"
+                                        class="btn btn-sm btn-outline-secondary ml-2">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Guest Name:</th>
+                                <td>{{ $guest->guest_name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Gender:</th>
+                                <td>
+                                    {{ $guest->guest_gender }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Category:</th>
+                                <td>{{ $guest->guest_category }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Contact:</th>
+                                <td>{{ $guest->guest_contact }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Address:</th>
+                                <td>{{ $guest->guest_address }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Attendance Status:</th>
+                                <td>
+                                    <span
+                                        class="badge badge-{{ $guest->guest_attendance_status == 'Yes' ? 'success' : ($guest->guest_attendance_status == 'No' ? 'danger' : 'secondary') }}">
+                                        {{ $guest->guest_attendance_status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Invitation Status:</th>
+                                <td>
+                                    <span
+                                        class="badge badge-{{ $guest->guest_invitation_status == 'Sent' ? 'success' : ($guest->guest_invitation_status == 'Pending' ? 'warning' : 'secondary') }}">
+                                        {{ $guest->guest_invitation_status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
+                                <tr>
+                                    <th class="text-right">Arrival Time:</th>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($guest->guest_arrival_time)->format('d M Y, H:i:s') }}
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr>
+                                <th class="text-right">Created At:</th>
+                                <td>{{ \Carbon\Carbon::parse($guest->created_at)->format('d M Y, H:i:s') }}</td>
+                            </tr>
+                            @if ($guest->updated_at != $guest->created_at)
+                                <tr>
+                                    <th class="text-right">Last Updated:</th>
+                                    <td>{{ \Carbon\Carbon::parse($guest->updated_at)->format('d M Y, H:i:s') }}</td>
+                                </tr>
+                            @endif
+                        </table>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <strong>QR Code</strong>
+                            </div>
+                            <div class="card-body text-center">
+                                @if ($guest->guest_qr_code && file_exists(public_path($guest->guest_qr_code)))
+                                    <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code" class="img-fluid"
+                                        style="max-width: 200px;">
+                                    <br><br>
+                                    <a href="{{ asset($guest->guest_qr_code) }}"
+                                        download="QR_{{ $guest->guest_name }}.png" class="btn btn-sm btn-success">
+                                        <i class="fas fa-download"></i> Download QR
+                                    </a>
+                                @else
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i><br>
+                                        QR Code not found
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card mt-3">
+                            <div class="card-header text-center">
+                                <strong>Quick Actions</strong>
+                            </div>
+                            <div class="card-body text-center">
+                                <a href="{{ url('/invitation-letter/' . $guest->guest_id_qr_code) }}" target="_blank"
+                                    class="btn btn-info btn-sm btn-block mb-2">
+                                    <i class="fas fa-envelope"></i> View Invitation Letter
+                                </a>
+
+                                <button
+                                    onclick="copyInvitationLink('{{ url('/invitation-letter/' . $guest->guest_id_qr_code) }}')"
+                                    class="btn btn-secondary btn-sm btn-block mb-2">
+                                    <i class="fas fa-copy"></i> Copy Invitation Link
+                                </button>
+
+                                @if ($guest->guest_attendance_status != 'Yes')
+                                    <button onclick="markAsAttended('{{ $guest->guest_id_qr_code }}')"
+                                        class="btn btn-success btn-sm btn-block mb-2">
+                                        <i class="fas fa-check"></i> Mark as Attended
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button
+                    onclick="editGuest('{{ url('/invitation/' . $guest->invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') }}')"
+                    class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit Guest
+                </button>
+                <button
+                    onclick="deleteGuest('{{ url('/invitation/' . $guest->invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') }}')"
+                    class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete Guest
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editGuest(url) {
+            $('#myModal').modal('hide');
+            setTimeout(function() {
+                modalAction(url);
+            }, 500);
+        }
+
+        function deleteGuest(url) {
+            $('#myModal').modal('hide');
+            setTimeout(function() {
+                modalAction(url);
+            }, 500);
+        }
+
+        function markAsAttended(guestIdQrCode) {
+            Swal.fire({
+                title: 'Mark as Attended?',
+                text: 'This will mark the guest as attended and record arrival time.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, mark as attended!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to welcome gate (which will mark as attended)
+                    window.open('{{ url('/welcome-gate') }}/' + guestIdQrCode, '_blank');
+
+                    // Close modal and reload data
+                    $('#myModal').modal('hide');
+                    if (typeof dataGuest !== 'undefined') {
+                        dataGuest.ajax.reload(null, false);
+                    }
+                }
+            });
+        }
+
+        function copyInvitationLink(url) {
+            navigator.clipboard.writeText(url).then(function() {
+                toastr.success('Invitation link copied to clipboard!');
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                toastr.error('Failed to copy link');
+            });
+        }
+
+        function markAsAttended(qrCode) {
+            // Implementation for quick mark as attended
+            $.ajax({
+                url: `/update-attendance/${qrCode}`,
+                type: 'POST',
+                data: {
+                    attendance_status: 'Yes',
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Guest marked as attended!');
+                        $('#myModal').modal('hide');
+                        if (typeof dataGuest !== 'undefined') {
+                            dataGuest.ajax.reload();
+                        }
+                    }
+                },
+                error: function() {
+                    toastr.error('Failed to update attendance status');
+                }
+            });
+        }
+    </script>
+@endempty

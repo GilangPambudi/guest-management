@@ -40,16 +40,19 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     Route::post('/import_process', [GuestController::class, 'import_process']);
     Route::get('/template', [GuestController::class, 'template']);
     Route::get('/create_ajax', [GuestController::class, 'create_ajax']);
+    Route::post('/check-contact', [GuestController::class, 'check_contact']);
     Route::post('/store_ajax', [GuestController::class, 'store_ajax']);
     Route::get('/{id}/show_ajax', [GuestController::class, 'show_ajax']);
     Route::get('/{id}/edit_ajax', [GuestController::class, 'edit_ajax']);
     Route::put('/{id}/update_ajax', [GuestController::class, 'update_ajax']);
     Route::get('/{id}/delete_ajax', [GuestController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [GuestController::class, 'delete_ajax']);
-    Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
-    ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
+    Route::post('/bulk-action', [GuestController::class, 'bulkAction']);
+    // Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
+    // ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
 });
 
 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation-letter/{guest_id_qr_code}', [GuestController::class, 'invitation_letter']);
+Route::post('/update-attendance/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');

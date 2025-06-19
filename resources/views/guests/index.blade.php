@@ -17,9 +17,6 @@
                     onclick="window.location.href='{{ url('/invitation/' . $invitation->invitation_id . '/guests/scanner') }}'">
                     <i class="fa fa-qrcode"></i> QR Scanner
                 </button>
-                <button id="reset-filters" class="btn btn-warning">
-                    <i class="fa fa-sync"></i> Reset Filters
-                </button>
                 <button onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/guests/import') }}')"
                     class="btn btn-success">
                     <i class="fa fa-upload"></i> Import Guests
@@ -37,59 +34,116 @@
                 <div class="col-md-12">
                     <div class="alert alert-info">
                         <h5><i class="icon fas fa-info"></i> Invitation Details</h5>
-                        <strong>{{ $invitation->wedding_name }}</strong> - {{ $invitation->groom_name }} &
+                        <strong>{{ $invitation->wedding_name }}</strong> | {{ $invitation->groom_name }} &
                         {{ $invitation->bride_name }}<br>
-                        <small>
-                            <i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }} 
-                            <i class="fa fa-clock ml-2"></i> {{ $invitation->wedding_time_start }} - {{ $invitation->wedding_time_end }}
-                            <i class="fa fa-map-marker-alt ml-2"></i> {{ $invitation->wedding_venue }}
-                        </small>
+                        <i class="fa fa-calendar"></i>
+                        {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }}
+                        <i class="fa fa-clock ml-2"></i> {{ $invitation->wedding_time_start }} -
+                        {{ $invitation->wedding_time_end }}
+                        <i class="fa fa-map-marker-alt ml-2"></i> {{ $invitation->wedding_venue }}
                     </div>
                 </div>
             </div>
 
             <!-- Filters Row -->
             <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="filter-category" class="form-label">Category Filter:</label>
-                    <select id="filter-category" class="form-control">
-                        <option value="">All Categories</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category }}">{{ $category }}</option>
-                        @endforeach
-                    </select>
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header p-2 d-flex justify-content-end">
+                            <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
+                                data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                                <i class="fas fa-filter"></i> Filters
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                        </div>
+                        <div class="collapse" id="filterCollapse">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="filter-category" class="form-label">Category Filter:</label>
+                                        <select id="filter-category" class="form-control">
+                                            <option value="">All Categories</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category }}">{{ $category }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="filter-gender" class="form-label">Gender Filter:</label>
+                                        <select id="filter-gender" class="form-control">
+                                            <option value="">All Genders</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="filter-attendance-status" class="form-label">Attendance Status:</label>
+                                        <select id="filter-attendance-status" class="form-control">
+                                            <option value="">All Status</option>
+                                            @foreach ($attendanceStatuses as $status)
+                                                <option value="{{ $status }}">{{ $status }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="filter-invitation-status" class="form-label">Invitation Status:</label>
+                                        <select id="filter-invitation-status" class="form-control">
+                                            <option value="">All Status</option>
+                                            @foreach ($invitationStatuses as $status)
+                                                <option value="{{ $status }}">{{ $status }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3 ">
+                                    <div class="col-md-12 d-flex justify-content-end ">
+                                        <button id="apply-filters" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-search"></i> Apply Filters
+                                        </button>
+                                        <button id="reset-filters" class="btn btn-warning btn-sm">
+                                            <i class="fa fa-sync"></i> Reset Filters
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label for="filter-gender" class="form-label">Gender Filter:</label>
-                    <select id="filter-gender" class="form-control">
-                        <option value="">All Genders</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="filter-attendance-status" class="form-label">Attendance Status:</label>
-                    <select id="filter-attendance-status" class="form-control">
-                        <option value="">All Status</option>
-                        @foreach ($attendanceStatuses as $status)
-                            <option value="{{ $status }}">{{ $status }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="filter-invitation-status" class="form-label">Invitation Status:</label>
-                    <select id="filter-invitation-status" class="form-control">
-                        <option value="">All Status</option>
-                        @foreach ($invitationStatuses as $status)
-                            <option value="{{ $status }}">{{ $status }}</option>
-                        @endforeach
-                    </select>
+            </div>
+
+            <!-- Bulk Actions Row -->
+            <div class="row mb-3" id="bulk-actions" style="display: none;">
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong id="selected-count">0</strong> guest(s) selected
+                            </div>
+                            <div>
+                                <button id="bulk-delete" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete Selected
+                                </button>
+                                <button id="bulk-mark-sent" class="btn btn-success btn-sm">
+                                    <i class="fas fa-paper-plane"></i> Mark as Sent
+                                </button>
+                                <button id="bulk-mark-pending" class="btn btn-info btn-sm">
+                                    <i class="fas fa-clock"></i> Mark as Pending
+                                </button>
+                                <button id="clear-selection" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-times"></i> Clear Selection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <table class="table table-bordered table-sm table-hover table-striped text-nowrap" id="guest-table">
                 <thead>
                     <tr>
+                        <th width="30px">
+                            <input type="checkbox" id="select-all" title="Select All">
+                        </th>
                         <th>No</th>
                         {{-- <th>ID</th> --}}
                         <th>Name</th>
@@ -159,6 +213,27 @@
         }
 
         var dataGuest;
+        var selectedGuests = [];
+
+        function updateBulkActions() {
+            var selectedCount = selectedGuests.length;
+            $('#selected-count').text(selectedCount);
+
+            if (selectedCount > 0) {
+                $('#bulk-actions').show();
+            } else {
+                $('#bulk-actions').hide();
+            }
+        }
+
+        function handleCheckboxChange() {
+            selectedGuests = [];
+            $('input[name="guest_ids[]"]:checked').each(function() {
+                selectedGuests.push($(this).val());
+            });
+            updateBulkActions();
+        }
+
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -171,7 +246,6 @@
                 serverSide: true,
                 deferRender: true,
                 scrollX: true,
-                // responsive: true,
                 ajax: {
                     url: "{{ url('/invitation/' . $invitation->invitation_id . '/guests/list') }}",
                     type: "POST",
@@ -183,6 +257,17 @@
                     }
                 },
                 columns: [{
+                        data: 'guest_id',
+                        name: 'guest_id',
+                        orderable: false,
+                        searchable: false,
+                        width: '30px',
+                        render: function(data, type, row) {
+                            return '<input type="checkbox" name="guest_ids[]" value="' + data +
+                                '" class="guest-checkbox">';
+                        }
+                    },
+                    {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -192,10 +277,7 @@
                     // {
                     //     data: 'guest_id_qr_code',
                     //     name: 'guest_id_qr_code',
-                    //     className: 'text-nowrap',
-                    //     render: function(data, type, row) {
-                    //         return '<small><code>' + data.substring(0, 15) + '...</code></small>';
-                    //     }
+                    //     className: 'text-nowrap'
                     // },
                     {
                         data: 'guest_name',
@@ -205,23 +287,27 @@
                     {
                         data: 'guest_gender',
                         name: 'guest_gender',
+                        orderable: false,
                     },
                     {
                         data: 'guest_category',
                         name: 'guest_category',
+                        orderable: false,
                     },
                     {
                         data: 'guest_contact',
-                        name: 'guest_contact'
+                        name: 'guest_contact',
+                        orderable: false,
                     },
                     {
                         data: 'guest_address',
                         name: 'guest_address',
                         render: function(data, type, row) {
-                            return data && data.length > 30 ? 
-                                '<span title="' + data + '">' + data.substr(0, 30) + '...</span>' : 
+                            return data && data.length > 30 ?
+                                '<span title="' + data + '">' + data.substr(0, 30) + '...</span>' :
                                 data;
                         },
+                        orderable: false,
                         className: 'text-nowrap'
                     },
                     {
@@ -235,18 +321,26 @@
                             } else {
                                 return '<span class="badge badge-secondary">' + data + '</span>';
                             }
-                        }
+                        },
+                        orderable: false,
                     },
                     {
                         data: 'guest_arrival_time',
                         name: 'guest_arrival_time',
                         render: function(data, type, row) {
-                            if (data && data !== '-' && data !== null) {
-                                return '<small>' + moment(data).format('DD/MM/YYYY<br>HH:mm:ss') + '</small>';
-                            } else {
-                                return '<span class="badge badge-secondary">-</span>';
+                            if (data && data !== '-') {
+                                return new Date(data).toLocaleString('en-US', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    hour12: false,
+                                    minute: '2-digit',
+                                });
                             }
+                            return '-';
                         },
+                        orderable: false,
                         className: 'text-nowrap'
                     },
                     {
@@ -260,7 +354,8 @@
                             } else {
                                 return '<span class="badge badge-secondary">' + data + '</span>';
                             }
-                        }
+                        },
+                        orderable: false,
                     },
                     {
                         data: 'action',
@@ -270,15 +365,117 @@
                         className: 'text-center text-nowrap'
                     },
                 ],
-                order: [[2, 'asc']], // Order by guest name
+                order: [
+                    [2, 'asc']
+                ], // Order by guest name
                 pageLength: 25,
-                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+                drawCallback: function() {
+                    // Reattach checkbox event handlers after DataTable redraw
+                    $('.guest-checkbox').off('change').on('change', handleCheckboxChange);
+                }
+            });
+
+            // Select All checkbox
+            $('#select-all').on('change', function() {
+                var isChecked = $(this).is(':checked');
+                $('.guest-checkbox').prop('checked', isChecked);
+                handleCheckboxChange();
+            });
+
+            // Individual checkbox change
+            $(document).on('change', '.guest-checkbox', function() {
+                handleCheckboxChange();
+
+                // Update select-all checkbox
+                var totalCheckboxes = $('.guest-checkbox').length;
+                var checkedCheckboxes = $('.guest-checkbox:checked').length;
+                $('#select-all').prop('checked', totalCheckboxes === checkedCheckboxes);
+            });
+
+            // Clear selection
+            $('#clear-selection').on('click', function() {
+                $('.guest-checkbox').prop('checked', false);
+                $('#select-all').prop('checked', false);
+                selectedGuests = [];
+                updateBulkActions();
+            });
+
+            // Bulk delete
+            $('#bulk-delete').on('click', function() {
+                if (selectedGuests.length === 0) {
+                    toastr.warning('Please select guests to delete');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Delete Selected Guests?',
+                    text: `Are you sure you want to delete ${selectedGuests.length} selected guest(s)? This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete them!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        bulkAction('delete', selectedGuests);
+                    }
+                });
+            });
+
+            // Bulk mark as sent
+            $('#bulk-mark-sent').on('click', function() {
+                if (selectedGuests.length === 0) {
+                    toastr.warning('Please select guests to update');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Mark as Sent?',
+                    text: `Mark ${selectedGuests.length} selected guest(s) invitation status as "Sent"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, mark as sent!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        bulkAction('mark_sent', selectedGuests);
+                    }
+                });
+            });
+
+            // Bulk mark as pending
+            $('#bulk-mark-pending').on('click', function() {
+                if (selectedGuests.length === 0) {
+                    toastr.warning('Please select guests to update');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Mark as Pending?',
+                    text: `Mark ${selectedGuests.length} selected guest(s) invitation status as "Pending"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, mark as pending!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        bulkAction('mark_pending', selectedGuests);
+                    }
+                });
             });
 
             // Filter event handlers
             $('#filter-category, #filter-gender, #filter-attendance-status, #filter-invitation-status').change(
                 function() {
                     dataGuest.draw();
+                    // Clear selection when filters change
+                    $('#clear-selection').click();
                 });
 
             // Reset filters
@@ -288,12 +485,73 @@
                 $('#filter-attendance-status').val('');
                 $('#filter-invitation-status').val('');
                 dataGuest.draw();
-                
+                $('#clear-selection').click();
+
                 toastr.options = {
                     "positionClass": "toast-bottom-right",
                 };
                 toastr.info('Filters have been reset');
             });
         });
+
+        function bulkAction(action, guestIds) {
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we process your request.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "{{ url('/invitation/' . $invitation->invitation_id . '/guests/bulk-action') }}",
+                type: 'POST',
+                data: {
+                    action: action,
+                    guest_ids: guestIds,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        // Clear selection and reload table
+                        $('#clear-selection').click();
+                        dataGuest.ajax.reload(null, false);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'An error occurred'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.close();
+                    console.error('Bulk action error:', xhr.responseText);
+
+                    var errorMessage = 'Failed to process bulk action';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage
+                    });
+                }
+            });
+        }
     </script>
 @endsection
