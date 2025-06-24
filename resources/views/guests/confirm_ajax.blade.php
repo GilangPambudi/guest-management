@@ -106,8 +106,7 @@
                     
                     $.ajax({
                         url: form.action,
-                        type: 'POST', // Menggunakan POST karena Laravel method spoofing
-                        data: $(form).serialize(),
+                        type: 'POST', // Menggunakan POST karena Laravel method spoofing                        data: $(form).serialize(),
                         dataType: 'json',
                         success: function(response) {
                             $('#btn-delete').prop('disabled', false).html('<i class="fas fa-trash"></i> Delete');
@@ -120,12 +119,9 @@
                                     text: response.message,
                                     timer: 2000,
                                     showConfirmButton: false
-                                });
-                                
-                                // Reload DataTable
-                                if (typeof dataGuest !== 'undefined') {
-                                    dataGuest.ajax.reload(null, false);
-                                }
+                                });                                
+                                // Safely reload DataTable
+                                safeReloadDataTable('#guest-table');
                             } else {
                                 Swal.fire({
                                     icon: 'error',

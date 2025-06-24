@@ -26,10 +26,14 @@ Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
     Route::get('/{id}/show_ajax', [InvitationController::class, 'show_ajax']);
     Route::get('/create_ajax', [InvitationController::class, 'create_ajax']);
     Route::post('/store_ajax', [InvitationController::class, 'store_ajax']);
+    Route::get('/{id}/show', [InvitationController::class, 'show']);
     Route::get('/{id}/edit_ajax', [InvitationController::class, 'edit_ajax']);
     Route::put('/{id}/update_ajax', [InvitationController::class, 'update_ajax']);
     Route::get('/{id}/delete_ajax', [InvitationController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [InvitationController::class, 'delete_ajax']);
+    Route::get('/{invitation_id}/scanner', [GuestController::class, 'scanner'])->name('guest.scanner');
+    Route::get('/{invitation_id}/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])->name('guest.welcome_gate');
+    Route::get('/{invitation_id}/recent-checkins', [GuestController::class, 'recentCheckins']);
 });
 
 Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'auth'], function () {
@@ -51,8 +55,9 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     // Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
     // ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
 });
-
+Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner.select');
+Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
-Route::get('/invitation-letter/{guest_id_qr_code}', [GuestController::class, 'invitation_letter']);
-Route::post('/update-attendance/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');
+Route::get('/invitation-letter/{slug}/{guest_id_qr_code}', [GuestController::class, 'invitation_letter'])->name('invitation.letter');
+Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');

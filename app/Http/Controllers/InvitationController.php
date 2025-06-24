@@ -46,6 +46,7 @@ class InvitationController extends Controller
         $invitation = Invitation::select(
             'invitation_id',
             'wedding_name',
+            'slug',
             'wedding_date',
             'wedding_time_start',
             'wedding_time_end',
@@ -57,10 +58,10 @@ class InvitationController extends Controller
         return DataTables::of($invitation)
             ->addIndexColumn()
             ->addColumn('action', function ($event) {
-                $btn = '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">View</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
-                $btn .= '<a href="' . url('/invitation/' . $event->invitation_id . '/guests') . '" class="btn btn-success btn-sm">Manage Guests</a> ';
+                $btn = '<a href="' . url('/invitation/' . $event->invitation_id) . '/show' . '" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</a> ';
+                $btn .= '<a href="' . url('/invitation/' . $event->invitation_id . '/guests') . '" class="btn btn-success btn-sm"><i class="fas fa-users"></i> Manage Guests</a> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i> Edit</button> ';
+
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -77,6 +78,7 @@ class InvitationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'wedding_name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:invitation,slug',
             'groom_name' => 'required|string|max:255',
             'bride_name' => 'required|string|max:255',
             'groom_alias' => 'nullable|string|max:50',
@@ -109,6 +111,55 @@ class InvitationController extends Controller
         return response()->json(['success' => 'Invitation created successfully.']);
     }
 
+    public function show($id)
+    {
+        $invitation = Invitation::with(['guests' => function ($query) {
+            $query->orderBy('guest_name');
+        }])->find($id);
+
+        if (!$invitation) {
+            return redirect()->route('invitation.index')->with('error', 'Invitation not found');
+        }
+
+        // Format times for display
+        $invitation->wedding_time_start = Carbon::parse($invitation->wedding_time_start)->format('H:i');
+        $invitation->wedding_time_end = Carbon::parse($invitation->wedding_time_end)->format('H:i');
+
+        $title = 'Invitation Details';
+        $breadcrumb = (object)[
+            'title' => 'Invitation Details',
+            'list' => ['Home', 'Invitations', $invitation->wedding_name]
+        ];
+
+        $page = (object)[
+            'title' => 'Invitation Details - ' . $invitation->wedding_name
+        ];
+
+        $activeMenu = 'invitation';
+
+        // Get statistics
+        $totalGuests = $invitation->guests->count();
+        $attendedGuests = $invitation->guests->where('guest_attendance_status', 'Yes')->count();
+        $pendingGuests = $invitation->guests->where('guest_attendance_status', 'Pending')->count();
+        $notAttendedGuests = $invitation->guests->where('guest_attendance_status', 'No')->count();
+
+        // Get guest categories
+        $guestCategories = $invitation->guests->groupBy('guest_category')->map->count();
+
+        return view('invitation.show', [
+            'title' => $title,
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'activeMenu' => $activeMenu,
+            'invitation' => $invitation,
+            'totalGuests' => $totalGuests,
+            'attendedGuests' => $attendedGuests,
+            'pendingGuests' => $pendingGuests,
+            'notAttendedGuests' => $notAttendedGuests,
+            'guestCategories' => $guestCategories
+        ]);
+    }
+
     public function show_ajax($id)
     {
         $invitation = Invitation::find($id);
@@ -136,6 +187,7 @@ class InvitationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'wedding_name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:invitation,slug,' . $id . ',invitation_id',
             'groom_name' => 'required|string|max:255',
             'bride_name' => 'required|string|max:255',
             'wedding_date' => 'required|date',
@@ -184,14 +236,32 @@ class InvitationController extends Controller
         $invitation = Invitation::find($id);
 
         if ($invitation) {
+            // Cek apakah invitation memiliki guests
+            $guestCount = $invitation->guests()->count();
+
+            if ($guestCount > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Cannot delete invitation. This invitation has {$guestCount} guest(s). Please delete all guests first."
+                ], 422);
+            }
+
             // Hapus file gambar jika ada
             if ($invitation->wedding_image && file_exists(public_path($invitation->wedding_image))) {
                 unlink(public_path($invitation->wedding_image));
             }
 
             $invitation->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation deleted successfully.'
+            ]);
         }
 
-        return response()->json(['success' => 'Invitation deleted successfully.']);
+        return response()->json([
+            'success' => false,
+            'message' => 'Invitation not found.'
+        ], 404);
     }
 }

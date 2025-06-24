@@ -34,7 +34,7 @@
                         <div class="icon">
                             <i class="ion ion-bag"></i>
                         </div>
-                        <a href="{{ url('/guests') }}" class="small-box-footer">More info <i
+                        <a href="{{ url('/invitation') }}" class="small-box-footer">More info <i
                                 class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                     <!-- small box -->
                     <div class="small-box bg-primary">
                         <div class="inner">
-                            <h3> 1 </h3>
+                            <h3> X </h3>
                             <p>Gifts Received</p>
                         </div>
                         <div class="icon">

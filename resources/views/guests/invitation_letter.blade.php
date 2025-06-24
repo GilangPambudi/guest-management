@@ -741,10 +741,8 @@
             Toast.fire({
                 icon: 'info',
                 title: 'Updating your attendance status...'
-            });
-
-            $.ajax({
-                url: "{{ url('/update-attendance/' . $guest->guest_id_qr_code) }}",
+            });            $.ajax({
+                url: "{{ url('/update-attendance/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}",
                 type: 'POST',
                 data: {
                     attendance_status: status

@@ -10,7 +10,8 @@
     <div class="sidebar">
 
         <div class="user-panel mt-1 pb-1 mb-1 d-flex">
-            <div class="info"><a href="{{ url('home') }}" class="d-block text-primary">{{ config('app.name') }}</a></div>
+            <div class="info"><a href="{{ url('home') }}" class="d-block text-primary">{{ config('app.name') }}</a>
+            </div>
         </div>
 
         <!-- Sidebar Menu -->
@@ -34,14 +35,14 @@
                         </p>
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a href="{{ url('/guests') }}" class="nav-link {{ $activeMenu == 'guests' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-users"></i>
+                <li class="nav-item">
+                    <a href="{{ url('/scanner') }}" class="nav-link {{ $activeMenu == 'scanner' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-qrcode"></i>
                         <p>
-                            Guests
+                            QR Scanner
                         </p>
                     </a>
-                </li> --}}
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link {{ request()->is('kanban') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-circle"></i>

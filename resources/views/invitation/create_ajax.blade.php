@@ -8,13 +8,21 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="form-group row">
+            <div class="modal-body">                <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Wedding Name</label>
                     <div class="col-sm-9">
                         <input type="text" name="wedding_name" id="wedding_name" class="form-control" required
                             readonly>
                         <small id="error-wedding_name" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Slug <small class="text-muted">(optional)</small></label>
+                    <div class="col-sm-9">
+                        <input type="text" name="slug" id="slug" class="form-control" 
+                            placeholder="Auto-generated from wedding name">
+                        <small class="form-text text-muted">Used for invitation URL. Leave empty to auto-generate.</small>
+                        <small id="error-slug" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -192,25 +200,57 @@
                 $(element).removeClass('is-invalid');
             }
         });
-    });
-    $(document).ready(function() {
-        $('#groom_name').on('input', function() {
-            const groomName = $(this).val().split(' ')[0];
-            $('#groom_alias').val(groomName);
-        });
-
-        $('#bride_name').on('input', function() {
-            const brideName = $(this).val().split(' ')[0];
-            $('#bride_alias').val(brideName);
-        });
-    });
-    $(document).ready(function() {
-        $('#groom_name, #bride_name').on('input', function() {
-            const groomAlias = $('#groom_alias').val();
-            const brideAlias = $('#bride_alias').val();
-            if (groomAlias && brideAlias) {
-                $('#wedding_name').val(`${groomAlias} & ${brideAlias}`);
+    });    $(document).ready(function() {
+        // Function to generate slug
+        function generateSlug(text) {
+            return text
+                .toLowerCase()
+                .replace(/[^a-z0-9\s&-]/g, '') // Allow & character temporarily
+                .replace(/\s*&\s*/g, '-')       // Replace " & " with "-"
+                .replace(/\s+/g, '-')           // Replace spaces with hyphens
+                .replace(/-+/g, '-')            // Replace multiple hyphens with single
+                .replace(/^-+|-+$/g, '')        // Remove leading/trailing hyphens
+                .trim();
+        }
+        
+        // Function to update wedding name and slug
+        function updateWeddingNameAndSlug() {
+            const groomName = $('#groom_name').val();
+            const brideName = $('#bride_name').val();
+            
+            if (groomName && brideName) {
+                const groomAlias = groomName.split(' ')[0];
+                const brideAlias = brideName.split(' ')[0];
+                
+                $('#groom_alias').val(groomAlias);
+                $('#bride_alias').val(brideAlias);
+                
+                const weddingName = `${groomAlias} & ${brideAlias}`;
+                $('#wedding_name').val(weddingName);
+                
+                // Auto-generate slug if slug field is empty or if it was auto-generated before
+                const currentSlug = $('#slug').val();
+                if (!currentSlug || $('#slug').data('auto-generated')) {
+                    const slug = generateSlug(weddingName);
+                    $('#slug').val(slug).data('auto-generated', true);
+                }
             }
+        }
+        
+        // Event listeners for groom and bride name inputs
+        $('#groom_name, #bride_name').on('input', function() {
+            updateWeddingNameAndSlug();
+        });
+        
+        // Allow manual slug editing
+        $('#slug').on('input', function() {
+            const value = $(this).val();
+            const slug = generateSlug(value);
+            if (value !== slug) {
+                $(this).val(slug);
+            }
+            // Mark as manually edited
+            $(this).data('auto-generated', false);
         });
     });
     $(document).ready(function() {

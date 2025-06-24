@@ -101,20 +101,16 @@
                     timeout: 300000, // 5 minutes timeout for large files
                     success: function(response) {
                         // Tutup SweetAlert loading
-                        Swal.close();
-
-                        if (response.status) {
+                        Swal.close();                        if (response.status) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Import Successful',
                                 html: response.message + '<br><small>QR codes have been generated for all guests</small>',
-                                confirmButtonText: 'OK'
-                            }).then((result) => {
+                                confirmButtonText: 'OK'                            }).then((result) => {
                                 if (result.isConfirmed) {
-                                    if (response.refresh) {
-                                        dataGuest.ajax.reload();
-                                    }
-                                    $('#myModal').modal('hide');
+                                    $('#myModal').modal('hide');                                    
+                                    // Safely reload DataTable
+                                    safeReloadDataTable('#guest-table');
                                 }
                             });
                         } else {

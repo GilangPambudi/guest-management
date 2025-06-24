@@ -30,7 +30,18 @@
                 <div class="modal-body">
                     <div class="alert alert-warning">
                         <h5><i class="icon fas fa-ban"></i> Confirmation!!!</h5>
-                        Do you want to delete this invitation?
+                        <p>Do you want to delete this invitation?</p>
+                        <p><strong>This action cannot be undone and will permanently delete:</strong></p>
+                        <ul>
+                            <li>Invitation details</li>
+                            <li>Wedding image (if any)</li>
+                        </ul>
+                        @if ($invitation->guests()->count() > 0)
+                            <div class="alert alert-danger mt-2">
+                                <strong>Error:</strong> This invitation has {{ $invitation->guests()->count() }} guest(s)
+                                and cannot be deleted.
+                            </div>
+                        @endif
                     </div>
                     <table class="table table-sm table-bordered table-striped">
                         <tr>
@@ -73,11 +84,10 @@
                         data: $(form).serialize(),
                         success: function(response) {
                             if (response.success) {
-                                $('#myModal').modal('hide');
                                 toastr.success('Invitation successfully deleted', 'Success', {
                                     positionClass: 'toast-bottom-right'
                                 });
-                                $('#invitation-table').DataTable().ajax.reload();
+                                window.location.href = "{{ url('/invitation') }}";
                             } else {
                                 toastr.error(response.message, 'Error', {
                                     positionClass: 'toast-bottom-right'

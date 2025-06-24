@@ -11,6 +11,10 @@
             <h3 class="text-center mb-4">Wedding of {{ $invitation->wedding_name }}</h3>
             <table class="table table-sm table-bordered table-striped">
                 <tr>
+                    <th class="text-right col-3">Slug:</th>
+                    <td class="col-9">{{ $invitation->slug }}</td>
+                </tr>
+                <tr>
                     <th class="text-right col-3">Groom:</th>
                     <td class="col-9">{{ $invitation->groom_name }}</td>
                 </tr>

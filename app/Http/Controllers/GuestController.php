@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use CaliCastle\Cuid;
+use Hidehalo\Nanoid\Client;
 use App\Models\Guest;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
@@ -63,7 +63,7 @@ class GuestController extends Controller
 
         $breadcrumb = (object)[
             'title' => 'List of Guests - ' . $invitation->wedding_name,
-            'list' => ['Home', 'Invitations', 'Guests']
+            'list' => ['Home', 'Invitations - ' . $invitation->wedding_name, 'Guests']
         ];
 
         $page = (object)[
@@ -119,10 +119,19 @@ class GuestController extends Controller
 
         return DataTables::of($guests)
             ->addIndexColumn()
+            ->editColumn('guest_arrival_time', function ($guest) {
+                if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-') {
+                    return \Carbon\Carbon::parse($guest->guest_arrival_time)->format('H:i');
+                }
+                return $guest->guest_arrival_time;
+            })
             ->addColumn('action', function ($guest) use ($invitation_id) {
-                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm">Copy ID</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Delete</button> ';
+                // Get invitation slug for invitation letter link
+                $invitation = Invitation::find($invitation_id);
+                $slug = $invitation ? $invitation->slug : '';
+
+                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm"><i class="fas fa-copy"></i> Copy ID</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</button> ';
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -219,7 +228,8 @@ class GuestController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $message
+                'message' => $message,
+                'refresh' => true
             ]);
         } else {
             return response()->json([
@@ -238,7 +248,8 @@ class GuestController extends Controller
         if ($updatedCount > 0) {
             return response()->json([
                 'success' => true,
-                'message' => "{$updatedCount} guest(s) invitation status updated to '{$status}'"
+                'message' => "{$updatedCount} guest(s) invitation status updated to '{$status}'",
+                'refresh' => true
             ]);
         } else {
             return response()->json([
@@ -291,9 +302,10 @@ class GuestController extends Controller
         }
 
         // Generate guest_id_qr_code
-        $cuidValue = Cuid::make();
+        $client = new Client();
+        $nanoId = $client->generateId(10); // Generate 10 character NanoID
         $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
-        $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
+        $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
         // Generate QR Code
         $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
@@ -312,13 +324,18 @@ class GuestController extends Controller
         // Simpan data tamu ke database
         Guest::create($data);
 
-        return response()->json(['success' => 'Guest created successfully.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Guest created successfully.',
+            'refresh' => true
+        ]);
     }
 
     public function show_ajax($invitation_id, $id)
     {
         $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
-        return view('guests.show_ajax', ['guest' => $guest]);
+        $invitation = Invitation::find($invitation_id);
+        return view('guests.show_ajax', ['guest' => $guest, 'invitation' => $invitation]);
     }
 
     public function edit_ajax($invitation_id, $id)
@@ -348,14 +365,19 @@ class GuestController extends Controller
         // Periksa apakah guest_name diubah
         if ($guest->guest_name !== $request->input('guest_name')) {
             // Hapus QR Code lama jika ada
-            if ($guest->guest_qr_code && Storage::disk('public')->exists(str_replace('storage/', '', $guest->guest_qr_code))) {
+            if ($guest->guest_qr_code && Storage::disk('public')->exists(str_replace(
+                'storage/',
+                '',
+                $guest->guest_qr_code
+            ))) {
                 Storage::disk('public')->delete(str_replace('storage/', '', $guest->guest_qr_code));
             }
 
             // Generate guest_id_qr_code baru
-            $cuidValue = Cuid::make();
+            $client = new Client();
+            $nanoId = $client->generateId(10); // Generate 10 character NanoID
             $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
-            $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
+            $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
             // Generate QR Code baru
             $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
@@ -369,10 +391,22 @@ class GuestController extends Controller
             ]);
         }
 
+        // Periksa apakah attendance status diubah menjadi "-" (Not Set)
+        if ($request->input('guest_attendance_status') === '-') {
+            // Set arrival time menjadi "-" jika attendance status diubah ke "Not Set"
+            $request->merge([
+            'guest_arrival_time' => '-',
+            ]);
+        }
+
         // Perbarui data tamu
         $guest->update($request->all());
 
-        return response()->json(['success' => 'Guest updated successfully.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Guest updated successfully.',
+            'refresh' => true
+        ]);
     }
 
     public function confirm_ajax($invitation_id, $id)
@@ -396,7 +430,8 @@ class GuestController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Data successfully deleted'
+                    'message' => 'Data successfully deleted',
+                    'refresh' => true
                 ]);
             } else {
                 return response()->json([
@@ -443,9 +478,10 @@ class GuestController extends Controller
             if (count($data) > 1) {
                 foreach ($data as $row => $value) {
                     if ($row > 1) {
-                        $cuidValue = Cuid::make();
+                        $client = new Client();
+                        $nanoId = $client->generateId(10); // Generate 10 character NanoID
                         $guestNameSlug = str_replace(' ', '-', strtolower($value['A']));
-                        $guestIdQrCode = "{$cuidValue}-{$guestNameSlug}";
+                        $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
                         // Generate QR Code
                         $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
@@ -554,16 +590,21 @@ class GuestController extends Controller
     }
 
     // QR Code Methods
-    public function invitation_letter($guest_id_qr_code)
+    public function invitation_letter($slug, $guest_id_qr_code)
     {
-        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
-        if (!$guest) {
-            abort(404, 'Guest not found');
-        }
-
-        $invitation = Invitation::where('invitation_id', $guest->invitation_id)->first();
+        // Cari invitation berdasarkan slug
+        $invitation = Invitation::where('slug', $slug)->first();
         if (!$invitation) {
             abort(404, 'Invitation not found');
+        }
+
+        // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->first();
+
+        if (!$guest) {
+            abort(404, 'Guest not found or does not belong to this invitation');
         }
 
         // Ambil data dari undangan
@@ -579,6 +620,7 @@ class GuestController extends Controller
 
         return view('guests.invitation_letter', [
             'guest' => $guest,
+            'invitation' => $invitation,
             'groomName' => $groomName,
             'brideName' => $brideName,
             'weddingDate' => $weddingDate,
@@ -591,7 +633,7 @@ class GuestController extends Controller
         ]);
     }
 
-    public function update_attendance_ajax(Request $request, $guest_id_qr_code)
+    public function update_attendance_ajax(Request $request, $slug, $guest_id_qr_code)
     {
         $validator = Validator::make($request->all(), [
             'attendance_status' => 'required|in:Yes,No,-'
@@ -604,12 +646,24 @@ class GuestController extends Controller
             ], 422);
         }
 
-        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
+        // Cari invitation berdasarkan slug
+        $invitation = Invitation::where('slug', $slug)->first();
+        if (!$invitation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invitation not found'
+            ], 404);
+        }
+
+        // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->first();
 
         if (!$guest) {
             return response()->json([
                 'success' => false,
-                'message' => 'Guest not found'
+                'message' => 'Guest not found or does not belong to this invitation'
             ], 404);
         }
 
@@ -622,28 +676,35 @@ class GuestController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Attendance status updated successfully',
+            'message' => 'RSVP status updated successfully',
             'new_status' => $newStatus
         ]);
     }
 
-
-    public function welcome_gate($guest_id_qr_code)
+    public function scannerSelect()
     {
-        // Cari tamu berdasarkan guest_id_qr_code
-        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)->first();
+        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+            ->withCount('guests')
+            ->orderBy('wedding_date', 'desc')
+            ->get();
 
-        if (!$guest) {
-            abort(404, 'Guest not found');
-        }
+        $title = 'Select Invitation for Scanner';
+        $breadcrumb = (object)[
+            'title' => 'QR Scanner - Select Invitation',
+            'list' => ['Home', 'Scanner']
+        ];
+        $page = (object)[
+            'title' => 'Select Invitation for QR Scanner'
+        ];
+        $activeMenu = 'scanner';
 
-        // Perbarui waktu kedatangan tamu dan status kehadiran
-        $guest->update([
-            'guest_attendance_status' => 'Yes',
-            'guest_arrival_time' => now()->format('Y-m-d H:i:s'),
+        return view('scanner.select', [
+            'title' => $title,
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'activeMenu' => $activeMenu,
+            'invitations' => $invitations
         ]);
-
-        return view('guests.welcome_gate', compact('guest'));
     }
 
     public function scanner($invitation_id)
@@ -651,24 +712,79 @@ class GuestController extends Controller
         $invitation = Invitation::findOrFail($invitation_id);
 
         $title = 'Guest Scanner';
-
         $breadcrumb = (object)[
             'title' => 'Guest Scanner - ' . $invitation->wedding_name,
-            'list' => ['Home', 'Invitations', 'Guests', 'Scanner']
+            'list' => ['Home', 'Scanner', 'Select Invitation', $invitation->wedding_name]
         ];
-
         $page = (object)[
             'title' => 'Guest Scanner - ' . $invitation->wedding_name
         ];
+        $activeMenu = 'scanner';
 
-        $activeMenu = 'invitation';
-
-        return view('guests.scanner', [
+        return view('scanner.index', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
             'invitation' => $invitation
         ]);
+    }
+
+    public function welcome_gate($invitation_id, $guest_id_qr_code)
+    {
+        // Cari invitation terlebih dahulu
+        $invitation = Invitation::findOrFail($invitation_id);
+
+        // Cari tamu berdasarkan guest_id_qr_code dan pastikan milik invitation yang benar
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+            ->where('invitation_id', $invitation_id)
+            ->first();
+
+        if (!$guest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Guest not found or does not belong to this invitation'
+            ], 404);
+        }
+
+        // Cek apakah sudah check-in sebelumnya
+        $alreadyCheckedIn = $guest->guest_attendance_status === 'Yes' && $guest->guest_arrival_time;
+
+        // Perbarui waktu kedatangan tamu dan status kehadiran
+        $guest->update([
+            'guest_attendance_status' => 'Yes',
+            'guest_arrival_time' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $alreadyCheckedIn ?
+                "Welcome back, {$guest->guest_name}! (Already checked in)" :
+                "Welcome, {$guest->guest_name}! Check-in successful",
+            'guest_name' => $guest->guest_name,
+            'guest_category' => $guest->guest_category,
+            'already_checked_in' => $alreadyCheckedIn,
+            'arrival_time' => now()->setTimezone('Asia/Jakarta')->format('H:i:s')
+        ]);
+    }
+
+    public function recentCheckins($invitation_id)
+    {
+        $guests = Guest::where('invitation_id', $invitation_id)
+            ->where('guest_attendance_status', 'Yes')
+            ->whereDate('guest_arrival_time', now()->setTimezone('Asia/Jakarta')->toDateString())
+            ->orderBy('guest_arrival_time', 'desc')
+            ->limit(10)
+            ->get(['guest_name', 'guest_category', 'guest_attendance_status', 'guest_arrival_time'])
+            ->map(function ($guest) {
+                if ($guest->guest_arrival_time) {
+                    $guest->guest_arrival_time_formatted = \Carbon\Carbon::parse($guest->guest_arrival_time)
+                        ->setTimezone('Asia/Jakarta')
+                        ->format('H:i:s');
+                }
+                return $guest;
+            });
+
+        return response()->json($guests);
     }
 }

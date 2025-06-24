@@ -13,7 +13,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
 
@@ -101,7 +101,51 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-        })
+        });
+
+        // Global DataTable error handler
+        $(document).ready(function() {
+            $.fn.dataTable.ext.errMode = function(settings, helpPage, message) {
+                console.error('DataTable error:', message);
+                console.error('Settings:', settings);
+                
+                // Show user-friendly error message
+                if (message.includes('Invalid JSON response')) {
+                    toastr.error('Failed to load data. Please refresh the page.');
+                } else {
+                    toastr.error('An error occurred while loading data.');
+                }
+            };
+
+            // Global function to safely reload DataTable
+            window.safeReloadDataTable = function(tableId) {
+                try {
+                    if ($.fn.DataTable.isDataTable(tableId)) {
+                        $(tableId).DataTable().ajax.reload(null, false);
+                    } else {
+                        console.warn('DataTable not found:', tableId);
+                        window.location.reload();
+                    }
+                } catch (e) {
+                    console.error('Error reloading DataTable:', e);
+                    window.location.reload();
+                }
+            };
+
+            // Debug function to check DataTable status
+            window.debugDataTable = function(tableId) {
+                console.log('=== DataTable Debug Info ===');
+                console.log('Table ID:', tableId);
+                console.log('Table exists:', $(tableId).length > 0);
+                console.log('Is DataTable:', $.fn.DataTable.isDataTable(tableId));
+                if ($.fn.DataTable.isDataTable(tableId)) {
+                    var table = $(tableId).DataTable();
+                    console.log('DataTable instance:', table);
+                    console.log('Ajax URL:', table.ajax.url());
+                }
+                console.log('=== End Debug Info ===');
+            };
+        });
     </script>
     @yield('scripts')
 </body>

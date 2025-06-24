@@ -10,11 +10,11 @@
         @endif
         <div class="card-header">
             <div class="card-tools">
-                <a href="{{ url('/invitation') }}" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> Back to Invitations
+                <a href="{{ url('/invitation/' . $invitation->invitation_id . '/show') }}" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i> Back to Detail
                 </a>
                 <button id="scanner" class="btn btn-info"
-                    onclick="window.location.href='{{ url('/invitation/' . $invitation->invitation_id . '/guests/scanner') }}'">
+                    onclick="window.location.href='{{ url('/invitation/' . $invitation->invitation_id . '/scanner') }}'">
                     <i class="fa fa-qrcode"></i> QR Scanner
                 </button>
                 <button onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/guests/import') }}')"
@@ -97,7 +97,7 @@
                                 </div>
                                 <div class="row mt-3 ">
                                     <div class="col-md-12 d-flex justify-content-end ">
-                                        <button id="apply-filters" class="btn btn-primary btn-sm">
+                                        <button id="apply-filters" class="btn btn-primary btn-sm mr-1">
                                             <i class="fas fa-search"></i> Apply Filters
                                         </button>
                                         <button id="reset-filters" class="btn btn-warning btn-sm">
@@ -123,14 +123,14 @@
                                 <button id="bulk-delete" class="btn btn-danger btn-sm">
                                     <i class="fas fa-trash"></i> Delete Selected
                                 </button>
-                                <button id="bulk-mark-sent" class="btn btn-success btn-sm">
+                                {{-- <button id="bulk-mark-sent" class="btn btn-success btn-sm">
                                     <i class="fas fa-paper-plane"></i> Mark as Sent
                                 </button>
                                 <button id="bulk-mark-pending" class="btn btn-info btn-sm">
                                     <i class="fas fa-clock"></i> Mark as Pending
-                                </button>
-                                <button id="clear-selection" class="btn btn-secondary btn-sm">
-                                    <i class="fas fa-times"></i> Clear Selection
+                                </button> --}}
+                                <button id="clear-selection" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-times"></i> Cancel Action
                                 </button>
                             </div>
                         </div>
@@ -145,7 +145,7 @@
                             <input type="checkbox" id="select-all" title="Select All">
                         </th>
                         <th>No</th>
-                        {{-- <th>ID</th> --}}
+                        <th>ID</th>
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Category</th>
@@ -184,7 +184,7 @@
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(function() {
                     toastr.options = {
-                        "positionClass": "toast-bottom-right",
+                        "positionClass": "toast-top-center",
                     };
                     toastr.success('QR Code ID copied to clipboard!');
                 }).catch(function(err) {
@@ -224,28 +224,43 @@
             } else {
                 $('#bulk-actions').hide();
             }
-        }
-
-        function handleCheckboxChange() {
+        }        function handleCheckboxChange() {
             selectedGuests = [];
-            $('input[name="guest_ids[]"]:checked').each(function() {
-                selectedGuests.push($(this).val());
+            
+            // Only count visible and checked checkboxes in current page
+            $('#guest-table tbody').find('input[name="guest_ids[]"]:checked').each(function() {
+                var guestId = $(this).val();
+                if (guestId && selectedGuests.indexOf(guestId) === -1) {
+                    selectedGuests.push(guestId);
+                }
             });
+            
             updateBulkActions();
         }
+
+        $('#guest-table').on('draw.dt', function() {
+            // Wrap hanya elemen table, bukan seluruh DataTables wrapper
+            const table = document.querySelector('#guest-table');
+            if (!table.closest('.custom-table-scroll')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'custom-table-scroll';
+                wrapper.style.overflowX = 'auto';
+                wrapper.style.width = '100%';
+                wrapper.appendChild(table.cloneNode(true));
+                table.replaceWith(wrapper);
+            }
+        });
+
 
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
-            });
-
-            dataGuest = $('#guest-table').DataTable({
+            });            dataGuest = $('#guest-table').DataTable({
                 processing: true,
                 serverSide: true,
                 deferRender: true,
-                scrollX: true,
                 ajax: {
                     url: "{{ url('/invitation/' . $invitation->invitation_id . '/guests/list') }}",
                     type: "POST",
@@ -254,6 +269,11 @@
                         d.gender = $('#filter-gender').val();
                         d.attendance_status = $('#filter-attendance-status').val();
                         d.invitation_status = $('#filter-invitation-status').val();
+                    },
+                    error: function(xhr, error, code) {
+                        console.error('DataTable AJAX Error:', xhr.responseText);
+                        console.error('Error Code:', code);
+                        toastr.error('Failed to load guests data. Please refresh the page.');
                     }
                 },
                 columns: [{
@@ -274,11 +294,11 @@
                         searchable: false,
                         width: '50px'
                     },
-                    // {
-                    //     data: 'guest_id_qr_code',
-                    //     name: 'guest_id_qr_code',
-                    //     className: 'text-nowrap'
-                    // },
+                    {
+                        data: 'guest_id_qr_code',
+                        name: 'guest_id_qr_code',
+                        className: 'text-nowrap'
+                    },
                     {
                         data: 'guest_name',
                         name: 'guest_name',
@@ -323,20 +343,12 @@
                             }
                         },
                         orderable: false,
-                    },
-                    {
+                    },                    {
                         data: 'guest_arrival_time',
                         name: 'guest_arrival_time',
                         render: function(data, type, row) {
                             if (data && data !== '-') {
-                                return new Date(data).toLocaleString('en-US', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    hour12: false,
-                                    minute: '2-digit',
-                                });
+                                return data; // Data sudah diformat dari controller dengan WIB
                             }
                             return '-';
                         },
@@ -372,40 +384,46 @@
                 lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
-                ],
-                drawCallback: function() {
-                    // Reattach checkbox event handlers after DataTable redraw
-                    $('.guest-checkbox').off('change').on('change', handleCheckboxChange);
+                ],                drawCallback: function() {
+                    // Update bulk actions after redraw
+                    handleCheckboxChange();
+                    
+                    // Reset select-all checkbox state based on current visible selection
+                    var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
+                    var visibleCheckedCheckboxes = $('#guest-table tbody').find('.guest-checkbox:checked');
+                    
+                    $('#select-all').prop('checked', 
+                        visibleCheckboxes.length > 0 && visibleCheckboxes.length === visibleCheckedCheckboxes.length
+                    );
                 }
-            });
-
-            // Select All checkbox
-            $('#select-all').on('change', function() {
+            });            // Select All checkbox
+            $(document).on('change', '#select-all', function() {
                 var isChecked = $(this).is(':checked');
-                $('.guest-checkbox').prop('checked', isChecked);
+                
+                // Only select checkboxes that are currently visible on the page
+                var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
+                visibleCheckboxes.prop('checked', isChecked);
+                
                 handleCheckboxChange();
-            });
-
-            // Individual checkbox change
+            });// Individual checkbox change
             $(document).on('change', '.guest-checkbox', function() {
                 handleCheckboxChange();
 
-                // Update select-all checkbox
-                var totalCheckboxes = $('.guest-checkbox').length;
-                var checkedCheckboxes = $('.guest-checkbox:checked').length;
-                $('#select-all').prop('checked', totalCheckboxes === checkedCheckboxes);
-            });
-
-            // Clear selection
-            $('#clear-selection').on('click', function() {
-                $('.guest-checkbox').prop('checked', false);
+                // Update select-all checkbox based on visible checkboxes only
+                var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
+                var visibleCheckedCheckboxes = $('#guest-table tbody').find('.guest-checkbox:checked');
+                
+                $('#select-all').prop('checked', 
+                    visibleCheckboxes.length > 0 && visibleCheckboxes.length === visibleCheckedCheckboxes.length
+                );
+            });            // Clear selection
+            $(document).on('click', '#clear-selection', function() {
+                $('#guest-table tbody').find('.guest-checkbox').prop('checked', false);
                 $('#select-all').prop('checked', false);
                 selectedGuests = [];
                 updateBulkActions();
-            });
-
-            // Bulk delete
-            $('#bulk-delete').on('click', function() {
+            });// Bulk delete
+            $(document).on('click', '#bulk-delete', function() {
                 if (selectedGuests.length === 0) {
                     toastr.warning('Please select guests to delete');
                     return;
@@ -476,10 +494,8 @@
                     dataGuest.draw();
                     // Clear selection when filters change
                     $('#clear-selection').click();
-                });
-
-            // Reset filters
-            $('#reset-filters').click(function() {
+                });            // Reset filters
+            $(document).on('click', '#reset-filters', function() {
                 $('#filter-category').val('');
                 $('#filter-gender').val('');
                 $('#filter-attendance-status').val('');
@@ -491,6 +507,10 @@
                     "positionClass": "toast-bottom-right",
                 };
                 toastr.info('Filters have been reset');
+            });            // Reload DataTable when modal is closed (after create/update)
+            $('#myModal').on('hidden.bs.modal', function () {
+                // Optional: Additional reload for safety, but AJAX success handlers should handle it
+                // $('#guest-table').DataTable().ajax.reload();
             });
         });
 
@@ -513,8 +533,7 @@
                     action: action,
                     guest_ids: guestIds,
                     _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
+                },                success: function(response) {
                     Swal.close();
                     if (response.success) {
                         Swal.fire({
@@ -523,11 +542,13 @@
                             text: response.message,
                             timer: 2000,
                             showConfirmButton: false
-                        });
-
-                        // Clear selection and reload table
+                        });                        // Clear selection and reload table if refresh flag is set
                         $('#clear-selection').click();
-                        dataGuest.ajax.reload(null, false);
+                          if (response.refresh || response.success) {                            setTimeout(function() {
+                                // Safely reload DataTable
+                                safeReloadDataTable('#guest-table');
+                            }, 500);
+                        }
                     } else {
                         Swal.fire({
                             icon: 'error',

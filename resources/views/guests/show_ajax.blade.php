@@ -79,23 +79,22 @@
                                         {{ $guest->guest_invitation_status }}
                                     </span>
                                 </td>
-                            </tr>
-                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
+                            </tr>                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
                                 <tr>
                                     <th class="text-right">Arrival Time:</th>
                                     <td>
-                                        {{ \Carbon\Carbon::parse($guest->guest_arrival_time)->format('d M Y, H:i:s') }}
+                                        {{ \Carbon\Carbon::parse($guest->guest_arrival_time)->format('d M Y, H:i:s') }} WIB
                                     </td>
                                 </tr>
                             @endif
                             <tr>
                                 <th class="text-right">Created At:</th>
-                                <td>{{ \Carbon\Carbon::parse($guest->created_at)->format('d M Y, H:i:s') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($guest->created_at)->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} WIB</td>
                             </tr>
                             @if ($guest->updated_at != $guest->created_at)
                                 <tr>
                                     <th class="text-right">Last Updated:</th>
-                                    <td>{{ \Carbon\Carbon::parse($guest->updated_at)->format('d M Y, H:i:s') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($guest->updated_at)->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} WIB</td>
                                 </tr>
                             @endif
                         </table>
@@ -129,17 +128,16 @@
                         <div class="card mt-3">
                             <div class="card-header text-center">
                                 <strong>Quick Actions</strong>
-                            </div>
-                            <div class="card-body text-center">
-                                <a href="{{ url('/invitation-letter/' . $guest->guest_id_qr_code) }}" target="_blank"
+                            </div>                            <div class="card-body text-center">
+                                <a href="{{ url('/invitation-letter/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}" target="_blank"
                                     class="btn btn-info btn-sm btn-block mb-2">
-                                    <i class="fas fa-envelope"></i> View Invitation Letter
+                                    <i class="fas fa-external-link-alt"></i> View
                                 </a>
 
                                 <button
-                                    onclick="copyInvitationLink('{{ url('/invitation-letter/' . $guest->guest_id_qr_code) }}')"
+                                    onclick="copyInvitationLink('{{ url('/invitation-letter/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}')"
                                     class="btn btn-secondary btn-sm btn-block mb-2">
-                                    <i class="fas fa-copy"></i> Copy Invitation Link
+                                    <i class="fas fa-copy"></i> Copy Link
                                 </button>
 
                                 @if ($guest->guest_attendance_status != 'Yes')
@@ -167,9 +165,7 @@
                 </button>
             </div>
         </div>
-    </div>
-
-    <script>
+    </div>    <script>
         function editGuest(url) {
             $('#myModal').modal('hide');
             setTimeout(function() {
@@ -182,12 +178,10 @@
             setTimeout(function() {
                 modalAction(url);
             }, 500);
-        }
-
-        function markAsAttended(guestIdQrCode) {
+        }        function markAsAttended(guestIdQrCode) {
             Swal.fire({
                 title: 'Mark as Attended?',
-                text: 'This will mark the guest as attended and record arrival time.',
+                text: 'This will update the guest RSVP status to "Yes".',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -195,14 +189,65 @@
                 confirmButtonText: 'Yes, mark as attended!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect to welcome gate (which will mark as attended)
-                    window.open('{{ url('/welcome-gate') }}/' + guestIdQrCode, '_blank');
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Updating...',
+                        text: 'Please wait while we update the attendance status.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
 
-                    // Close modal and reload data
-                    $('#myModal').modal('hide');
-                    if (typeof dataGuest !== 'undefined') {
-                        dataGuest.ajax.reload(null, false);
-                    }
+                    // Update attendance status via AJAX
+                    $.ajax({
+                        url: `{{ url('/update-attendance/' . $invitation->slug) }}/${guestIdQrCode}`,
+                        type: 'POST',
+                        data: {
+                            attendance_status: 'Yes',
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.success) {                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: 'Guest marked as attended!',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                
+                                // Close modal and reload data
+                                $('#myModal').modal('hide');                                
+                                // Safely reload DataTable
+                                safeReloadDataTable('#guest-table');
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: response.message || 'Failed to update attendance status'
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', xhr.responseText);
+                            let errorMessage = 'Something went wrong. Please try again.';
+                            
+                            try {
+                                const errorResponse = JSON.parse(xhr.responseText);
+                                errorMessage = errorResponse.message || errorMessage;
+                            } catch (e) {
+                                // Use default error message
+                            }
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: errorMessage
+                            });
+                        }
+                    });
                 }
             });
         }
@@ -213,30 +258,6 @@
             }).catch(function(err) {
                 console.error('Could not copy text: ', err);
                 toastr.error('Failed to copy link');
-            });
-        }
-
-        function markAsAttended(qrCode) {
-            // Implementation for quick mark as attended
-            $.ajax({
-                url: `/update-attendance/${qrCode}`,
-                type: 'POST',
-                data: {
-                    attendance_status: 'Yes',
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success('Guest marked as attended!');
-                        $('#myModal').modal('hide');
-                        if (typeof dataGuest !== 'undefined') {
-                            dataGuest.ajax.reload();
-                        }
-                    }
-                },
-                error: function() {
-                    toastr.error('Failed to update attendance status');
-                }
             });
         }
     </script>

@@ -240,86 +240,50 @@ $(document).ready(function() {
         },
         highlight: function(element, errorClass, validClass) {
             $(element).addClass('is-invalid').removeClass('is-valid');
-        },
-        unhighlight: function(element, errorClass, validClass) {
+        },        unhighlight: function(element, errorClass, validClass) {
             $(element).removeClass('is-invalid').addClass('is-valid');
         },
-        submitHandler: function(form, event) {
-            event.preventDefault();
-            
+        submitHandler: function(form) {
             // Disable submit button
             $('#btn-save').prop('disabled', true).text('Saving...');
             
-            // Show loading
-            Swal.fire({
-                title: 'Processing...',
-                text: 'Generating QR Code and saving guest data. Please wait...',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
             $.ajax({
                 url: $(form).attr('action'),
                 type: 'POST',
-                data: $(form).serialize(),
-                dataType: 'json',
-                success: function(response) {
-                    Swal.close();
+                data: $(form).serialize(),                success: function(response) {
                     $('#btn-save').prop('disabled', false).text('Save');
                     
-                    if (response.success) {
+                    if (response.status || response.success) {
                         // Clear saved form data after successful submission
                         clearFormData();
                         
                         $('#myModal').modal('hide');
                         Swal.fire({
                             icon: 'success',
-                            title: 'Success!',
-                            text: response.success,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        
-                        // Reload DataTable
-                        if (typeof dataGuest !== 'undefined') {
-                            dataGuest.ajax.reload(null, false);
-                        }
-                    } else if (response.errors) {
-                        // Clear previous errors
+                            title: 'Guest Added',
+                            text: response.message || 'Guest added successfully'
+                        });                        
+                        // Safely reload DataTable
+                        safeReloadDataTable('#guest-table');
+                    } else {
                         $('.error-text').text('');
-                        
-                        // Show validation errors
-                        $.each(response.errors, function(field, messages) {
+                        $.each(response.errors || {}, function(field, messages) {
                             $('#error-' + field).text(messages[0]);
                             $('[name="' + field + '"]').addClass('is-invalid');
                         });
-                        
                         Swal.fire({
                             icon: 'error',
-                            title: 'Validation Error',
-                            text: 'Please check your input and try again.'
+                            title: 'Something Wrong',
+                            text: response.message || 'Please check your input and try again.'
                         });
                     }
-                },
-                error: function(xhr, status, error) {
-                    Swal.close();
+                },                error: function(xhr, status, error) {
                     $('#btn-save').prop('disabled', false).text('Save');
-                    
                     console.error('AJAX Error:', xhr.responseText);
-                    
-                    var errorMessage = 'Failed to save guest data.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
-                    
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: errorMessage
+                        title: 'Something Wrong',
+                        text: 'Failed to add guest. Please try again.'
                     });
                 }
             });

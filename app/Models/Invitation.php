@@ -12,6 +12,7 @@ class Invitation extends Model
 
     protected $fillable = [
         'wedding_name',
+        'slug',
         'groom_name',
         'bride_name',
         'groom_alias',
@@ -24,6 +25,37 @@ class Invitation extends Model
         'wedding_maps',
         'wedding_image',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($invitation) {
+            if (empty($invitation->slug)) {
+                $invitation->slug = $invitation->generateSlug($invitation->wedding_name);
+            }
+        });
+
+        static::updating(function ($invitation) {
+            if ($invitation->isDirty('wedding_name') && empty($invitation->slug)) {
+                $invitation->slug = $invitation->generateSlug($invitation->wedding_name);
+            }
+        });
+    }
+
+    public function generateSlug($name)
+    {
+        $slug = \Illuminate\Support\Str::slug($name);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->where('invitation_id', '!=', $this->invitation_id ?? 0)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
 
     public function guests()
 {
