@@ -34,6 +34,8 @@ Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
     Route::get('/{invitation_id}/scanner', [GuestController::class, 'scanner'])->name('guest.scanner');
     Route::get('/{invitation_id}/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])->name('guest.welcome_gate');
     Route::get('/{invitation_id}/recent-checkins', [GuestController::class, 'recentCheckins']);
+    Route::post('/{invitation}/guests/{guest}/send-wa', [GuestController::class, 'sendWhatsapp'])->name('guests.send-wa');
+    Route::post('/{invitation}/guests/send-wa-bulk', [GuestController::class, 'sendWhatsappBulk'])->name('guests.send-wa-bulk');
 });
 
 Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'auth'], function () {
@@ -51,6 +53,7 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     Route::put('/{id}/update_ajax', [GuestController::class, 'update_ajax']);
     Route::get('/{id}/delete_ajax', [GuestController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [GuestController::class, 'delete_ajax']);
+    Route::post('/{id}/delete_ajax', [GuestController::class, 'delete_ajax']); // Tambahkan untuk AJAX
     Route::post('/bulk-action', [GuestController::class, 'bulkAction']);
     // Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
     // ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
@@ -62,6 +65,3 @@ Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->nam
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation-letter/{slug}/{guest_id_qr_code}', [GuestController::class, 'invitation_letter'])->name('invitation.letter');
 Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');
-
-Route::post('/invitation/{invitation}/guests/{guest}/send-wa', [GuestController::class, 'sendWhatsapp'])->name('guests.send-wa');
-Route::post('/invitation/{invitation}/guests/send-wa-bulk', [GuestController::class, 'sendWhatsappBulk'])->name('guests.send-wa-bulk');

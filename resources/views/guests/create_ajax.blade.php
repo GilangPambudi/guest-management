@@ -37,7 +37,7 @@
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Guest Category</label>
                     <div class="col-sm-9">
-                        <input value="" type="text" name="guest_category" id="guest_category" class="form-control" required>
+                        <input value="" type="text" name="guest_category" id="guest_category" class="form-control" placeholder="e.g. Family, Friend, VIP" required>
                         <small id="error-guest_category" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Guest Contact</label>
                     <div class="col-sm-9">
-                        <input value="" type="text" name="guest_contact" id="guest_contact" class="form-control" required>
+                        <input value="" type="text" name="guest_contact" id="guest_contact" class="form-control" required placeholder="e.g. 6281234567890">
                         <small id="error-guest_contact" class="error-text form-text text-danger"></small>
                     </div>
                 </div>

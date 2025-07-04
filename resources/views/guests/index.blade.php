@@ -120,9 +120,6 @@
                                 <strong id="selected-count">0</strong> guest(s) selected
                             </div>
                             <div>
-                                <button id="bulk-delete" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i> Delete Selected
-                                </button>
                                 <button id="bulk-send-wa" class="btn btn-success btn-sm">
                                     <i class="fab fa-whatsapp"></i> Send Invitation via WA
                                 </button>
@@ -134,6 +131,9 @@
                                 </button> --}}
                                 <button id="clear-selection" class="btn btn-primary btn-sm">
                                     <i class="fas fa-times"></i> Cancel Action
+                                </button>
+                                <button id="bulk-delete" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete Selected
                                 </button>
                             </div>
                         </div>
@@ -626,7 +626,7 @@
                 toastr.warning('Pilih tamu terlebih dahulu!');
                 return;
             }
-            
+
             Swal.fire({
                 title: 'Konfirmasi Kirim WhatsApp',
                 text: `Kirim pesan WhatsApp ke ${selectedGuests.length} tamu terpilih?`,
@@ -650,7 +650,8 @@
                         },
                         success: function(res) {
                             if (res.success) {
-                                toastr.success('Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
+                                toastr.success(
+                                    'Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
                             } else {
                                 toastr.error(res.message || 'Gagal mengirim WhatsApp bulk.');
                             }
@@ -663,7 +664,8 @@
                             toastr.error(errorMessage);
                         },
                         complete: function() {
-                            btn.prop('disabled', false).html('<i class="fab fa-whatsapp"></i> Kirim WhatsApp Terpilih');
+                            btn.prop('disabled', false).html(
+                                '<i class="fab fa-whatsapp"></i> Kirim WhatsApp Terpilih');
                         }
                     });
                 }

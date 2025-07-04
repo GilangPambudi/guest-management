@@ -862,7 +862,7 @@ class GuestController extends Controller
                 . "📍 *Link Undangan Digital:*\n{$url}\n\n"
                 . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
                 . "Salam hangat,\n"
-                . "*Mempelai & Keluarga*\n\n"
+                . "*{$invitation->groom_name} & {$invitation->bride_name}*\n\n"
                 . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
 
 
@@ -939,7 +939,7 @@ class GuestController extends Controller
                 . "📍 *Link Undangan Digital:*\n{$url}\n\n"
                 . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
                 . "Salam hangat,\n"
-                . "*Mempelai & Keluarga*\n\n"
+                . "*{$invitation->groom_name} & {$invitation->bride_name}*\n\n"
                 . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
 
                 $response = Http::withHeaders([
