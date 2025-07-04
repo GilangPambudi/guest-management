@@ -39,6 +39,7 @@
                     <ul class="mb-0">
                         <li>Make sure the Excel file follows the template format</li>
                         <li>Contact numbers must be unique</li>
+                        <li>Contact numbers must start with 62 (e.g., 6281234567890)</li>
                         <li>QR codes will be automatically generated for each imported guest</li>
                         <li>Default attendance status will be set to "-" (Not Set)</li>
                         <li>Default invitation status will be set to "-" (Not Set)</li>

@@ -25,9 +25,9 @@
                                 </p>
                             </div>
                             <div class="card-footer">
-                                <a href="{{ url('/scanner/' . $invitation->invitation_id) }}" 
-                                   class="btn btn-primary btn-block">
-                                    <i class="fa fa-qrcode"></i> Open Scanner
+                                <a href="{{ url('/invitation/' . $invitation->invitation_id . '/guests') }}" 
+                                   class="btn btn-primary btn-block rounded-lg">
+                                    <i class="fa fa-users"></i> Manage Guests
                                 </a>
                             </div>
                         </div>
@@ -36,7 +36,7 @@
                     <div class="col-12">
                         <div class="alert alert-info text-center">
                             <h4><i class="icon fas fa-info"></i> No Invitations Found</h4>
-                            <p>Please create an invitation first before using the scanner.</p>
+                            <p>Please create an invitation first before managing guests.</p>
                             <a href="{{ url('/invitation') }}" class="btn btn-primary">
                                 <i class="fa fa-plus"></i> Create Invitation
                             </a>

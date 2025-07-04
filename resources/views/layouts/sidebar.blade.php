@@ -36,6 +36,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url('/guests') }}" class="nav-link {{ $activeMenu == 'guests' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>
+                            Guests
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url('/scanner') }}" class="nav-link {{ $activeMenu == 'scanner' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-qrcode"></i>
                         <p>

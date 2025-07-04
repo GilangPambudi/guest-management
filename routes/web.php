@@ -55,9 +55,13 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     // Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
     // ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
 });
+Route::get('/guests', [GuestController::class, 'guestSelect'])->name('guests.select');
 Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner.select');
 Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation-letter/{slug}/{guest_id_qr_code}', [GuestController::class, 'invitation_letter'])->name('invitation.letter');
 Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');
+
+Route::post('/invitation/{invitation}/guests/{guest}/send-wa', [GuestController::class, 'sendWhatsapp'])->name('guests.send-wa');
+Route::post('/invitation/{invitation}/guests/send-wa-bulk', [GuestController::class, 'sendWhatsappBulk'])->name('guests.send-wa-bulk');

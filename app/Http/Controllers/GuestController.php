@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Http;
 
 class GuestController extends Controller
 {
@@ -130,8 +131,11 @@ class GuestController extends Controller
                 $invitation = Invitation::find($invitation_id);
                 $slug = $invitation ? $invitation->slug : '';
 
-                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-success btn-sm"><i class="fas fa-copy"></i> Copy ID</button> ';
+                $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-primary btn-sm"><i class="fas fa-copy"></i> Copy ID</button> ';
+                $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</button> ';
+                // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</button> ';
+                // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> ';
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -395,7 +399,7 @@ class GuestController extends Controller
         if ($request->input('guest_attendance_status') === '-') {
             // Set arrival time menjadi "-" jika attendance status diubah ke "Not Set"
             $request->merge([
-            'guest_arrival_time' => '-',
+                'guest_arrival_time' => '-',
             ]);
         }
 
@@ -707,6 +711,32 @@ class GuestController extends Controller
         ]);
     }
 
+    public function guestSelect()
+    {
+        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+            ->withCount('guests')
+            ->orderBy('wedding_date', 'desc')
+            ->get();
+
+        $title = 'Select Invitation for Guest Management';
+        $breadcrumb = (object)[
+            'title' => 'Guest Management - Select Invitation',
+            'list' => ['Home', 'Guests']
+        ];
+        $page = (object)[
+            'title' => 'Select Invitation for Guest Management'
+        ];
+        $activeMenu = 'guests';
+
+        return view('guests.select', [
+            'title' => $title,
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'activeMenu' => $activeMenu,
+            'invitations' => $invitations
+        ]);
+    }
+
     public function scanner($invitation_id)
     {
         $invitation = Invitation::findOrFail($invitation_id);
@@ -786,5 +816,171 @@ class GuestController extends Controller
             });
 
         return response()->json($guests);
+    }
+
+    public function sendWhatsapp($invitation_id, $guest_id)
+    {
+        try {
+            $guest = Guest::find($guest_id);
+            if (!$guest) {
+                return response()->json(['success' => false, 'message' => 'Guest not found']);
+            }
+
+            // Validasi apakah guest belong to invitation
+            if ($guest->invitation_id != $invitation_id) {
+                return response()->json(['success' => false, 'message' => 'Guest does not belong to this invitation']);
+            }
+
+            // Validasi nomor telepon
+            if (!$guest->guest_contact) {
+                return response()->json(['success' => false, 'message' => 'Guest contact number is empty']);
+            }
+
+            $token = env('FONNTE_TOKEN');
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Fonnte token not configured']);
+            }
+
+            // Ambil invitation terkait tamu
+            $invitation = Invitation::find($invitation_id);
+            if (!$invitation) {
+                return response()->json(['success' => false, 'message' => 'Invitation not found']);
+            }
+
+            $slug = $invitation->slug;
+            $url = url("/invitation/{$slug}/{$guest->guest_id_qr_code}");
+
+            $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
+                . "━━━━━━━━━━━━━━━━━━━━\n"
+                . "💌 *Elegant Wedding Invitation*\n"
+                . "━━━━━━━━━━━━━━━━━━━━\n\n"
+                . "Halo {$guest->guest_name},\n\n"
+                . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
+                . "🗓️ *Tanggal:* " . \Carbon\Carbon::parse($invitation->wedding_date)->translatedFormat('d F Y') . "\n"
+                . "⏰ *Waktu:* " . \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') . " - " . \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') . "\n"
+                . "🏛️ *Tempat:* {$invitation->wedding_venue}\n\n"
+                . "📍 *Link Undangan Digital:*\n{$url}\n\n"
+                . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
+                . "Salam hangat,\n"
+                . "*Mempelai & Keluarga*\n\n"
+                . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
+
+
+            $response = Http::withHeaders([
+                'Authorization' => $token
+            ])->asForm()->post('https://api.fonnte.com/send', [
+                'target' => $guest->guest_contact,
+                'message' => $message,
+            ]);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'WhatsApp message sent successfully',
+                    'data' => $response->json()
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send WhatsApp message',
+                    'error' => $response->json()
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function sendWhatsappBulk(Request $request, $invitation_id)
+    {
+        try {
+            $guestIds = $request->input('guest_ids', []);
+
+            if (empty($guestIds)) {
+                return response()->json(['success' => false, 'message' => 'No guests selected']);
+            }
+
+            $token = env('FONNTE_TOKEN');
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Fonnte token not configured']);
+            }
+
+            $invitation = Invitation::find($invitation_id);
+            if (!$invitation) {
+                return response()->json(['success' => false, 'message' => 'Invitation not found']);
+            }
+
+            $results = [];
+            $successCount = 0;
+            $failedCount = 0;
+
+            foreach ($guestIds as $guestId) {
+                $guest = Guest::find($guestId);
+                if (!$guest || !$guest->guest_contact) {
+                    $failedCount++;
+                    continue;
+                }
+
+                $slug = $invitation->slug;
+                $url = url("/invitation/{$slug}/{$guest->guest_id_qr_code}");
+
+                $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
+                . "━━━━━━━━━━━━━━━━━━━━\n"
+                . "💌 *Elegant Wedding Invitation*\n"
+                . "━━━━━━━━━━━━━━━━━━━━\n\n"
+                . "Halo {$guest->guest_name},\n\n"
+                . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
+                . "🗓️ *Tanggal:* " . \Carbon\Carbon::parse($invitation->wedding_date)->translatedFormat('d F Y') . "\n"
+                . "⏰ *Waktu:* " . \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') . " - " . \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') . "\n"
+                . "🏛️ *Tempat:* {$invitation->wedding_venue}\n\n"
+                . "📍 *Link Undangan Digital:*\n{$url}\n\n"
+                . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
+                . "Salam hangat,\n"
+                . "*Mempelai & Keluarga*\n\n"
+                . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
+
+                $response = Http::withHeaders([
+                    'Authorization' => $token
+                ])->asForm()->post('https://api.fonnte.com/send', [
+                    'target' => $guest->guest_contact,
+                    'message' => $message,
+                ]);
+
+                if ($response->successful()) {
+                    $successCount++;
+                } else {
+                    $failedCount++;
+                }
+
+                $results[] = [
+                    'guest_id' => $guestId,
+                    'guest_name' => $guest->guest_name,
+                    'success' => $response->successful(),
+                    'response' => $response->json()
+                ];
+
+                // Add small delay to prevent rate limiting
+                usleep(500000); // 0.5 second delay
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "WhatsApp sent: {$successCount} success, {$failedCount} failed",
+                'data' => [
+                    'total' => count($guestIds),
+                    'success_count' => $successCount,
+                    'failed_count' => $failedCount,
+                    'results' => $results
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
     }
 }

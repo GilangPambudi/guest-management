@@ -123,6 +123,9 @@
                                 <button id="bulk-delete" class="btn btn-danger btn-sm">
                                     <i class="fas fa-trash"></i> Delete Selected
                                 </button>
+                                <button id="bulk-send-wa" class="btn btn-success btn-sm">
+                                    <i class="fab fa-whatsapp"></i> Send Invitation via WA
+                                </button>
                                 {{-- <button id="bulk-mark-sent" class="btn btn-success btn-sm">
                                     <i class="fas fa-paper-plane"></i> Mark as Sent
                                 </button>
@@ -224,9 +227,11 @@
             } else {
                 $('#bulk-actions').hide();
             }
-        }        function handleCheckboxChange() {
+        }
+
+        function handleCheckboxChange() {
             selectedGuests = [];
-            
+
             // Only count visible and checked checkboxes in current page
             $('#guest-table tbody').find('input[name="guest_ids[]"]:checked').each(function() {
                 var guestId = $(this).val();
@@ -234,7 +239,7 @@
                     selectedGuests.push(guestId);
                 }
             });
-            
+
             updateBulkActions();
         }
 
@@ -257,7 +262,8 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
-            });            dataGuest = $('#guest-table').DataTable({
+            });
+            dataGuest = $('#guest-table').DataTable({
                 processing: true,
                 serverSide: true,
                 deferRender: true,
@@ -343,7 +349,7 @@
                             }
                         },
                         orderable: false,
-                    },                    {
+                    }, {
                         data: 'guest_arrival_time',
                         name: 'guest_arrival_time',
                         render: function(data, type, row) {
@@ -384,45 +390,49 @@
                 lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
-                ],                drawCallback: function() {
+                ],
+                drawCallback: function() {
                     // Update bulk actions after redraw
                     handleCheckboxChange();
-                    
+
                     // Reset select-all checkbox state based on current visible selection
                     var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
-                    var visibleCheckedCheckboxes = $('#guest-table tbody').find('.guest-checkbox:checked');
-                    
-                    $('#select-all').prop('checked', 
-                        visibleCheckboxes.length > 0 && visibleCheckboxes.length === visibleCheckedCheckboxes.length
+                    var visibleCheckedCheckboxes = $('#guest-table tbody').find(
+                        '.guest-checkbox:checked');
+
+                    $('#select-all').prop('checked',
+                        visibleCheckboxes.length > 0 && visibleCheckboxes.length ===
+                        visibleCheckedCheckboxes.length
                     );
                 }
-            });            // Select All checkbox
+            }); // Select All checkbox
             $(document).on('change', '#select-all', function() {
                 var isChecked = $(this).is(':checked');
-                
+
                 // Only select checkboxes that are currently visible on the page
                 var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
                 visibleCheckboxes.prop('checked', isChecked);
-                
+
                 handleCheckboxChange();
-            });// Individual checkbox change
+            }); // Individual checkbox change
             $(document).on('change', '.guest-checkbox', function() {
                 handleCheckboxChange();
 
                 // Update select-all checkbox based on visible checkboxes only
                 var visibleCheckboxes = $('#guest-table tbody').find('.guest-checkbox');
                 var visibleCheckedCheckboxes = $('#guest-table tbody').find('.guest-checkbox:checked');
-                
-                $('#select-all').prop('checked', 
-                    visibleCheckboxes.length > 0 && visibleCheckboxes.length === visibleCheckedCheckboxes.length
+
+                $('#select-all').prop('checked',
+                    visibleCheckboxes.length > 0 && visibleCheckboxes.length ===
+                    visibleCheckedCheckboxes.length
                 );
-            });            // Clear selection
+            }); // Clear selection
             $(document).on('click', '#clear-selection', function() {
                 $('#guest-table tbody').find('.guest-checkbox').prop('checked', false);
                 $('#select-all').prop('checked', false);
                 selectedGuests = [];
                 updateBulkActions();
-            });// Bulk delete
+            }); // Bulk delete
             $(document).on('click', '#bulk-delete', function() {
                 if (selectedGuests.length === 0) {
                     toastr.warning('Please select guests to delete');
@@ -494,7 +504,7 @@
                     dataGuest.draw();
                     // Clear selection when filters change
                     $('#clear-selection').click();
-                });            // Reset filters
+                }); // Reset filters
             $(document).on('click', '#reset-filters', function() {
                 $('#filter-category').val('');
                 $('#filter-gender').val('');
@@ -507,8 +517,8 @@
                     "positionClass": "toast-bottom-right",
                 };
                 toastr.info('Filters have been reset');
-            });            // Reload DataTable when modal is closed (after create/update)
-            $('#myModal').on('hidden.bs.modal', function () {
+            }); // Reload DataTable when modal is closed (after create/update)
+            $('#myModal').on('hidden.bs.modal', function() {
                 // Optional: Additional reload for safety, but AJAX success handlers should handle it
                 // $('#guest-table').DataTable().ajax.reload();
             });
@@ -533,7 +543,8 @@
                     action: action,
                     guest_ids: guestIds,
                     _token: $('meta[name="csrf-token"]').attr('content')
-                },                success: function(response) {
+                },
+                success: function(response) {
                     Swal.close();
                     if (response.success) {
                         Swal.fire({
@@ -542,9 +553,10 @@
                             text: response.message,
                             timer: 2000,
                             showConfirmButton: false
-                        });                        // Clear selection and reload table if refresh flag is set
+                        }); // Clear selection and reload table if refresh flag is set
                         $('#clear-selection').click();
-                          if (response.refresh || response.success) {                            setTimeout(function() {
+                        if (response.refresh || response.success) {
+                            setTimeout(function() {
                                 // Safely reload DataTable
                                 safeReloadDataTable('#guest-table');
                             }, 500);
@@ -574,5 +586,88 @@
                 }
             });
         }
+
+        // WhatsApp Functions - Moved outside bulkAction for proper execution
+        $(document).on('click', '.btn-send-wa', function() {
+            var guestId = $(this).data('guest-id');
+            var invitationId = $(this).data('invitation-id');
+            var btn = $(this);
+            btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(res) {
+                    if (res.success) {
+                        toastr.success('Pesan WhatsApp berhasil dikirim!');
+                    } else {
+                        toastr.error(res.message || 'Gagal mengirim WhatsApp.');
+                    }
+                },
+                error: function(err) {
+                    var errorMessage = 'Gagal mengirim WhatsApp.';
+                    if (err.responseJSON && err.responseJSON.message) {
+                        errorMessage = err.responseJSON.message;
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html('<i class="fab fa-whatsapp"></i> Kirim WA');
+                }
+            });
+        });
+
+        // Kirim WhatsApp bulk
+        $(document).on('click', '#bulk-send-wa', function() {
+            if (selectedGuests.length === 0) {
+                toastr.warning('Pilih tamu terlebih dahulu!');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Konfirmasi Kirim WhatsApp',
+                text: `Kirim pesan WhatsApp ke ${selectedGuests.length} tamu terpilih?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#25d366',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var btn = $(this);
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+
+                    $.ajax({
+                        url: `/invitation/{{ $invitation->invitation_id }}/guests/send-wa-bulk`,
+                        type: 'POST',
+                        data: {
+                            guest_ids: selectedGuests,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                toastr.success('Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
+                            } else {
+                                toastr.error(res.message || 'Gagal mengirim WhatsApp bulk.');
+                            }
+                        },
+                        error: function(err) {
+                            var errorMessage = 'Gagal mengirim WhatsApp bulk.';
+                            if (err.responseJSON && err.responseJSON.message) {
+                                errorMessage = err.responseJSON.message;
+                            }
+                            toastr.error(errorMessage);
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).html('<i class="fab fa-whatsapp"></i> Kirim WhatsApp Terpilih');
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endsection
