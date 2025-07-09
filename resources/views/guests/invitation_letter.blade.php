@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Invitation - {{ $groomName }} & {{ $brideName }}</title>
+    <title>Undangan Pernikahan - {{ $groomName }} & {{ $brideName }}</title>
+    <link rel="icon" href="{{ asset('logoQR-transparent.png') }}" type="image/png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Tailwind CSS CDN --}}
@@ -87,39 +88,51 @@
     <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
             <!-- Header -->
-            <div
-                class="bg-gradient-pink text-white text-center py-8 sm:py-12 md:py-16 px-4 sm:px-8 relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10">
+            <div class="relative overflow-hidden bg-gradient-pink text-white text-center py-8 sm:py-12 md:py-16 px-4 sm:px-8">
+                <!-- Decorative Background -->
+                <div class="absolute inset-0 opacity-10 pointer-events-none select-none">
                     <div class="absolute inset-0"
                         style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><text y=&quot;.9em&quot; font-size=&quot;90&quot; fill=&quot;white&quot; opacity=&quot;0.1&quot;>♥</text></svg>'); background-size: 100px 100px;">
                     </div>
                 </div>
-                <div class="relative z-10">
-                    <h1 class="font-dancing text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 animate-float">
-                        You Are Cordially Invited
-                    </h1>
-                    <div class="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
-                        {{ $groomName }}
+                <!-- Guest Info -->
+                <div class="relative z-10 max-w-xl mx-auto mb-6">
+                    <div class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border-l-4 border-wedding-pink shadow-lg">
+                        <h2 class="font-playfair text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2">
+                            Kepada Yth. {{ $guest->guest_name }}
+                        </h2>
+                        <span class="inline-block bg-blue-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
+                            {{ $guest->guest_category }}
+                        </span>
                     </div>
-                    <div class="font-dancing text-2xl sm:text-3xl md:text-4xl my-1 sm:my-2">&</div>
-                    <div class="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
-                        {{ $brideName }}
+                </div>
+                <!-- Couple Names & Invitation -->
+                <div class="relative z-10 flex flex-col items-center">
+                    <h1 class="font-playfair text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 drop-shadow px-4">
+                        Dengan hormat kami mengundang Anda untuk menghadiri acara pernikahan kami
+                    </h1>
+                    <div class="flex flex-col items-center w-full">
+                        <div class="bg-white bg-opacity-80 rounded-2xl shadow-lg px-6 py-4 sm:px-10 sm:py-6 border-2 border-wedding-pink 
+                            inline-block 
+                            w-full 
+                            max-w-full 
+                            sm:w-auto sm:max-w-none">
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+                                <span class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
+                                    {{ $groomName }}
+                                </span>
+                                <span class="font-dancing text-2xl sm:text-3xl md:text-4xl my-1 sm:my-0 text-gray-700">&</span>
+                                <span class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
+                                    {{ $brideName }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Main Content -->
             <div class="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 md:space-y-8">
-                <!-- Guest Info -->
-                <div
-                    class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border-l-4 border-wedding-pink">
-                    <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2">Dear
-                        {{ $guest->guest_name }}</h2>
-                    <span
-                        class="inline-block bg-blue-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
-                        {{ $guest->guest_category }} Guest
-                    </span>
-                </div>
 
                 <!-- Wedding Details Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
@@ -128,9 +141,9 @@
                         <div class="text-center">
                             <i
                                 class="fas fa-calendar-alt text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Date</h3>
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tanggal</h3>
                             <p class="text-gray-800 font-medium text-sm sm:text-base">
-                                {{ \Carbon\Carbon::parse($weddingDate)->format('l, F j, Y') }}</p>
+                                {{ \Carbon\Carbon::parse($weddingDate)->locale('id')->translatedFormat('j F Y') }}</p>
                         </div>
                     </div>
 
@@ -138,9 +151,8 @@
                         class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border-t-4 border-wedding-pink hover:transform hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
                         <div class="text-center">
                             <i class="fas fa-clock text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Time</h3>
-                            <p class="text-gray-800 font-medium text-sm sm:text-base">{{ $weddingTimeStart }} -
-                                {{ $weddingTimeEnd }}</p>
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Waktu</h3>
+                            <p class="text-gray-800 font-medium text-sm sm:text-base">{{ \Carbon\Carbon::parse($weddingTimeStart)->format('H:i') }} - {{ \Carbon\Carbon::parse($weddingTimeEnd)->format('H:i') }}</p>
                         </div>
                     </div>
 
@@ -149,7 +161,7 @@
                         <div class="text-center">
                             <i
                                 class="fas fa-building text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Venue</h3>
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tempat</h3>
                             <p class="text-gray-800 font-medium text-sm sm:text-base">{{ $weddingVenue }}</p>
                         </div>
                     </div>
@@ -159,7 +171,7 @@
                         <div class="text-center">
                             <i
                                 class="fas fa-map-marker-alt text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Location
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Lokasi
                             </h3>
                             <p class="text-gray-800 font-medium text-sm sm:text-base">{{ $weddingLocation }}</p>
                         </div>
@@ -169,7 +181,7 @@
                 <!-- Wedding Image -->
                 @if ($weddingImage)
                     <div class="text-center">
-                        <img src="{{ asset($weddingImage) }}" alt="Wedding Image"
+                        <img src="{{ asset($weddingImage) }}" alt="Foto Pernikahan"
                             class="max-w-full h-auto max-h-64 sm:max-h-80 md:max-h-96 mx-auto rounded-xl sm:rounded-2xl shadow-xl">
                     </div>
                 @endif
@@ -185,11 +197,11 @@
                     <div class="relative z-10 text-center">
                         <h3 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
                             <i class="fas fa-clipboard-check mr-2 sm:mr-3"></i>
-                            <span class="block sm:inline">RSVP - Please Confirm Your Attendance</span>
+                            <span class="block sm:inline">RSVP - Mohon Konfirmasi Kehadiran Anda</span>
                         </h3>
 
                         <div class="mb-4 sm:mb-6">
-                            <span class="text-blue-200 text-sm sm:text-base">Current Status:</span>
+                            <span class="text-blue-200 text-sm sm:text-base">Status Saat Ini:</span>
                             <span id="current-status"
                                 class="ml-2 inline-block px-3 py-1 sm:px-4 sm:py-2 rounded-full font-semibold text-xs sm:text-sm
                 {{ $guest->guest_attendance_status == 'Yes'
@@ -197,7 +209,7 @@
                     : ($guest->guest_attendance_status == 'No'
                         ? 'bg-red-500 text-white'
                         : 'bg-gray-500 text-white') }}">
-                                {{ $guest->guest_attendance_status == '-' ? 'Not Confirmed' : $guest->guest_attendance_status }}
+                                {{ $guest->guest_attendance_status == '-' ? 'Belum Dikonfirmasi' : ($guest->guest_attendance_status == 'Yes' ? 'Hadir' : 'Tidak Hadir') }}
                             </span>
                         </div>
 
@@ -207,36 +219,33 @@
                                 <button onclick="updateAttendance('Yes')"
                                     class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 md:px-8 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                                     id="btn-yes">
-                                    <i class="fas fa-check mr-2"></i>Yes, I'll Attend
+                                    <i class="fas fa-check mr-2"></i>Ya, Saya akan Hadir
                                 </button>
                                 <button onclick="updateAttendance('No')"
                                     class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 md:px-8 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                                     id="btn-no">
-                                    <i class="fas fa-times mr-2"></i>Sorry, Can't Attend
+                                    <i class="fas fa-times mr-2"></i>Maaf, Tidak Bisa Hadir
                                 </button>
                             </div>
-                            <p class="text-blue-200 text-xs sm:text-sm mt-3 sm:mt-4">Your response helps us prepare
-                                better for the
-                                celebration. Thank you!</p>
+                            <p class="text-blue-200 text-xs sm:text-sm mt-3 sm:mt-4">Konfirmasi Anda membantu kami mempersiapkan
+                                acara dengan lebih baik. Terima kasih!</p>
                         @else
                             <div id="attendance-confirmed">
                                 @if ($guest->guest_attendance_status == 'Yes')
                                     <div
                                         class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                                         <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🎉</div>
-                                        <h4 class="text-lg sm:text-xl font-bold mb-2">Thank You for Confirming!</h4>
-                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">We're excited to
-                                            celebrate with you on our special
-                                            day!</p>
+                                        <h4 class="text-lg sm:text-xl font-bold mb-2">Terima Kasih Sudah Konfirmasi!</h4>
+                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Kami sangat senang
+                                            bisa merayakan hari istimewa kami bersama Anda!</p>
                                     </div>
                                 @else
                                     <div
                                         class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                                         <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">😔</div>
-                                        <h4 class="text-lg sm:text-xl font-bold mb-2">We'll Miss You!</h4>
-                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Thank you for letting
-                                            us know. We understand and
-                                            hope to celebrate with you another time!</p>
+                                        <h4 class="text-lg sm:text-xl font-bold mb-2">Kami akan merindukan Anda!</h4>
+                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Terima kasih sudah memberitahu kami. 
+                                            Kami mengerti dan berharap bisa merayakan bersama di lain waktu!</p>
                                     </div>
                                 @endif
 
@@ -245,7 +254,7 @@
                                     <button onclick="showChangeRSVP()"
                                         class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                                         id="btn-change-rsvp">
-                                        <i class="fas fa-edit mr-2"></i>Change RSVP
+                                        <i class="fas fa-edit mr-2"></i>Ubah RSVP
                                     </button>
                                 </div>
 
@@ -256,17 +265,17 @@
                                     <button onclick="updateAttendance('Yes')"
                                         class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                                         id="btn-change-yes">
-                                        <i class="fas fa-check mr-2"></i>Yes, I'll Attend
+                                        <i class="fas fa-check mr-2"></i>Ya, Saya akan Hadir
                                     </button>
                                     <button onclick="updateAttendance('No')"
                                         class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                                         id="btn-change-no">
-                                        <i class="fas fa-times mr-2"></i>Sorry, Can't Attend
+                                        <i class="fas fa-times mr-2"></i>Maaf, Tidak Bisa Hadir
                                     </button>
                                     <button onclick="hideChangeRSVP()"
                                         class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 text-sm sm:text-base"
                                         id="btn-cancel-change">
-                                        <i class="fas fa-undo mr-2"></i>Cancel
+                                        <i class="fas fa-undo mr-2"></i>Batal
                                     </button>
                                 </div>
                             </div>
@@ -284,21 +293,20 @@
                     </div>
                     <div class="relative z-10">
                         <h3 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
-                            Your Personal QR Code</h3>
+                            Kode QR Pribadi Anda</h3>
                         <div
                             class="bg-white p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl md:rounded-2xl shadow-xl inline-block mb-4 sm:mb-6 hover:transform hover:scale-105 transition-all duration-300">
-                            <img src="{{ asset($guest->guest_qr_code) }}" alt="Guest QR Code"
+                            <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code Tamu"
                                 class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 mx-auto">
                         </div>
                         <div class="text-gray-700">
-                            <p class="mb-3 sm:mb-4 text-sm sm:text-base">Please present this QR code at the entrance
-                                for quick check-in.</p>
-                            <div class="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg inline-block cursor-pointer hover:bg-gray-700 transition-colors font-mono text-xs sm:text-sm break-all"
+                            <p class="mb-3 sm:mb-4 text-sm sm:text-base">Silakan tunjukkan kode QR ini di pintu masuk.</p>
+                            {{-- <div class="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg inline-block cursor-pointer hover:bg-gray-700 transition-colors font-mono text-xs sm:text-sm break-all"
                                 onclick="copyQRCode('{{ $guest->guest_id_qr_code }}')">
                                 {{ $guest->guest_id_qr_code }}
                             </div>
-                            <br><small class="text-gray-500 mt-2 block text-xs sm:text-sm">Click the ID above to
-                                copy</small>
+                            <br><small class="text-gray-500 mt-2 block text-xs sm:text-sm">Klik ID di atas untuk
+                                menyalin</small> --}}
                         </div>
                     </div>
                 </div>
@@ -308,13 +316,12 @@
                     <div
                         class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border-t-4 border-wedding-pink text-center">
                         <i class="fas fa-map text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-3 sm:mb-4"></i>
-                        <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Get
-                            Directions</h3>
-                        <p class="text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Click below to open the location in
-                            your maps application</p>
+                        <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Petunjuk Arah</h3>
+                        <p class="text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Klik di bawah untuk membuka lokasi di
+                            aplikasi peta Anda</p>
                         <a href="{{ $weddingMaps }}" target="_blank"
                             class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
-                            <i class="fas fa-map-marker-alt mr-2"></i>View on Maps
+                            <i class="fas fa-map-marker-alt mr-2"></i>Lihat di Peta
                         </a>
                     </div>
                 @endif
@@ -329,44 +336,50 @@
                     <div class="relative z-10">
                         <h3
                             class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
-                            <i class="fas fa-heart mr-2 sm:mr-3 text-pink-500"></i>Wedding Wishes
+                            <i class="fas fa-heart mr-2 sm:mr-3 text-pink-500"></i>Ucapan & Doa
                         </h3>
 
                         <!-- Form Ucapan -->
                         <div class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
-                            <h4 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4">Leave Your Wishes
-                            </h4>
-                            <form id="wishForm" class="space-y-3 sm:space-y-4">
-                                <div>
-                                    <textarea id="wishMessage" name="message" rows="4"
-                                        placeholder="Write your heartfelt wishes for the happy couple..."
-                                        class="w-full p-3 sm:p-4 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-sm sm:text-base"
-                                        maxlength="500" required></textarea>
-                                    <div class="text-right mt-1">
-                                        <small class="text-gray-500" id="charCount">0/500</small>
+                            <h4 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4" id="wishFormTitle">Tinggalkan Ucapan Anda</h4>
+                            <div id="wishFormContainer">
+                                <form id="wishForm" class="space-y-3 sm:space-y-4">
+                                    <div>
+                                        <textarea id="wishMessage" name="message" rows="4"
+                                            placeholder="Tuliskan ucapan dan doa terbaik Anda untuk pasangan bahagia..."
+                                            class="w-full p-3 sm:p-4 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-sm sm:text-base"
+                                            maxlength="500" required></textarea>
+                                        <div class="text-right mt-1">
+                                            <small class="text-gray-500" id="charCount">0/500</small>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="text-center">
-                                    <button type="submit" id="submitWishBtn"
-                                        class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
-                                        <i class="fas fa-paper-plane mr-2"></i>Send Wishes
-                                    </button>
-                                </div>
-                            </form>
+                                    <div class="text-center">
+                                        <button type="submit" id="submitWishBtn"
+                                            class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
+                                            <i class="fas fa-paper-plane mr-2"></i><span id="wishBtnText">Kirim Ucapan</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="editWishBtnContainer" class="text-center" style="display:none;">
+                                <button type="button" onclick="showWishForm()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
+                                    <i class="fas fa-edit mr-2"></i>Ubah ucapan
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Daftar Ucapan -->
                         <div class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg">
                             <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-base sm:text-lg font-bold text-gray-800">All Wishes</h4>
-                                <span class="text-sm text-gray-500" id="wishCount">Loading...</span>
+                                <h4 class="text-base sm:text-lg font-bold text-gray-800">Semua Ucapan</h4>
+                                <span class="text-sm text-gray-500" id="wishCount">Memuat...</span>
                             </div>
 
                             <div id="wishList" class="space-y-3 sm:space-y-4 max-h-96 overflow-y-auto">
                                 <!-- Wishes will be loaded here -->
                                 <div class="text-center py-4">
                                     <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-                                    <p class="text-gray-500">Loading wishes...</p>
+                                    <p class="text-gray-500">Memuat ucapan...</p>
                                 </div>
                             </div>
 
@@ -374,7 +387,7 @@
                             <div class="text-center mt-4" id="loadMoreContainer" style="display: none;">
                                 <button id="loadMoreBtn"
                                     class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">
-                                    <i class="fas fa-chevron-down mr-2"></i>Load More
+                                    <i class="fas fa-chevron-down mr-2"></i>Muat Lebih Banyak
                                 </button>
                             </div>
                         </div>
@@ -385,7 +398,7 @@
                 <div
                     class="bg-gradient-pink text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center border-l-4 border-wedding-pink">
                     <h3 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
-                        <i class="fas fa-gift mr-2 sm:mr-3"></i>Wedding Gift
+                        <i class="fas fa-gift mr-2 sm:mr-3"></i>Hadiah Pernikahan
                     </h3>
                     <p class="mb-4 sm:mb-6 text-sm sm:text-base">Doa restu Anda adalah hadiah terbaik
                         untuk kami. Namun jika Anda
@@ -400,12 +413,11 @@
                 <!-- Footer Message -->
                 <div
                     class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center border-l-4 border-wedding-pink">
-                    <p class="text-gray-700 italic text-sm sm:text-base md:text-lg mb-3 sm:mb-4">We joyfully request
-                        your presence as we celebrate our
-                        union in marriage. Your presence will make our special day even more meaningful.</p>
+                    <p class=" text-gray-700 italic text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Dengan penuh sukacita kami mengundang kehadiran
+                        Anda untuk merayakan pernikahan kami. Kehadiran Anda akan membuat hari istimewa kami menjadi lebih bermakna.</p>
                     <p class="text-gray-800 font-bold text-base sm:text-lg md:text-xl">
-                        With love and gratitude,<br>
-                        <span class="font-playfair">{{ $groomName }} & {{ $brideName }}</span>
+                        Dengan cinta dan rasa syukur,<br>
+                        <span class="font-dancing">{{ $groomName }} & {{ $brideName }}</span>
                     </p>
                 </div>
 
@@ -569,7 +581,7 @@
                 attendance_status: status
             });
 
-            clickedBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+            clickedBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memperbarui...';
             clickedBtn.disabled = true;
 
             // Disable all attendance buttons safely
@@ -586,7 +598,7 @@
 
             Toast.fire({
                 icon: 'info',
-                title: isChanging ? 'Updating your RSVP...' : 'Updating your attendance status...'
+                title: isChanging ? 'Memperbarui RSVP Anda...' : 'Memperbarui status kehadiran Anda...'
             });
 
             $.ajax({
@@ -601,10 +613,10 @@
                     if (response.success) {
                         updateStatusDisplay(response.new_status, isChanging);
 
-                        let statusText = response.new_status === 'Yes' ? 'attending' : 'not attending';
+                        let statusText = response.new_status === 'Yes' ? 'hadir' : 'tidak hadir';
                         let icon = response.new_status === 'Yes' ? 'success' : 'info';
-                        let message = isChanging ? `RSVP changed! You're now marked as ${statusText}` :
-                            `You're now marked as ${statusText}!`;
+                        let message = isChanging ? `RSVP diubah! Anda sekarang terdaftar sebagai ${statusText}` :
+                            `Anda sekarang terdaftar sebagai ${statusText}!`;
 
                         Toast.fire({
                             icon: icon,
@@ -622,7 +634,7 @@
                     } else {
                         Toast.fire({
                             icon: 'error',
-                            title: response.message || 'Failed to update attendance status'
+                            title: response.message || 'Gagal memperbarui status kehadiran'
                         });
                     }
                 },
@@ -630,16 +642,16 @@
                     console.error('AJAX Error:', xhr, status, error);
                     console.error('Response text:', xhr.responseText);
 
-                    let errorMessage = 'Something went wrong. Please try again.';
+                    let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
 
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     } else if (xhr.status === 404) {
-                        errorMessage = 'Page not found. Please check the URL.';
+                        errorMessage = 'Halaman tidak ditemukan. Silakan periksa URL.';
                     } else if (xhr.status === 422) {
-                        errorMessage = 'Invalid data provided.';
+                        errorMessage = 'Data yang diberikan tidak valid.';
                     } else if (xhr.status === 500) {
-                        errorMessage = 'Server error occurred.';
+                        errorMessage = 'Terjadi kesalahan server.';
                     }
 
                     Toast.fire({
@@ -679,7 +691,7 @@
 
             Toast.fire({
                 icon: 'info',
-                title: 'You can now change your RSVP status'
+                title: 'Anda sekarang dapat mengubah status RSVP Anda'
             });
         }
 
@@ -698,7 +710,7 @@
 
         function updateStatusDisplay(status, isChanging = false) {
             const statusBadge = document.getElementById('current-status');
-            const statusText = status === 'Yes' ? 'Yes' : (status === 'No' ? 'No' : 'Not Confirmed');
+            const statusText = status === 'Yes' ? 'Hadir' : (status === 'No' ? 'Tidak Hadir' : 'Belum Dikonfirmasi');
 
             let statusClass = 'ml-2 inline-block px-3 py-1 sm:px-4 sm:py-2 rounded-full font-semibold text-xs sm:text-sm ';
             if (status === 'Yes') {
@@ -725,31 +737,31 @@
                     confirmationHTML = `
                 <div class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                     <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🎉</div>
-                    <h4 class="text-lg sm:text-xl font-bold mb-2">Thank You for Confirming!</h4>
-                    <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">We're excited to celebrate with you on our special day!</p>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Terima Kasih Sudah Konfirmasi!</h4>
+                    <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Kami sangat senang bisa merayakan hari istimewa kami bersama Anda!</p>
                 </div>
                 <div id="change-rsvp-section">
                     <button onclick="showChangeRSVP()" 
                             class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-rsvp">
-                        <i class="fas fa-edit mr-2"></i>Change RSVP
+                        <i class="fas fa-edit mr-2"></i>Ubah RSVP
                     </button>
                 </div>
                 <div id="change-attendance-buttons" class="space-y-3 sm:space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center mt-3 sm:mt-4" style="display: none;">
                     <button onclick="updateAttendance('Yes')" 
                             class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-yes">
-                        <i class="fas fa-check mr-2"></i>Yes, I'll Attend
+                        <i class="fas fa-check mr-2"></i>Ya, Saya akan Hadir
                     </button>
                     <button onclick="updateAttendance('No')" 
                             class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-no">
-                        <i class="fas fa-times mr-2"></i>Sorry, Can't Attend
+                        <i class="fas fa-times mr-2"></i>Maaf, Tidak Bisa Hadir
                     </button>
                     <button onclick="hideChangeRSVP()" 
                             class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 text-sm sm:text-base" 
                             id="btn-cancel-change">
-                        <i class="fas fa-undo mr-2"></i>Cancel
+                        <i class="fas fa-undo mr-2"></i>Batal
                     </button>
                 </div>
             `;
@@ -757,31 +769,31 @@
                     confirmationHTML = `
                 <div class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                     <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">😔</div>
-                    <h4 class="text-lg sm:text-xl font-bold mb-2">We'll Miss You!</h4>
-                    <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Thank you for letting us know. We understand and hope to celebrate with you another time!</p>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Kami akan merindukan Anda!</h4>
+                    <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Terima kasih sudah memberitahu kami. Kami mengerti dan berharap bisa merayakan bersama di lain waktu!</p>
                 </div>
                 <div id="change-rsvp-section">
                     <button onclick="showChangeRSVP()" 
                             class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-rsvp">
-                        <i class="fas fa-edit mr-2"></i>Change RSVP
+                        <i class="fas fa-edit mr-2"></i>Ubah RSVP
                     </button>
                 </div>
                 <div id="change-attendance-buttons" class="space-y-3 sm:space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center mt-3 sm:mt-4" style="display: none;">
                     <button onclick="updateAttendance('Yes')" 
                             class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-yes">
-                        <i class="fas fa-check mr-2"></i>Yes, I'll Attend
+                        <i class="fas fa-check mr-2"></i>Ya, Saya akan Hadir
                     </button>
                     <button onclick="updateAttendance('No')" 
                             class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base" 
                             id="btn-change-no">
-                        <i class="fas fa-times mr-2"></i>Sorry, Can't Attend
+                        <i class="fas fa-times mr-2"></i>Maaf, Tidak Bisa Hadir
                     </button>
                     <button onclick="hideChangeRSVP()" 
                             class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 text-sm sm:text-base" 
                             id="btn-cancel-change">
-                        <i class="fas fa-undo mr-2"></i>Cancel
+                        <i class="fas fa-undo mr-2"></i>Batal
                     </button>
                 </div>
             `;
@@ -823,7 +835,7 @@
                 navigator.clipboard.writeText(qrCode).then(() => {
                     Toast.fire({
                         icon: 'success',
-                        title: 'QR Code ID copied to clipboard!'
+                        title: 'ID Kode QR disalin ke clipboard!'
                     });
                 }).catch(() => fallbackCopyTextToClipboard(qrCode));
             } else {
@@ -842,7 +854,7 @@
 
             Toast.fire({
                 icon: 'success',
-                title: 'QR Code ID copied to clipboard!'
+                title: 'ID Kode QR disalin ke clipboard!'
             });
         }
 
@@ -859,7 +871,7 @@
             const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
             const originalText = paymentBtn.innerHTML;
 
-            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             paymentBtn.disabled = true;
 
             fetch('{{ url("/payment/create/{$invitation->slug}/{$guest->guest_id_qr_code}") }}', {
@@ -1010,7 +1022,7 @@
             const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
             const originalText = paymentBtn.innerHTML;
 
-            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             paymentBtn.disabled = true;
 
             // Format amount for display
@@ -1022,7 +1034,7 @@
 
             Toast.fire({
                 icon: 'info',
-                title: `Processing payment for ${formattedAmount}...`
+                title: `Memproses pembayaran sebesar ${formattedAmount}...`
             });
 
             fetch('{{ url("/payment/create/{$invitation->slug}/{$guest->guest_id_qr_code}") }}', {
@@ -1124,7 +1136,7 @@
 
                         Toast.fire({
                             icon: 'info',
-                            title: 'Minimal amount set to Rp 10.000'
+                            title: 'Nominal minimal diatur ke Rp 10.000'
                         });
                     }
                 });
@@ -1141,17 +1153,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             const wishMessage = document.getElementById('wishMessage');
             const charCount = document.getElementById('charCount');
+            const wishForm = document.getElementById('wishForm');
+            const wishFormContainer = document.getElementById('wishFormContainer');
+            const editWishBtnContainer = document.getElementById('editWishBtnContainer');
+            const wishBtnText = document.getElementById('wishBtnText');
+            const wishFormTitle = document.getElementById('wishFormTitle');
 
             if (wishMessage && charCount) {
+                charCount.textContent = wishMessage.value.length + '/500';
                 wishMessage.addEventListener('input', function() {
-                    const count = this.value.length;
-                    charCount.textContent = `${count}/500`;
-
-                    if (count > 450) {
-                        charCount.classList.add('text-red-500');
-                    } else {
-                        charCount.classList.remove('text-red-500');
-                    }
+                    charCount.textContent = wishMessage.value.length + '/500';
                 });
             }
 
@@ -1162,11 +1173,52 @@
             loadWishes();
 
             // Setup wish form submission
-            const wishForm = document.getElementById('wishForm');
             if (wishForm) {
                 wishForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    submitWish();
+                    const message = wishMessage.value.trim();
+                    if (!message) {
+                        Swal.fire({ icon: 'warning', title: 'Ucapan tidak boleh kosong!' });
+                        return;
+                    }
+                    // Kirim AJAX ke backend (ganti URL sesuai route Laravel)
+                    const url = userHasWish
+                        ? '{{ url('/wishes/update/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}'
+                        : '{{ url('/wishes/create/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}';
+                    const btn = document.getElementById('submitWishBtn');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+                    btn.disabled = true;
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ message })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Toast.fire({ icon: 'success', title: userHasWish ? 'Ucapan diperbarui!' : 'Ucapan terkirim!' });
+                            userHasWish = true;
+                            userWish = message;
+                            // Sembunyikan form, tampilkan tombol edit
+                            wishFormContainer.style.display = 'none';
+                            editWishBtnContainer.style.display = 'block';
+                            // Refresh daftar ucapan agar perubahan langsung terlihat
+                            loadWishes(1);
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Gagal mengirim ucapan.' });
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Terjadi kesalahan sistem.' });
+                    })
+                    .finally(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
                 });
             }
 
@@ -1177,91 +1229,40 @@
                     loadWishes(currentPage + 1);
                 });
             }
-
-            // ...existing code for custom amount input...
         });
+
+        function showWishForm() {
+            document.getElementById('wishFormContainer').style.display = 'block';
+            document.getElementById('editWishBtnContainer').style.display = 'none';
+            const wishMessage = document.getElementById('wishMessage');
+            if (wishMessage && userWish) {
+                wishMessage.value = userWish;
+                const charCount = document.getElementById('charCount');
+                if (charCount) charCount.textContent = wishMessage.value.length + '/500';
+            }
+            const wishBtnText = document.getElementById('wishBtnText');
+            if (wishBtnText) wishBtnText.textContent = 'Perbarui Ucapan';
+        }
 
         function checkUserWish() {
             fetch(`{{ url('/wishes/' . $invitation->slug . '/' . $guest->guest_id_qr_code . '/check') }}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        userHasWish = data.has_wish;
-                        userWish = data.wish;
-
-                        updateWishForm();
+                    if (data.success && data.has_wish) {
+                        userHasWish = true;
+                        userWish = data.wish.message;
+                        document.getElementById('wishFormContainer').style.display = 'none';
+                        document.getElementById('editWishBtnContainer').style.display = 'block';
+                    } else {
+                        userHasWish = false;
+                        userWish = null;
+                        document.getElementById('wishFormContainer').style.display = 'block';
+                        document.getElementById('editWishBtnContainer').style.display = 'none';
                     }
                 })
                 .catch(error => {
                     console.error('Error checking user wish:', error);
                 });
-        }
-
-        function updateWishForm() {
-            const submitBtn = document.getElementById('submitWishBtn');
-            const wishMessage = document.getElementById('wishMessage');
-            const formTitle = document.querySelector('.bg-white h4');
-
-            if (userHasWish && userWish) {
-                // User has already sent a wish - show edit mode
-                formTitle.innerHTML = `
-                    <i class="fas fa-edit mr-2"></i>Edit Your Wishes
-                    <small class="block text-sm text-gray-500 font-normal mt-1">
-                        You sent your wishes ${userWish.created_at_formatted}
-                    </small>
-                `;
-
-                wishMessage.value = userWish.message;
-                wishMessage.placeholder = "Edit your heartfelt wishes for the happy couple...";
-
-                // Update character count
-                const charCount = document.getElementById('charCount');
-                charCount.textContent = `${userWish.message.length}/500`;
-
-                submitBtn.innerHTML = '<i class="fas fa-edit mr-2"></i>Update Wishes';
-                submitBtn.className = submitBtn.className.replace('bg-pink-500 hover:bg-pink-600',
-                    'bg-yellow-500 hover:bg-yellow-600');
-
-                // Add cancel edit button
-                const cancelBtn = document.createElement('button');
-                cancelBtn.type = 'button';
-                cancelBtn.id = 'cancelEditBtn';
-                cancelBtn.className =
-                    'bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base ml-2';
-                cancelBtn.innerHTML = '<i class="fas fa-times mr-2"></i>Cancel Edit';
-                cancelBtn.onclick = cancelEditWish;
-
-                submitBtn.parentNode.appendChild(cancelBtn);
-
-            } else {
-                // User hasn't sent a wish yet - show normal mode
-                formTitle.innerHTML = '<i class="fas fa-heart mr-2"></i>Leave Your Wishes';
-                wishMessage.value = '';
-                wishMessage.placeholder = "Write your heartfelt wishes for the happy couple...";
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Wishes';
-                submitBtn.className = submitBtn.className.replace('bg-yellow-500 hover:bg-yellow-600',
-                    'bg-pink-500 hover:bg-pink-600');
-
-                // Remove cancel button if exists
-                const cancelBtn = document.getElementById('cancelEditBtn');
-                if (cancelBtn) {
-                    cancelBtn.remove();
-                }
-            }
-        }
-
-        function cancelEditWish() {
-            const wishMessage = document.getElementById('wishMessage');
-            const charCount = document.getElementById('charCount');
-
-            // Restore original wish message
-            wishMessage.value = userWish.message;
-            charCount.textContent = `${userWish.message.length}/500`;
-
-            Toast.fire({
-                icon: 'info',
-                title: 'Edit cancelled'
-            });
         }
 
         function loadWishes(page = 1) {
@@ -1303,7 +1304,7 @@
                             wishList.innerHTML = `
                                 <div class="text-center py-8 text-gray-500">
                                     <i class="fas fa-heart text-4xl mb-4 opacity-50"></i>
-                                    <p>Be the first to leave your wishes!</p>
+                                    <p>Jadilah yang pertama memberikan ucapan!</p>
                                 </div>
                             `;
                         }
@@ -1401,7 +1402,7 @@
             if (userHasWish && userWish && message === userWish.message) {
                 Toast.fire({
                     icon: 'info',
-                    title: 'No changes to save'
+                    title: 'Tidak ada perubahan untuk disimpan'
                 });
                 return;
             }
@@ -1409,7 +1410,7 @@
             const originalText = submitBtn.innerHTML;
             const isEditing = userHasWish;
 
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${isEditing ? 'Updating...' : 'Sending...'}`;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${isEditing ? 'Memperbarui...' : 'Mengirim...'}`;
             submitBtn.disabled = true;
 
             fetch('{{ url('/wishes/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}', {
@@ -1429,7 +1430,7 @@
 
                         Toast.fire({
                             icon: 'success',
-                            title: isUpdate ? 'Your wishes have been updated!' : 'Your wishes have been sent!'
+                            title: isUpdate ? 'Ucapan Anda telah diperbarui!' : 'Ucapan Anda telah terkirim!'
                         });
 
                         // Update user wish status
@@ -1589,7 +1590,7 @@
             if (!message) {
                 Toast.fire({
                     icon: 'warning',
-                    title: 'Please write your wishes first!'
+                    title: 'Silakan tulis ucapan Anda terlebih dahulu!'
                 });
                 return;
             }
@@ -1597,13 +1598,13 @@
             if (message.length > 500) {
                 Toast.fire({
                     icon: 'warning',
-                    title: 'Your message is too long (max 500 characters)'
+                    title: 'Pesan Anda terlalu panjang (maksimal 500 karakter)'
                 });
                 return;
             }
 
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
             submitBtn.disabled = true;
 
             fetch('{{ url('/wishes/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}', {
@@ -1621,7 +1622,7 @@
                     if (data.success) {
                         Toast.fire({
                             icon: 'success',
-                            title: 'Your wishes have been sent!'
+                            title: 'Ucapan Anda telah terkirim!'
                         });
 
                         // Clear form
@@ -1636,7 +1637,7 @@
                     } else {
                         Toast.fire({
                             icon: 'error',
-                            title: data.message || 'Failed to send wishes'
+                            title: data.message || 'Gagal mengirim ucapan'
                         });
                     }
                 })

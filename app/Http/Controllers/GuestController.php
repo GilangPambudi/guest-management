@@ -132,8 +132,10 @@ class GuestController extends Controller
                 $slug = $invitation ? $invitation->slug : '';
 
                 $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-primary btn-sm"><i class="fas fa-copy"></i> Copy ID</button> ';
-                $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
+
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</button> ';
+
+                 $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
                 // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</button> ';
                 // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> ';
                 return $btn;
@@ -400,6 +402,14 @@ class GuestController extends Controller
             // Set arrival time menjadi "-" jika attendance status diubah ke "Not Set"
             $request->merge([
                 'guest_arrival_time' => '-',
+            ]);
+        }
+
+        // Jika invitation status diubah ke "-", kosongkan sent_at dan opened_at
+        if ($request->input('guest_invitation_status') === '-') {
+            $request->merge([
+                'invitation_sent_at' => null,
+                'invitation_opened_at' => null,
             ]);
         }
 

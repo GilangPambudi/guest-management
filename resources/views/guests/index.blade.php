@@ -32,15 +32,59 @@
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-12">
-                    <div class="alert alert-info">
-                        <h5><i class="icon fas fa-info"></i> Invitation Details</h5>
-                        <strong>{{ $invitation->wedding_name }}</strong> | {{ $invitation->groom_name }} &
-                        {{ $invitation->bride_name }}<br>
-                        <i class="fa fa-calendar"></i>
-                        {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }}
-                        <i class="fa fa-clock ml-2"></i> {{ $invitation->wedding_time_start }} -
-                        {{ $invitation->wedding_time_end }}
-                        <i class="fa fa-map-marker-alt ml-2"></i> {{ $invitation->wedding_venue }}
+                    <div class="row">
+                        <!-- Card 1: Nama Pengantin -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <h5 class="mb-1 font-weight-bold text-primary" style="font-size: 1.2rem;">
+                                        {{ $invitation->groom_name }}  
+                                    </h5>
+                                    <h5 class="mb-1 font-weight-bold" style="font-size: 1.2rem; color: #e75480;">
+                                        <i class="fa fa-heart mx-1"></i>
+                                    </h5>
+                                    <h5 class="mb-1 font-weight-bold text-pink" style="font-size: 1.2rem; color: #d63384;">
+                                        {{ $invitation->bride_name }}
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2: Tanggal -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-calendar fa-2x mb-2" style="color: #a370f7;"></i>
+                                    <div class="font-weight-bold text-secondary">Tanggal</div>
+                                    <div class="text-dark">
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3: Waktu -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-clock fa-2x mb-2" style="color: #00bcd4;"></i>
+                                    <div class="font-weight-bold text-secondary">Waktu</div>
+                                    <div class="text-dark">
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 4: Tempat -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-map-marker-alt fa-2x mb-2" style="color: #ffc107;"></i>
+                                    <div class="font-weight-bold text-secondary">Tempat</div>
+                                    <div class="text-dark">
+                                        {{ $invitation->wedding_venue }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,9 +198,9 @@
                         <th>Category</th>
                         <th>Contact</th>
                         <th>Address</th>
-                        <th>Attendance Status</th>
-                        <th>Arrival Time</th>
                         <th>Invitation Status</th>
+                        <th>RSVP</th>
+                        <th>Arrival Time</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -296,7 +340,7 @@
                     {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
-                        orderable: false,
+                        orderable: true,
                         searchable: false,
                         width: '50px'
                     },
@@ -308,7 +352,8 @@
                     {
                         data: 'guest_name',
                         name: 'guest_name',
-                        className: 'text-nowrap'
+                        className: 'text-nowrap',
+                        orderable: true,
                     },
                     {
                         data: 'guest_gender',
@@ -337,6 +382,26 @@
                         className: 'text-nowrap'
                     },
                     {
+                        data: 'guest_invitation_status',
+                        name: 'guest_invitation_status',
+                        render: function(data, type, row) {
+                            if (data === 'Sent') {
+                                return '<span class="badge badge-success" title="Invitation sent via WhatsApp">' +
+                                    data + '</span>';
+                            } else if (data === 'Opened') {
+                                return '<span class="badge badge-info" title="Guest has opened the invitation">' +
+                                    data + '</span>';
+                            } else if (data === 'Pending') {
+                                return '<span class="badge badge-warning" title="Invitation pending">' +
+                                    data + '</span>';
+                            } else {
+                                return '<span class="badge badge-secondary" title="Invitation not sent">' +
+                                    data + '</span>';
+                            }
+                        },
+                        orderable: false,
+                    },
+                    {
                         data: 'guest_attendance_status',
                         name: 'guest_attendance_status',
                         render: function(data, type, row) {
@@ -362,22 +427,6 @@
                         className: 'text-nowrap'
                     },
                     {
-                        data: 'guest_invitation_status',
-                        name: 'guest_invitation_status',
-                        render: function(data, type, row) {
-                            if (data === 'Sent') {
-                                return '<span class="badge badge-success" title="Invitation sent via WhatsApp">' + data + '</span>';
-                            } else if (data === 'Opened') {
-                                return '<span class="badge badge-info" title="Guest has opened the invitation">' + data + '</span>';
-                            } else if (data === 'Pending') {
-                                return '<span class="badge badge-warning" title="Invitation pending">' + data + '</span>';
-                            } else {
-                                return '<span class="badge badge-secondary" title="Invitation not sent">' + data + '</span>';
-                            }
-                        },
-                        orderable: false,
-                    },
-                    {
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -386,7 +435,7 @@
                     },
                 ],
                 order: [
-                    [2, 'asc']
+                    [3, 'asc']
                 ], // Order by guest name
                 pageLength: 25,
                 lengthMenu: [
@@ -600,47 +649,47 @@
 
             // Show confirmation modal using SweetAlert
             Swal.fire({
-                title: 'Konfirmasi Kirim WhatsApp',
-                text: `Kirim undangan WhatsApp ke ${guestName}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#25d366',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Kirim!',
-                cancelButtonText: 'Batal'
+            title: 'Confirm Send WhatsApp',
+            text: `Send WhatsApp invitation to ${guestName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#25d366',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Send!',
+            cancelButtonText: 'Cancel'
             }).then((result) => {
-                if (result.isConfirmed) {
-                    // Show loading state
-                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+            if (result.isConfirmed) {
+                // Show loading state
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 
-                    $.ajax({
-                        url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
-                        type: 'POST',
-                        data: {
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(res) {
-                            if (res.success) {
-                                toastr.success('Pesan WhatsApp berhasil dikirim!');
-                                // Refresh DataTable untuk memperbarui status
-                                dataGuest.ajax.reload(null, false);
-                            } else {
-                                toastr.error(res.message || 'Gagal mengirim WhatsApp.');
-                            }
-                        },
-                        error: function(err) {
-                            var errorMessage = 'Gagal mengirim WhatsApp.';
-                            if (err.responseJSON && err.responseJSON.message) {
-                                errorMessage = err.responseJSON.message;
-                            }
-                            toastr.error(errorMessage);
-                        },
-                        complete: function() {
-                            btn.prop('disabled', false).html(
-                                '<i class="fab fa-whatsapp"></i> Kirim WA');
-                        }
-                    });
+                $.ajax({
+                url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(res) {
+                    if (res.success) {
+                    toastr.success('WhatsApp message sent successfully!');
+                    // Refresh DataTable to update status
+                    dataGuest.ajax.reload(null, false);
+                    } else {
+                    toastr.error(res.message || 'Failed to send WhatsApp.');
+                    }
+                },
+                error: function(err) {
+                    var errorMessage = 'Failed to send WhatsApp.';
+                    if (err.responseJSON && err.responseJSON.message) {
+                    errorMessage = err.responseJSON.message;
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html(
+                    '<i class="fab fa-whatsapp"></i> Send WA');
                 }
+                });
+            }
             });
         });
 

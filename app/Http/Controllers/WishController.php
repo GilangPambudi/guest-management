@@ -389,4 +389,78 @@ class WishController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update an existing wish for a guest (AJAX)
+     */
+    public function update(Request $request, $slug, $guest_id_qr_code)
+    {
+        try {
+            Log::info('Updating wish', [
+                'slug' => $slug,
+                'guest_id_qr_code' => $guest_id_qr_code,
+                'message' => $request->message
+            ]);
+
+            $invitation = Invitation::where('slug', $slug)->firstOrFail();
+            $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+                ->where('invitation_id', $invitation->invitation_id)
+                ->firstOrFail();
+
+            $validator = Validator::make($request->all(), [
+                'message' => 'required|string|max:500'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please check your input: ' . implode(', ', $validator->errors()->all())
+                ], 422);
+            }
+
+            $wish = Wish::where('invitation_id', $invitation->invitation_id)
+                ->where('guest_id', $guest->guest_id)
+                ->first();
+
+            if (!$wish) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ucapan tidak ditemukan untuk diperbarui.'
+                ], 404);
+            }
+
+            $wish->message = $request->message;
+            $wish->save();
+
+            Log::info('Wish updated successfully', ['wish_id' => $wish->wish_id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Ucapan berhasil diperbarui!',
+                'new_message' => $wish->message
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Model not found in wish update', [
+                'slug' => $slug,
+                'guest_id_qr_code' => $guest_id_qr_code,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Data undangan atau tamu tidak valid.'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error updating wish: ' . $e->getMessage(), [
+                'slug' => $slug,
+                'guest_id_qr_code' => $guest_id_qr_code,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui ucapan. Silakan coba lagi.'
+            ], 500);
+        }
+    }
 }

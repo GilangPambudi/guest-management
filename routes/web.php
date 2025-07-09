@@ -79,7 +79,8 @@ Route::prefix('wishes')->middleware('auth')->group(function () {
 // Guest facing wishes routes
 Route::get('/wishes/{slug}', [WishController::class, 'getWishesForInvitation']);
 Route::get('/wishes/{slug}/{guest_id_qr_code}/check', [WishController::class, 'checkUserWish']);
-Route::post('/wishes/{slug}/{guest_id_qr_code}', [WishController::class, 'storeGuestWish']);
+Route::post('/wishes/create/{slug}/{guest_id_qr_code}', [WishController::class, 'storeGuestWish']);
+Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 'update']);
 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation_letter']);
