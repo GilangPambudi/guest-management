@@ -6,27 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
-
         Schema::create('wishes', function (Blueprint $table) {
             $table->id('wish_id');
+            $table->unsignedBigInteger('invitation_id');
             $table->unsignedBigInteger('guest_id');
-            $table->foreign('guest_id')->references('guest_id')->on('guests');
-            $table->string('message', 255);
-            $table->timestamp('posted_at');
-        });
+            $table->text('message');
+            $table->timestamps();
 
-        Schema::enableForeignKeyConstraints();
+            $table->foreign('invitation_id')->references('invitation_id')->on('invitation')->onDelete('cascade');
+            $table->foreign('guest_id')->references('guest_id')->on('guests')->onDelete('cascade');
+            
+            $table->index(['invitation_id', 'created_at']);
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('wishes');

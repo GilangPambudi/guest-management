@@ -75,11 +75,23 @@
                                 <th class="text-right">Invitation Status:</th>
                                 <td>
                                     <span
-                                        class="badge badge-{{ $guest->guest_invitation_status == 'Sent' ? 'success' : ($guest->guest_invitation_status == 'Pending' ? 'warning' : 'secondary') }}">
+                                        class="badge badge-{{ $guest->guest_invitation_status == 'Sent' ? 'success' : ($guest->guest_invitation_status == 'Opened' ? 'info' : ($guest->guest_invitation_status == 'Pending' ? 'warning' : 'secondary')) }}">
                                         {{ $guest->guest_invitation_status }}
                                     </span>
                                 </td>
-                            </tr>                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
+                            </tr>
+                            @if($guest->invitation_sent_at)
+                            <tr>
+                                <th class="text-right">Invitation Sent At:</th>
+                                <td>{{ \Carbon\Carbon::parse($guest->invitation_sent_at)->format('d/m/Y H:i:s') }}</td>
+                            </tr>
+                            @endif
+                            @if($guest->invitation_opened_at)
+                            <tr>
+                                <th class="text-right">Invitation Opened At:</th>
+                                <td>{{ \Carbon\Carbon::parse($guest->invitation_opened_at)->format('d/m/Y H:i:s') }}</td>
+                            </tr>
+                            @endif                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
                                 <tr>
                                     <th class="text-right">Arrival Time:</th>
                                     <td>

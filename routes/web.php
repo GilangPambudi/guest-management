@@ -3,9 +3,12 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WishController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\PublicInvitationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,13 +58,29 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     Route::delete('/{id}/delete_ajax', [GuestController::class, 'delete_ajax']);
     Route::post('/{id}/delete_ajax', [GuestController::class, 'delete_ajax']); // Tambahkan untuk AJAX
     Route::post('/bulk-action', [GuestController::class, 'bulkAction']);
-    // Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])
-    // ->where('guest_id_qr_code', '.*'); // Allow forward slashes in the parameter
 });
+
 Route::get('/guests', [GuestController::class, 'guestSelect'])->name('guests.select');
 Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner.select');
 Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
+Route::post('/payment/create/{slug}/{guest_id_qr_code}', [PaymentController::class, 'createPayment']);
+Route::post('/payment/callback', [PaymentController::class, 'handleCallback']);
+
+Route::prefix('wishes')->middleware('auth')->group(function () {
+    Route::get('/', [WishController::class, 'wishSelect'])->name('wishes.select');
+    Route::get('/invitation/{invitation_id}', [WishController::class, 'index'])->name('wishes.index');
+    Route::post('/invitation/{invitation_id}/list', [WishController::class, 'list'])->name('wishes.list');
+    Route::get('/{id}/show_ajax', [WishController::class, 'show_ajax']);
+    Route::delete('/{id}/delete_ajax', [WishController::class, 'delete_ajax']);
+    Route::post('/bulk-action', [WishController::class, 'bulkAction']);
+});
+
+// Guest facing wishes routes
+Route::get('/wishes/{slug}', [WishController::class, 'getWishesForInvitation']);
+Route::get('/wishes/{slug}/{guest_id_qr_code}/check', [WishController::class, 'checkUserWish']);
+Route::post('/wishes/{slug}/{guest_id_qr_code}', [WishController::class, 'storeGuestWish']);
+
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
-Route::get('/invitation-letter/{slug}/{guest_id_qr_code}', [GuestController::class, 'invitation_letter'])->name('invitation.letter');
-Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [GuestController::class, 'update_attendance_ajax'])->name('update.attendance');
+Route::get('/invitation/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation_letter']);
+Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax']);

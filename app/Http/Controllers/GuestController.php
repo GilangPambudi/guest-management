@@ -298,7 +298,7 @@ class GuestController extends Controller
             'guest_contact' => 'required|unique:guests,guest_contact',
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
-            'guest_invitation_status' => 'required',
+            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
         ]);
 
         if ($validator->fails()) {
@@ -357,7 +357,7 @@ class GuestController extends Controller
             'guest_contact' => 'required|unique:guests,guest_contact,' . $id . ',guest_id',
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
-            'guest_invitation_status' => 'required',
+            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
         ]);
 
         if ($validator->fails()) {
@@ -593,98 +593,6 @@ class GuestController extends Controller
         }
     }
 
-    // QR Code Methods
-    public function invitation_letter($slug, $guest_id_qr_code)
-    {
-        // Cari invitation berdasarkan slug
-        $invitation = Invitation::where('slug', $slug)->first();
-        if (!$invitation) {
-            abort(404, 'Invitation not found');
-        }
-
-        // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
-        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
-            ->where('invitation_id', $invitation->invitation_id)
-            ->first();
-
-        if (!$guest) {
-            abort(404, 'Guest not found or does not belong to this invitation');
-        }
-
-        // Ambil data dari undangan
-        $groomName = $invitation->groom_name;
-        $brideName = $invitation->bride_name;
-        $weddingDate = $invitation->wedding_date;
-        $weddingTimeStart = $invitation->wedding_time_start;
-        $weddingTimeEnd = $invitation->wedding_time_end;
-        $weddingVenue = $invitation->wedding_venue;
-        $weddingLocation = $invitation->wedding_location;
-        $weddingMaps = $invitation->wedding_maps;
-        $weddingImage = $invitation->wedding_image;
-
-        return view('guests.invitation_letter', [
-            'guest' => $guest,
-            'invitation' => $invitation,
-            'groomName' => $groomName,
-            'brideName' => $brideName,
-            'weddingDate' => $weddingDate,
-            'weddingTimeStart' => $weddingTimeStart,
-            'weddingTimeEnd' => $weddingTimeEnd,
-            'weddingVenue' => $weddingVenue,
-            'weddingLocation' => $weddingLocation,
-            'weddingMaps' => $weddingMaps,
-            'weddingImage' => $weddingImage
-        ]);
-    }
-
-    public function update_attendance_ajax(Request $request, $slug, $guest_id_qr_code)
-    {
-        $validator = Validator::make($request->all(), [
-            'attendance_status' => 'required|in:Yes,No,-'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid attendance status'
-            ], 422);
-        }
-
-        // Cari invitation berdasarkan slug
-        $invitation = Invitation::where('slug', $slug)->first();
-        if (!$invitation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invitation not found'
-            ], 404);
-        }
-
-        // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
-        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
-            ->where('invitation_id', $invitation->invitation_id)
-            ->first();
-
-        if (!$guest) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Guest not found or does not belong to this invitation'
-            ], 404);
-        }
-
-        $newStatus = $request->attendance_status;
-
-        // Hanya update status kehadiran, arrival time tidak diubah di sini
-        $guest->update([
-            'guest_attendance_status' => $newStatus
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'RSVP status updated successfully',
-            'new_status' => $newStatus
-        ]);
-    }
-
     public function scannerSelect()
     {
         $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
@@ -852,7 +760,7 @@ class GuestController extends Controller
 
             $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
                 . "━━━━━━━━━━━━━━━━━━━━\n"
-                . "💌 *Elegant Wedding Invitation*\n"
+                . "💌 *Quick Response Elegant Wedding — Invitation*\n"
                 . "━━━━━━━━━━━━━━━━━━━━\n\n"
                 . "Halo {$guest->guest_name},\n\n"
                 . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
@@ -874,6 +782,12 @@ class GuestController extends Controller
             ]);
 
             if ($response->successful()) {
+                // Update invitation status to "Sent" when WhatsApp is successfully sent
+                $guest->update([
+                    'guest_invitation_status' => 'Sent',
+                    'invitation_sent_at' => now()
+                ]);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'WhatsApp message sent successfully',
@@ -929,7 +843,7 @@ class GuestController extends Controller
 
                 $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
                 . "━━━━━━━━━━━━━━━━━━━━\n"
-                . "💌 *Elegant Wedding Invitation*\n"
+                . "💌 *Quick Response Elegant Wedding — Invitation*\n"
                 . "━━━━━━━━━━━━━━━━━━━━\n\n"
                 . "Halo {$guest->guest_name},\n\n"
                 . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
@@ -951,6 +865,11 @@ class GuestController extends Controller
 
                 if ($response->successful()) {
                     $successCount++;
+                    // Update invitation status to "Sent" when WhatsApp is successfully sent
+                    $guest->update([
+                        'guest_invitation_status' => 'Sent',
+                        'invitation_sent_at' => now()
+                    ]);
                 } else {
                     $failedCount++;
                 }
@@ -963,7 +882,7 @@ class GuestController extends Controller
                 ];
 
                 // Add small delay to prevent rate limiting
-                usleep(500000); // 0.5 second delay
+                usleep(rand(5, 10) * 1000000); // 5-10 second delay
             }
 
             return response()->json([

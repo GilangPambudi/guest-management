@@ -366,11 +366,13 @@
                         name: 'guest_invitation_status',
                         render: function(data, type, row) {
                             if (data === 'Sent') {
-                                return '<span class="badge badge-success">' + data + '</span>';
+                                return '<span class="badge badge-success" title="Invitation sent via WhatsApp">' + data + '</span>';
+                            } else if (data === 'Opened') {
+                                return '<span class="badge badge-info" title="Guest has opened the invitation">' + data + '</span>';
                             } else if (data === 'Pending') {
-                                return '<span class="badge badge-warning">' + data + '</span>';
+                                return '<span class="badge badge-warning" title="Invitation pending">' + data + '</span>';
                             } else {
-                                return '<span class="badge badge-secondary">' + data + '</span>';
+                                return '<span class="badge badge-secondary" title="Invitation not sent">' + data + '</span>';
                             }
                         },
                         orderable: false,
@@ -592,30 +594,52 @@
             var guestId = $(this).data('guest-id');
             var invitationId = $(this).data('invitation-id');
             var btn = $(this);
-            btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 
-            $.ajax({
-                url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(res) {
-                    if (res.success) {
-                        toastr.success('Pesan WhatsApp berhasil dikirim!');
-                    } else {
-                        toastr.error(res.message || 'Gagal mengirim WhatsApp.');
-                    }
-                },
-                error: function(err) {
-                    var errorMessage = 'Gagal mengirim WhatsApp.';
-                    if (err.responseJSON && err.responseJSON.message) {
-                        errorMessage = err.responseJSON.message;
-                    }
-                    toastr.error(errorMessage);
-                },
-                complete: function() {
-                    btn.prop('disabled', false).html('<i class="fab fa-whatsapp"></i> Kirim WA');
+            // Get guest name from the row data for better confirmation message
+            var guestName = $(this).closest('tr').find('td').eq(3).text(); // Assuming guest name is in 4th column
+
+            // Show confirmation modal using SweetAlert
+            Swal.fire({
+                title: 'Konfirmasi Kirim WhatsApp',
+                text: `Kirim undangan WhatsApp ke ${guestName}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#25d366',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+
+                    $.ajax({
+                        url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
+                        type: 'POST',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                toastr.success('Pesan WhatsApp berhasil dikirim!');
+                                // Refresh DataTable untuk memperbarui status
+                                dataGuest.ajax.reload(null, false);
+                            } else {
+                                toastr.error(res.message || 'Gagal mengirim WhatsApp.');
+                            }
+                        },
+                        error: function(err) {
+                            var errorMessage = 'Gagal mengirim WhatsApp.';
+                            if (err.responseJSON && err.responseJSON.message) {
+                                errorMessage = err.responseJSON.message;
+                            }
+                            toastr.error(errorMessage);
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).html(
+                                '<i class="fab fa-whatsapp"></i> Kirim WA');
+                        }
+                    });
                 }
             });
         });
@@ -652,6 +676,12 @@
                             if (res.success) {
                                 toastr.success(
                                     'Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
+                                // Refresh DataTable untuk memperbarui status
+                                dataGuest.ajax.reload(null, false);
+                                // Clear selection after successful bulk send
+                                selectedGuests = [];
+                                updateBulkActions();
+                                $('.guest-checkbox').prop('checked', false);
                             } else {
                                 toastr.error(res.message || 'Gagal mengirim WhatsApp bulk.');
                             }

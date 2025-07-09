@@ -52,7 +52,21 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link {{ request()->is('kanban') ? 'active' : '' }}">
+                    <a href="{{ url('/wishes') }}" class="nav-link {{ request()->is('wishes*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-heart"></i>
+                        <p>Wishes</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('/gifts') }}" class="nav-link {{ $activeMenu == 'gifts' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-gift"></i>
+                        <p>
+                            Gifts
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('/home') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-circle"></i>
                         <p>
                             Link

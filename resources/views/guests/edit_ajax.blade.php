@@ -109,12 +109,34 @@
                                     Set</option>
                                 <option value="Sent" {{ $guest->guest_invitation_status == 'Sent' ? 'selected' : '' }}>
                                     Sent</option>
+                                <option value="Opened" {{ $guest->guest_invitation_status == 'Opened' ? 'selected' : '' }}>
+                                    Opened</option>
                                 <option value="Pending"
                                     {{ $guest->guest_invitation_status == 'Pending' ? 'selected' : '' }}>Pending</option>
                             </select>
                             <small id="error-guest_invitation_status" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
+
+                    @if($guest->invitation_sent_at)
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Sent At</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($guest->invitation_sent_at)->format('d/m/Y H:i:s') }}" readonly>
+                            <small class="form-text text-muted">When the invitation was sent via WhatsApp</small>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($guest->invitation_opened_at)
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Opened At</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($guest->invitation_opened_at)->format('d/m/Y H:i:s') }}" readonly>
+                            <small class="form-text text-muted">When the guest opened the invitation letter</small>
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <div class="col-12 mb-2">

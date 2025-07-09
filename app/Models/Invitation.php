@@ -58,7 +58,18 @@ class Invitation extends Model
     }
 
     public function guests()
-{
-    return $this->hasMany(Guest::class, 'invitation_id', 'invitation_id');
-}
+    {
+        return $this->hasMany(Guest::class, 'invitation_id', 'invitation_id');
+    }
+
+    public function wishes()
+    {
+        return $this->hasMany(Wish::class, 'invitation_id', 'invitation_id');
+    }
+
+    // Tambahkan relasi payments jika diperlukan
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'invitation_id', 'invitation_id');
+    }
 }
