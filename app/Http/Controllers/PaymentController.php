@@ -25,10 +25,36 @@ class PaymentController extends Controller
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
             ->where('invitation_id', $invitation->invitation_id)
             ->firstOrFail();
-            
         $amount = $request->input('amount', 50000); // Default 50k
+
+        // Check existing payment for this guest & invitation
+        $existingPayment = Payment::where('guest_id', $guest->guest_id)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->orderByDesc('payment_id')
+            ->first();
+
+        // 1. If already paid (settlement), return thank you message and block payment
+        if ($existingPayment && $existingPayment->transaction_status === 'settlement') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terima kasih telah memberikan hadiah untuk pernikahan ' . $invitation->groom_name . ' & ' . $invitation->bride_name . '. Kontribusi Anda sangat berarti bagi kami! 💝',
+                'already_paid' => true
+            ]);
+        }
+
+        // 2. If has pending payment, always reuse it (never update order_id or snap_token)
+        if ($existingPayment && $existingPayment->transaction_status === 'pending') {
+            return response()->json([
+                'success' => true,
+                'snap_token' => $existingPayment->snap_token,
+                'order_id' => $existingPayment->order_id,
+                'reused' => true,
+                'message' => 'Melanjutkan pembayaran yang masih pending. Silakan selesaikan pembayaran.'
+            ]);
+        }
+
+        // 3. If expired/canceled or no payment, create new payment (new order_id & snap_token)
         $orderId = 'WED-' . $invitation->invitation_id . '-' . $guest->guest_id . '-' . time();
-        
         $params = [
             'transaction_details' => [
                 'order_id' => $orderId,
@@ -47,11 +73,9 @@ class PaymentController extends Controller
                 ]
             ],
         ];
-        
+
         try {
             $snapToken = Snap::getSnapToken($params);
-            
-            // Simpan ke database
             Payment::create([
                 'guest_id' => $guest->guest_id,
                 'invitation_id' => $invitation->invitation_id,
@@ -59,13 +83,11 @@ class PaymentController extends Controller
                 'gross_amount' => $amount,
                 'snap_token' => $snapToken,
             ]);
-            
             return response()->json([
                 'success' => true,
                 'snap_token' => $snapToken,
                 'order_id' => $orderId
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -74,6 +96,52 @@ class PaymentController extends Controller
         }
     }
     
+    public function checkPaymentStatus($slug, $guest_id_qr_code)
+    {
+        $invitation = Invitation::where('slug', $slug)->firstOrFail();
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->firstOrFail();
+            
+        // Check existing payment for this guest
+        $existingPayment = Payment::where('guest_id', $guest->guest_id)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->first();
+            
+        if (!$existingPayment) {
+            return response()->json([
+                'has_payment' => false,
+                'message' => 'Belum ada pembayaran'
+            ]);
+        }
+        
+        $createdAt = \Carbon\Carbon::parse($existingPayment->created_at);
+        $now = \Carbon\Carbon::now();
+        $hoursSinceCreated = $now->diffInHours($createdAt);
+        
+        $message = '';
+        if ($existingPayment->transaction_status === 'settlement') {
+            $message = 'Terima kasih telah memberikan hadiah untuk pernikahan ' . $invitation->groom_name . ' & ' . $invitation->bride_name . '. Kontribusi Anda sangat berarti bagi kami! 💝';
+        } elseif ($existingPayment->transaction_status === 'pending') {
+            if ($hoursSinceCreated < 3) {
+                $message = 'Anda memiliki pembayaran yang sedang pending. Silakan selesaikan atau lanjutkan pembayaran tersebut.';
+            } else {
+                $message = 'Pembayaran sebelumnya sudah expired. Anda dapat membuat pembayaran baru.';
+            }
+        }
+        
+        return response()->json([
+            'has_payment' => true,
+            'status' => $existingPayment->transaction_status,
+            'amount' => $existingPayment->gross_amount,
+            'hours_since_created' => $hoursSinceCreated,
+            'message' => $message,
+            'created_at' => $existingPayment->created_at,
+            'order_id' => $existingPayment->order_id,
+            'snap_token' => $existingPayment->snap_token  // Menambahkan snap_token untuk digunakan langsung
+        ]);
+    }
+
     public function handleCallback(Request $request)
     {
         $serverKey = env('MIDTRANS_SERVER_KEY');
@@ -89,6 +157,11 @@ class PaymentController extends Controller
                     'payment_status' => $request->transaction_status == 'settlement' ? 'success' : 'pending',
                     'midtrans_response' => $request->all()
                 ]);
+
+                // Auto-create gift record when payment is successful
+                if ($request->transaction_status == 'settlement') {
+                    $this->createGiftFromPayment($payment);
+                }
             }
         }
         

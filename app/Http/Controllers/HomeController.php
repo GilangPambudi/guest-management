@@ -29,7 +29,7 @@ class HomeController extends Controller
 
         $breadcrumb = (object)[
             'title' => 'Dashboard',
-            'list' => ['Home', 'Dashboard']
+            'list' => ['Dashboard']
         ];
 
         $page = (object)[
@@ -37,19 +37,51 @@ class HomeController extends Controller
         ];
 
         $activeMenu = 'dashboard';
-        $totalInvitation = Invitation::count();
-        $totalGuests = Guest::count();
-        $totalAttendance = Guest::where('guest_attendance_status', 'Yes')->count();
-    
+        
+        // Get all invitations with their statistics
+        $invitations = Invitation::with(['guests.payments'])->get()->map(function ($invitation) {
+            $guests = $invitation->guests;
+            $totalGuests = $guests->count();
+            $confirmedAttendance = $guests->where('guest_attendance_status', 'Yes')->count();
+            $checkedIn = $guests->whereNotNull('guest_arrival_time')
+                ->where('guest_arrival_time', '!=', '-')
+                ->count();
+            
+            // Calculate total gift amount (like in GiftController)
+            $payments = \App\Models\Payment::where('invitation_id', $invitation->invitation_id)
+                ->where('transaction_status', 'settlement')
+                ->get();
+            $totalGiftAmount = $payments->sum('gross_amount');
+            $totalGiftCount = $payments->count();
+            
+            // Calculate attendance percentage
+            $attendancePercentage = $totalGuests > 0 ? round(($confirmedAttendance / $totalGuests) * 100, 1) : 0;
+            
+            return [
+                'id' => $invitation->invitation_id,
+                'name' => $invitation->wedding_name,
+                'groom_name' => $invitation->groom_name,
+                'bride_name' => $invitation->bride_name,
+                'wedding_date' => $invitation->wedding_date,
+                'wedding_time_start' => $invitation->wedding_time_start,
+                'wedding_time_end' => $invitation->wedding_time_end,
+                'wedding_venue' => $invitation->wedding_venue,
+                'total_guests' => $totalGuests,
+                'confirmed_attendance' => $confirmedAttendance,
+                'checked_in' => $checkedIn,
+                'total_gift_amount' => $totalGiftAmount,
+                'total_gift_count' => $totalGiftCount,
+                'attendance_percentage' => $attendancePercentage,
+                'slug' => $invitation->slug,
+            ];
+        });
 
         return view('home', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
-            'totalInvitation' => $totalInvitation,
-            'totalGuests' => $totalGuests,
-            'totalAttendance' => $totalAttendance,
+            'invitations' => $invitations,
         ]);
     }
 }

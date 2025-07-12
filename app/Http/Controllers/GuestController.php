@@ -71,7 +71,7 @@ class GuestController extends Controller
             'title' => 'List of Guests - ' . $invitation->wedding_name
         ];
 
-        $activeMenu = 'invitation';
+        $activeMenu = 'guests';
 
         return view('guests.index', [
             'title' => $title,
@@ -610,13 +610,13 @@ class GuestController extends Controller
             ->orderBy('wedding_date', 'desc')
             ->get();
 
-        $title = 'Select Invitation for Scanner';
+        $title = 'Scanner';
         $breadcrumb = (object)[
             'title' => 'QR Scanner - Select Invitation',
             'list' => ['Home', 'Scanner']
         ];
         $page = (object)[
-            'title' => 'Select Invitation for QR Scanner'
+            'title' => 'QR Scanner'
         ];
         $activeMenu = 'scanner';
 
@@ -636,13 +636,13 @@ class GuestController extends Controller
             ->orderBy('wedding_date', 'desc')
             ->get();
 
-        $title = 'Select Invitation for Guest Management';
+        $title = 'Guest Management';
         $breadcrumb = (object)[
             'title' => 'Guest Management - Select Invitation',
             'list' => ['Home', 'Guests']
         ];
         $page = (object)[
-            'title' => 'Select Invitation for Guest Management'
+            'title' => 'Guest Management'
         ];
         $activeMenu = 'guests';
 
@@ -911,5 +911,18 @@ class GuestController extends Controller
                 'message' => 'Error: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Get list of guests for specific invitation (for dropdowns).
+     */
+    public function getGuestsList($invitation_id)
+    {
+        $guests = Guest::where('invitation_id', $invitation_id)
+            ->select('guest_id', 'guest_name', 'guest_category')
+            ->orderBy('guest_name')
+            ->get();
+
+        return response()->json($guests);
     }
 }

@@ -192,7 +192,7 @@
                             <input type="checkbox" id="select-all" title="Select All">
                         </th>
                         <th>No</th>
-                        <th>ID</th>
+                        {{-- <th>ID</th> --}}
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Category</th>
@@ -344,11 +344,17 @@
                         searchable: false,
                         width: '50px'
                     },
-                    {
-                        data: 'guest_id_qr_code',
-                        name: 'guest_id_qr_code',
-                        className: 'text-nowrap'
-                    },
+                    // {
+                    //     data: 'guest_id_qr_code',
+                    //     name: 'guest_id_qr_code',
+                    //     className: 'text-nowrap',
+                    //     render: function(data, type, row) {
+                    //         if (data && data.length > 10) {
+                    //             return '<span title="' + data + '">' + data.substr(0, 10) + '...</span>';
+                    //         }
+                    //         return data;
+                    //     }
+                    // },
                     {
                         data: 'guest_name',
                         name: 'guest_name',
@@ -435,7 +441,7 @@
                     },
                 ],
                 order: [
-                    [3, 'asc']
+                    [2, 'asc']
                 ], // Order by guest name
                 pageLength: 25,
                 lengthMenu: [

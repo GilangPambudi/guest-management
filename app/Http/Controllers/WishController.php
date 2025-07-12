@@ -123,13 +123,13 @@ class WishController extends Controller
             ->orderBy('wedding_date', 'desc')
             ->get();
 
-        $title = 'Select Invitation for Wish Management';
+        $title = 'Wish Management';
         $breadcrumb = (object)[
             'title' => 'Wish Management - Select Invitation',
             'list' => ['Home', 'Wishes']
         ];
         $page = (object)[
-            'title' => 'Select Invitation for Wish Management'
+            'title' => 'Wish Management'
         ];
         $activeMenu = 'wishes';
 

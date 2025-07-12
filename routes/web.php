@@ -9,6 +9,7 @@ use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PublicInvitationController;
+use App\Http\Controllers\GiftController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,7 +17,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index']);
+Route::get('/dashboard', [HomeController::class, 'index']);
 
 Route::group(['prefix' => 'qr'], function () {
     Route::get('/', [QRCodeController::class, 'index']);
@@ -37,6 +38,7 @@ Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
     Route::get('/{invitation_id}/scanner', [GuestController::class, 'scanner'])->name('guest.scanner');
     Route::get('/{invitation_id}/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate'])->name('guest.welcome_gate');
     Route::get('/{invitation_id}/recent-checkins', [GuestController::class, 'recentCheckins']);
+    Route::get('/{invitation_id}/guests/list', [GuestController::class, 'getGuestsList'])->name('guests.list');
     Route::post('/{invitation}/guests/{guest}/send-wa', [GuestController::class, 'sendWhatsapp'])->name('guests.send-wa');
     Route::post('/{invitation}/guests/send-wa-bulk', [GuestController::class, 'sendWhatsappBulk'])->name('guests.send-wa-bulk');
 });
@@ -64,8 +66,20 @@ Route::get('/guests', [GuestController::class, 'guestSelect'])->name('guests.sel
 Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner.select');
 Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
+// Gift Management Routes
+Route::get('/gifts', [GiftController::class, 'select'])->name('gifts.select');
+Route::get('/gifts/{invitation_id}', [GiftController::class, 'index'])->name('gifts.index');
+Route::get('/gifts/{invitation_id}/data', [GiftController::class, 'data'])->name('gifts.data');
+Route::get('/gifts/{invitation_id}/summary', [GiftController::class, 'summary'])->name('gifts.summary');
+Route::get('/gifts/payment/{payment_id}/detail', [GiftController::class, 'detail'])->name('gifts.detail');
+Route::post('/gifts/{invitation_id}/sync-all-status', [GiftController::class, 'syncAllStatus'])->name('gifts.sync-all-status');
+Route::post('/gifts/payment/{payment_id}/check-status', [GiftController::class, 'checkStatus'])->name('gifts.check-status');
+Route::post('/gifts/{invitation_id}/auto-expire', [GiftController::class, 'autoExpirePayments'])->name('gifts.auto-expire');
+
 Route::post('/payment/create/{slug}/{guest_id_qr_code}', [PaymentController::class, 'createPayment']);
-Route::post('/payment/callback', [PaymentController::class, 'handleCallback']);
+Route::get('/payment/check/{slug}/{guest_id_qr_code}', [PaymentController::class, 'checkPaymentStatus']);
+Route::post('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
+Route::post('/midtrans/webhook', [PaymentController::class, 'handleCallback'])->name('midtrans.webhook'); // Alternative webhook URL
 
 Route::prefix('wishes')->middleware('auth')->group(function () {
     Route::get('/', [WishController::class, 'wishSelect'])->name('wishes.select');

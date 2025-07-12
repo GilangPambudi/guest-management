@@ -88,7 +88,8 @@
     <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
             <!-- Header -->
-            <div class="relative overflow-hidden bg-gradient-pink text-white text-center py-8 sm:py-12 md:py-16 px-4 sm:px-8">
+            <div
+                class="relative overflow-hidden bg-gradient-pink text-white text-center py-8 sm:py-12 md:py-16 px-4 sm:px-8">
                 <!-- Decorative Background -->
                 <div class="absolute inset-0 opacity-10 pointer-events-none select-none">
                     <div class="absolute inset-0"
@@ -97,32 +98,39 @@
                 </div>
                 <!-- Guest Info -->
                 <div class="relative z-10 max-w-xl mx-auto mb-6">
-                    <div class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border-l-4 border-wedding-pink shadow-lg">
+                    <div
+                        class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border-l-4 border-wedding-pink shadow-lg">
                         <h2 class="font-playfair text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2">
                             Kepada Yth. {{ $guest->guest_name }}
                         </h2>
-                        <span class="inline-block bg-blue-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
+                        <span
+                            class="inline-block bg-blue-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
                             {{ $guest->guest_category }}
                         </span>
                     </div>
                 </div>
                 <!-- Couple Names & Invitation -->
                 <div class="relative z-10 flex flex-col items-center">
-                    <h1 class="font-playfair text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 drop-shadow px-4">
+                    <h1
+                        class="font-playfair text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 drop-shadow px-4">
                         Dengan hormat kami mengundang Anda untuk menghadiri acara pernikahan kami
                     </h1>
                     <div class="flex flex-col items-center w-full">
-                        <div class="bg-white bg-opacity-80 rounded-2xl shadow-lg px-6 py-4 sm:px-10 sm:py-6 border-2 border-wedding-pink 
+                        <div
+                            class="bg-white bg-opacity-80 rounded-2xl shadow-lg px-6 py-4 sm:px-10 sm:py-6 border-2 border-wedding-pink 
                             inline-block 
                             w-full 
                             max-w-full 
                             sm:w-auto sm:max-w-none">
                             <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-                                <span class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
+                                <span
+                                    class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
                                     {{ $groomName }}
                                 </span>
-                                <span class="font-dancing text-2xl sm:text-3xl md:text-4xl my-1 sm:my-0 text-gray-700">&</span>
-                                <span class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
+                                <span
+                                    class="font-dancing text-2xl sm:text-3xl md:text-4xl my-1 sm:my-0 text-gray-700">&</span>
+                                <span
+                                    class="font-dancing text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-wedding-purple drop-shadow">
                                     {{ $brideName }}
                                 </span>
                             </div>
@@ -141,7 +149,8 @@
                         <div class="text-center">
                             <i
                                 class="fas fa-calendar-alt text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tanggal</h3>
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tanggal
+                            </h3>
                             <p class="text-gray-800 font-medium text-sm sm:text-base">
                                 {{ \Carbon\Carbon::parse($weddingDate)->locale('id')->translatedFormat('j F Y') }}</p>
                         </div>
@@ -152,7 +161,9 @@
                         <div class="text-center">
                             <i class="fas fa-clock text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
                             <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Waktu</h3>
-                            <p class="text-gray-800 font-medium text-sm sm:text-base">{{ \Carbon\Carbon::parse($weddingTimeStart)->format('H:i') }} - {{ \Carbon\Carbon::parse($weddingTimeEnd)->format('H:i') }}</p>
+                            <p class="text-gray-800 font-medium text-sm sm:text-base">
+                                {{ \Carbon\Carbon::parse($weddingTimeStart)->format('H:i') }} -
+                                {{ \Carbon\Carbon::parse($weddingTimeEnd)->format('H:i') }}</p>
                         </div>
                     </div>
 
@@ -161,7 +172,8 @@
                         <div class="text-center">
                             <i
                                 class="fas fa-building text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-2 sm:mb-4"></i>
-                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tempat</h3>
+                            <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Tempat
+                            </h3>
                             <p class="text-gray-800 font-medium text-sm sm:text-base">{{ $weddingVenue }}</p>
                         </div>
                     </div>
@@ -227,7 +239,8 @@
                                     <i class="fas fa-times mr-2"></i>Maaf, Tidak Bisa Hadir
                                 </button>
                             </div>
-                            <p class="text-blue-200 text-xs sm:text-sm mt-3 sm:mt-4">Konfirmasi Anda membantu kami mempersiapkan
+                            <p class="text-blue-200 text-xs sm:text-sm mt-3 sm:mt-4">Konfirmasi Anda membantu kami
+                                mempersiapkan
                                 acara dengan lebih baik. Terima kasih!</p>
                         @else
                             <div id="attendance-confirmed">
@@ -235,7 +248,8 @@
                                     <div
                                         class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                                         <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🎉</div>
-                                        <h4 class="text-lg sm:text-xl font-bold mb-2">Terima Kasih Sudah Konfirmasi!</h4>
+                                        <h4 class="text-lg sm:text-xl font-bold mb-2">Terima Kasih Sudah Konfirmasi!
+                                        </h4>
                                         <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Kami sangat senang
                                             bisa merayakan hari istimewa kami bersama Anda!</p>
                                     </div>
@@ -244,7 +258,8 @@
                                         class="bg-white bg-opacity-20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-3 sm:mb-4">
                                         <div class="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">😔</div>
                                         <h4 class="text-lg sm:text-xl font-bold mb-2">Kami akan merindukan Anda!</h4>
-                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Terima kasih sudah memberitahu kami. 
+                                        <p class="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">Terima kasih sudah
+                                            memberitahu kami.
                                             Kami mengerti dan berharap bisa merayakan bersama di lain waktu!</p>
                                     </div>
                                 @endif
@@ -300,7 +315,8 @@
                                 class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 mx-auto">
                         </div>
                         <div class="text-gray-700">
-                            <p class="mb-3 sm:mb-4 text-sm sm:text-base">Silakan tunjukkan kode QR ini di pintu masuk.</p>
+                            <p class="mb-3 sm:mb-4 text-sm sm:text-base">Silakan tunjukkan kode QR ini di pintu masuk.
+                            </p>
                             {{-- <div class="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg inline-block cursor-pointer hover:bg-gray-700 transition-colors font-mono text-xs sm:text-sm break-all"
                                 onclick="copyQRCode('{{ $guest->guest_id_qr_code }}')">
                                 {{ $guest->guest_id_qr_code }}
@@ -316,8 +332,10 @@
                     <div
                         class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border-t-4 border-wedding-pink text-center">
                         <i class="fas fa-map text-2xl sm:text-3xl md:text-4xl text-wedding-pink mb-3 sm:mb-4"></i>
-                        <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Petunjuk Arah</h3>
-                        <p class="text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Klik di bawah untuk membuka lokasi di
+                        <h3 class="text-gray-500 uppercase text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Petunjuk Arah
+                        </h3>
+                        <p class="text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Klik di bawah untuk membuka lokasi
+                            di
                             aplikasi peta Anda</p>
                         <a href="{{ $weddingMaps }}" target="_blank"
                             class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
@@ -341,7 +359,8 @@
 
                         <!-- Form Ucapan -->
                         <div class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
-                            <h4 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4" id="wishFormTitle">Tinggalkan Ucapan Anda</h4>
+                            <h4 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4" id="wishFormTitle">
+                                Tinggalkan Ucapan Anda</h4>
                             <div id="wishFormContainer">
                                 <form id="wishForm" class="space-y-3 sm:space-y-4">
                                     <div>
@@ -356,13 +375,15 @@
                                     <div class="text-center">
                                         <button type="submit" id="submitWishBtn"
                                             class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
-                                            <i class="fas fa-paper-plane mr-2"></i><span id="wishBtnText">Kirim Ucapan</span>
+                                            <i class="fas fa-paper-plane mr-2"></i><span id="wishBtnText">Kirim
+                                                Ucapan</span>
                                         </button>
                                     </div>
                                 </form>
                             </div>
                             <div id="editWishBtnContainer" class="text-center" style="display:none;">
-                                <button type="button" onclick="showWishForm()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
+                                <button type="button" onclick="showWishForm()"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
                                     <i class="fas fa-edit mr-2"></i>Ubah ucapan
                                 </button>
                             </div>
@@ -413,8 +434,10 @@
                 <!-- Footer Message -->
                 <div
                     class="bg-gradient-gold rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center border-l-4 border-wedding-pink">
-                    <p class=" text-gray-700 italic text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Dengan penuh sukacita kami mengundang kehadiran
-                        Anda untuk merayakan pernikahan kami. Kehadiran Anda akan membuat hari istimewa kami menjadi lebih bermakna.</p>
+                    <p class=" text-gray-700 italic text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Dengan penuh sukacita
+                        kami mengundang kehadiran
+                        Anda untuk merayakan pernikahan kami. Kehadiran Anda akan membuat hari istimewa kami menjadi
+                        lebih bermakna.</p>
                     <p class="text-gray-800 font-bold text-base sm:text-lg md:text-xl">
                         Dengan cinta dan rasa syukur,<br>
                         <span class="font-dancing">{{ $groomName }} & {{ $brideName }}</span>
@@ -520,6 +543,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}">
     </script>
+    </script>
 
     <script>
         // Setup CSRF token
@@ -615,7 +639,8 @@
 
                         let statusText = response.new_status === 'Yes' ? 'hadir' : 'tidak hadir';
                         let icon = response.new_status === 'Yes' ? 'success' : 'info';
-                        let message = isChanging ? `RSVP diubah! Anda sekarang terdaftar sebagai ${statusText}` :
+                        let message = isChanging ?
+                            `RSVP diubah! Anda sekarang terdaftar sebagai ${statusText}` :
                             `Anda sekarang terdaftar sebagai ${statusText}!`;
 
                         Toast.fire({
@@ -858,21 +883,45 @@
             });
         }
 
-        function openPaymentModal() {
-            document.getElementById('paymentModal').classList.remove('hidden');
-        }
-
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.add('hidden');
         }
 
+        // Global flag to prevent multiple payment processing
+        let isProcessingPayment = false;
+
         function processPayment() {
+            // Prevent multiple payment processing
+            if (isProcessingPayment) {
+                console.log('Payment already in progress, ignoring duplicate request');
+                return;
+            }
+
             const amount = document.getElementById('giftAmount').value;
             const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
             const originalText = paymentBtn.innerHTML;
 
+            // Validate amount
+            if (!amount || amount < 10000) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Tidak Valid!',
+                    text: 'Silakan pilih nominal hadiah minimal Rp 10.000.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            // Set processing flag and update UI
+            isProcessingPayment = true;
             paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             paymentBtn.disabled = true;
+
+            // Show loading toast
+            Toast.fire({
+                icon: 'info',
+                title: 'Memproses pembayaran...'
+            });
 
             fetch('{{ url("/payment/create/{$invitation->slug}/{$guest->guest_id_qr_code}") }}', {
                     method: 'POST',
@@ -887,6 +936,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Show appropriate message for reused payment
+                        if (data.reused) {
+                            Toast.fire({
+                                icon: 'info',
+                                title: data.message || 'Melanjutkan pembayaran sebelumnya'
+                            });
+                        }
+
                         snap.pay(data.snap_token, {
                             onSuccess: function(result) {
                                 closePaymentModal();
@@ -898,10 +955,11 @@
                                 });
                             },
                             onPending: function(result) {
+                                closePaymentModal();
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Pembayaran Pending',
-                                    text: 'Silakan selesaikan pembayaran Anda.',
+                                    text: 'Silakan selesaikan transaksi Anda.',
                                     confirmButtonText: 'OK'
                                 });
                             },
@@ -912,7 +970,28 @@
                                     text: 'Terjadi kesalahan dalam proses pembayaran.',
                                     confirmButtonText: 'OK'
                                 });
+                            },
+                            onClose: function() {
+                                // Reset processing flag when modal closes
+                                isProcessingPayment = false;
                             }
+                        });
+                    } else if (data.already_paid) {
+                        // Handle already paid case
+                        closePaymentModal();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sudah Memberikan Hadiah',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        // Handle other errors
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Memproses!',
+                            text: data.message || 'Terjadi kesalahan dalam memproses pembayaran.',
+                            confirmButtonText: 'OK'
                         });
                     }
                 })
@@ -926,8 +1005,10 @@
                     });
                 })
                 .finally(() => {
+                    // Reset UI and processing flag
                     paymentBtn.innerHTML = originalText;
                     paymentBtn.disabled = false;
+                    isProcessingPayment = false;
                 });
         }
 
@@ -973,9 +1054,86 @@
         }
 
         function openPaymentModal() {
-            document.getElementById('paymentModal').classList.remove('hidden');
-            // Initialize with preset mode
-            toggleGiftMode('preset');
+            // Check for existing pending payment first
+            Toast.fire({
+                icon: 'info',
+                title: 'Memeriksa status pembayaran...'
+            });
+            
+            fetch(`{{ url('/payment/check/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}`)
+                .then(response => response.json())
+                .then(data => {
+                    // If there's a pending payment that's still valid (less than 3 hours old)
+                    if (data.has_payment && data.status === 'pending' && data.hours_since_created < 3 && data.snap_token) {
+                        // Use the pending payment directly
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Melanjutkan pembayaran yang masih pending'
+                        });
+                        
+                        // Use the snap token directly without opening modal
+                        snap.pay(data.snap_token, {
+                            onSuccess: function(result) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Pembayaran Berhasil!',
+                                    text: 'Terima kasih atas hadiah Anda.',
+                                    confirmButtonText: 'OK'
+                                });
+                                // Celebrate successful payment
+                                createFallingHearts();
+                            },
+                            onPending: function(result) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Pembayaran Pending',
+                                    text: 'Silakan selesaikan transaksi Anda.',
+                                    confirmButtonText: 'OK'
+                                });
+                            },
+                            onError: function(result) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Pembayaran Gagal!',
+                                    text: 'Terjadi kesalahan dalam proses pembayaran.',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        });                    }
+                    // If pending payment exists but no snap token available
+                    else if (data.has_payment && data.status === 'pending' && data.hours_since_created < 3 && !data.snap_token) {
+                        console.error('Snap token not found for pending payment');
+                        // Show error and let user create a new payment
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Token pembayaran tidak ditemukan, membuat pembayaran baru'
+                        });
+                        document.getElementById('paymentModal').classList.remove('hidden');
+                        toggleGiftMode('preset');
+                    }
+                    // If payment is already settled, show message
+                    else if (data.has_payment && data.status === 'settlement') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sudah Memberikan Hadiah',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                    // If no payment or expired pending payment, show modal
+                    else {
+                        document.getElementById('paymentModal').classList.remove('hidden');
+                        // Initialize with preset mode
+                        toggleGiftMode('preset');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking payment status:', error);
+                    // If error occurs, fallback to showing the modal
+                    document.getElementById('paymentModal').classList.remove('hidden');
+                    // Initialize with preset mode
+                    toggleGiftMode('preset');
+                });
         }
 
         function closePaymentModal() {
@@ -987,6 +1145,12 @@
         }
 
         function processPayment() {
+            // Prevent multiple payment processing
+            if (isProcessingPayment) {
+                console.log('Payment already in progress, ignoring duplicate request');
+                return;
+            }
+
             let amount;
 
             // Get amount based on current mode
@@ -1019,9 +1183,22 @@
                 amount = customAmount;
             }
 
+            // Final validation
+            if (!amount || amount < 10000) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Tidak Valid!',
+                    text: 'Silakan pilih nominal hadiah minimal Rp 10.000.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
             const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
             const originalText = paymentBtn.innerHTML;
 
+            // Set processing flag and update UI
+            isProcessingPayment = true;
             paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             paymentBtn.disabled = true;
 
@@ -1032,6 +1209,7 @@
                 minimumFractionDigits: 0
             }).format(amount);
 
+            // Show loading toast
             Toast.fire({
                 icon: 'info',
                 title: `Memproses pembayaran sebesar ${formattedAmount}...`
@@ -1050,6 +1228,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Show appropriate message for reused payment
+                        if (data.reused) {
+                            Toast.fire({
+                                icon: 'info',
+                                title: data.message || 'Melanjutkan pembayaran sebelumnya'
+                            });
+                        }
+
                         snap.pay(data.snap_token, {
                             onSuccess: function(result) {
                                 closePaymentModal();
@@ -1068,7 +1254,7 @@
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Pembayaran Pending',
-                                    text: 'Silakan selesaikan pembayaran Anda.',
+                                    text: 'Silakan selesaikan transaksi Anda.',
                                     confirmButtonText: 'OK'
                                 });
                             },
@@ -1079,13 +1265,27 @@
                                     text: 'Terjadi kesalahan dalam proses pembayaran.',
                                     confirmButtonText: 'OK'
                                 });
+                            },
+                            onClose: function() {
+                                // Reset processing flag when modal closes
+                                isProcessingPayment = false;
                             }
                         });
+                    } else if (data.already_paid) {
+                        // Handle already paid case
+                        closePaymentModal();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sudah Memberikan Hadiah',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        });
                     } else {
+                        // Handle other errors
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error!',
-                            text: data.message || 'Gagal membuat transaksi.',
+                            title: 'Gagal Memproses!',
+                            text: data.message || 'Terjadi kesalahan dalam memproses pembayaran.',
                             confirmButtonText: 'OK'
                         });
                     }
@@ -1100,8 +1300,10 @@
                     });
                 })
                 .finally(() => {
+                    // Reset UI and processing flag
                     paymentBtn.innerHTML = originalText;
                     paymentBtn.disabled = false;
+                    isProcessingPayment = false;
                 });
         }
 
@@ -1178,47 +1380,64 @@
                     e.preventDefault();
                     const message = wishMessage.value.trim();
                     if (!message) {
-                        Swal.fire({ icon: 'warning', title: 'Ucapan tidak boleh kosong!' });
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Ucapan tidak boleh kosong!'
+                        });
                         return;
                     }
                     // Kirim AJAX ke backend (ganti URL sesuai route Laravel)
-                    const url = userHasWish
-                        ? '{{ url('/wishes/update/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}'
-                        : '{{ url('/wishes/create/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}';
+                    const url = userHasWish ?
+                        '{{ url('/wishes/update/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}' :
+                        '{{ url('/wishes/create/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}';
                     const btn = document.getElementById('submitWishBtn');
                     const originalText = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
                     btn.disabled = true;
                     fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ message })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            Toast.fire({ icon: 'success', title: userHasWish ? 'Ucapan diperbarui!' : 'Ucapan terkirim!' });
-                            userHasWish = true;
-                            userWish = message;
-                            // Sembunyikan form, tampilkan tombol edit
-                            wishFormContainer.style.display = 'none';
-                            editWishBtnContainer.style.display = 'block';
-                            // Refresh daftar ucapan agar perubahan langsung terlihat
-                            loadWishes(1);
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Gagal mengirim ucapan.' });
-                        }
-                    })
-                    .catch(() => {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Terjadi kesalahan sistem.' });
-                    })
-                    .finally(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    });
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                message
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Toast.fire({
+                                    icon: 'success',
+                                    title: userHasWish ? 'Ucapan diperbarui!' :
+                                        'Ucapan terkirim!'
+                                });
+                                userHasWish = true;
+                                userWish = message;
+                                // Sembunyikan form, tampilkan tombol edit
+                                wishFormContainer.style.display = 'none';
+                                editWishBtnContainer.style.display = 'block';
+                                // Refresh daftar ucapan agar perubahan langsung terlihat
+                                loadWishes(1);
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: data.message || 'Gagal mengirim ucapan.'
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Terjadi kesalahan sistem.'
+                            });
+                        })
+                        .finally(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
                 });
             }
 
@@ -1410,7 +1629,8 @@
             const originalText = submitBtn.innerHTML;
             const isEditing = userHasWish;
 
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${isEditing ? 'Memperbarui...' : 'Mengirim...'}`;
+            submitBtn.innerHTML =
+                `<i class="fas fa-spinner fa-spin mr-2"></i>${isEditing ? 'Memperbarui...' : 'Mengirim...'}`;
             submitBtn.disabled = true;
 
             fetch('{{ url('/wishes/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}', {

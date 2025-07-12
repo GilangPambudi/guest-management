@@ -46,4 +46,10 @@ class Guest extends Model
     {
         return $this->hasMany(Payment::class, 'guest_id', 'guest_id');
     }
+
+    // Tambahkan relasi gifts
+    public function gifts()
+    {
+        return $this->hasMany(Gift::class, 'guest_id', 'guest_id');
+    }
 }
