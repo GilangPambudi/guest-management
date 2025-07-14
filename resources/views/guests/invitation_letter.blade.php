@@ -472,55 +472,25 @@
             <div class="p-4 sm:p-6">
                 <form id="paymentForm">
                     <div class="mb-4 sm:mb-6">
-                        <label class="block text-gray-700 font-bold mb-3 text-sm sm:text-base">Pilih Nominal
-                            Hadiah:</label>
-
-                        <!-- Gift Amount Selection Toggle -->
-                        <div class="mb-4">
-                            <div class="flex space-x-2">
-                                <button type="button" onclick="toggleGiftMode('preset')"
-                                    class="flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors"
-                                    id="preset-btn">
-                                    💰 Preset
-                                </button>
-                                <button type="button" onclick="toggleGiftMode('custom')"
-                                    class="flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors"
-                                    id="custom-btn">
-                                    ✏️ Custom
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Preset Amount Dropdown -->
-                        <div id="preset-section">
-                            <select id="giftAmount"
-                                class="w-full p-3 sm:p-4 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base">
-                                <option value="50000">💰 Rp 50.000</option>
-                                <option value="100000">💰 Rp 100.000</option>
-                                <option value="200000">💰 Rp 200.000</option>
-                                <option value="500000">💰 Rp 500.000</option>
-                                <option value="1000000">💰 Rp 1.000.000</option>
-                            </select>
-                        </div>
+                        <label class="block text-gray-700 font-bold mb-3 text-sm sm:text-base">Masukkan Nominal Hadiah:</label>
 
                         <!-- Custom Amount Input -->
-                        <div id="custom-section" style="display: none;">
-                            <div class="relative">
-                                <span
-                                    class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">Rp</span>
-                                <input type="number" id="customAmount" placeholder="Masukkan nominal (min. 10.000)"
-                                    min="10000" max="10000000" step="1000"
-                                    class="w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base">
-                            </div>
-                            <small class="text-gray-500 mt-1 block text-xs">Minimal Rp 10.000 - Maksimal Rp
-                                10.000.000</small>
+                        <div class="relative">
+                            <span
+                                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm sm:text-base">Rp</span>
+                            <input type="number" id="customAmount" placeholder="Masukkan nominal hadiah"
+                                min="1000" step="10000"
+                                class="w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base
+                                [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
+                                [appearance:textfield]"
+                            >
                         </div>
                     </div>
 
                     <div class="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                         <div class="flex items-center">
                             <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                            <span class="text-blue-700 text-xs sm:text-sm">Pembayaran aman menggunakan Midtrans</span>
+                            <span class="text-blue-700 text-xs sm:text-sm">Transaksi aman menggunakan Midtrans</span>
                         </div>
                     </div>
                 </form>
@@ -897,21 +867,44 @@
                 return;
             }
 
-            const amount = document.getElementById('giftAmount').value;
+            const amount = document.getElementById('customAmount').value;
             const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
             const originalText = paymentBtn.innerHTML;
 
             // Validate amount
-            if (!amount || amount < 10000) {
+            if (!amount || amount < 1000) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Nominal Tidak Valid!',
-                    text: 'Silakan pilih nominal hadiah minimal Rp 10.000.',
+                    text: 'Minimal transaksi midtrans adalah Rp 1.000.',
                     confirmButtonText: 'OK'
                 });
                 return;
             }
 
+            // Format number for display
+            const formattedAmount = new Intl.NumberFormat('id-ID').format(amount);
+
+            // Show confirmation dialog
+            Swal.fire({
+                icon: 'question',
+                title: 'Konfirmasi Pemberian Hadiah',
+                html: `Anda akan memberikan hadiah <strong>Rp ${formattedAmount}</strong> kepada <strong>{{ $groomName }} & {{ $brideName }}</strong>?`,
+                showCancelButton: true,
+                cancelButtonText: 'Batal',
+                confirmButtonText: 'Ya, Lanjutkan',
+                confirmButtonColor: '#22c55e',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true // Tambahkan ini agar tombol confirm di kanan
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // User confirmed, proceed with payment
+                    proceedToMidtrans(amount, paymentBtn, originalText);
+                }
+            });
+        }
+
+        function proceedToMidtrans(amount, paymentBtn, originalText) {
             // Set processing flag and update UI
             isProcessingPayment = true;
             paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
@@ -920,7 +913,7 @@
             // Show loading toast
             Toast.fire({
                 icon: 'info',
-                title: 'Memproses pembayaran...'
+                title: 'Memproses transaksi...'
             });
 
             fetch('{{ url("/payment/create/{$invitation->slug}/{$guest->guest_id_qr_code}") }}', {
@@ -930,17 +923,22 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        amount: amount
+                        amount: parseInt(amount)
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Show appropriate message for reused payment
                         if (data.reused) {
                             Toast.fire({
                                 icon: 'info',
-                                title: data.message || 'Melanjutkan pembayaran sebelumnya'
+                                title: data.message || 'Melanjutkan transaksi sebelumnya'
                             });
                         }
 
@@ -949,7 +947,7 @@
                                 closePaymentModal();
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Pembayaran Berhasil!',
+                                    title: 'Transaksi Berhasil!',
                                     text: 'Terima kasih atas hadiah Anda.',
                                     confirmButtonText: 'OK'
                                 });
@@ -958,7 +956,7 @@
                                 closePaymentModal();
                                 Swal.fire({
                                     icon: 'warning',
-                                    title: 'Pembayaran Pending',
+                                    title: 'Transaksi Pending',
                                     text: 'Silakan selesaikan transaksi Anda.',
                                     confirmButtonText: 'OK'
                                 });
@@ -966,8 +964,8 @@
                             onError: function(result) {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Pembayaran Gagal!',
-                                    text: 'Terjadi kesalahan dalam proses pembayaran.',
+                                    title: 'Transaksi Gagal!',
+                                    text: 'Terjadi kesalahan dalam proses transaksi.',
                                     confirmButtonText: 'OK'
                                 });
                             },
@@ -990,7 +988,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal Memproses!',
-                            text: data.message || 'Terjadi kesalahan dalam memproses pembayaran.',
+                            text: data.message || 'Terjadi kesalahan dalam memproses transaksi.',
                             confirmButtonText: 'OK'
                         });
                     }
@@ -1012,52 +1010,14 @@
                 });
         }
 
-        // Global variable for gift mode
-        let currentGiftMode = 'preset';
-
-        function toggleGiftMode(mode) {
-            currentGiftMode = mode;
-            const presetBtn = document.getElementById('preset-btn');
-            const customBtn = document.getElementById('custom-btn');
-            const presetSection = document.getElementById('preset-section');
-            const customSection = document.getElementById('custom-section');
-
-            if (mode === 'preset') {
-                // Update buttons
-                presetBtn.className =
-                    'flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors bg-green-500 text-white';
-                customBtn.className =
-                    'flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300';
-
-                // Show/hide sections
-                presetSection.style.display = 'block';
-                customSection.style.display = 'none';
-
-                // Clear custom input
-                document.getElementById('customAmount').value = '';
-            } else {
-                // Update buttons
-                presetBtn.className =
-                    'flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300';
-                customBtn.className =
-                    'flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors bg-green-500 text-white';
-
-                // Show/hide sections
-                presetSection.style.display = 'none';
-                customSection.style.display = 'block';
-
-                // Focus on custom input
-                setTimeout(() => {
-                    document.getElementById('customAmount').focus();
-                }, 100);
-            }
-        }
+        // Global variable for gift mode (no longer needed but kept for compatibility)
+        let currentGiftMode = 'custom';
 
         function openPaymentModal() {
             // Check for existing pending payment first
             Toast.fire({
                 icon: 'info',
-                title: 'Memeriksa status pembayaran...'
+                title: 'Memeriksa status transaksi...'
             });
             
             fetch(`{{ url('/payment/check/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}`)
@@ -1068,7 +1028,7 @@
                         // Use the pending payment directly
                         Toast.fire({
                             icon: 'info',
-                            title: 'Melanjutkan pembayaran yang masih pending'
+                            title: 'Melanjutkan transaksi yang masih pending'
                         });
                         
                         // Use the snap token directly without opening modal
@@ -1076,7 +1036,7 @@
                             onSuccess: function(result) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Pembayaran Berhasil!',
+                                    title: 'Transaksi Berhasil!',
                                     text: 'Terima kasih atas hadiah Anda.',
                                     confirmButtonText: 'OK'
                                 });
@@ -1086,7 +1046,7 @@
                             onPending: function(result) {
                                 Swal.fire({
                                     icon: 'warning',
-                                    title: 'Pembayaran Pending',
+                                    title: 'Transaksi Pending',
                                     text: 'Silakan selesaikan transaksi Anda.',
                                     confirmButtonText: 'OK'
                                 });
@@ -1094,8 +1054,8 @@
                             onError: function(result) {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Pembayaran Gagal!',
-                                    text: 'Terjadi kesalahan dalam proses pembayaran.',
+                                    title: 'Transaksi Gagal!',
+                                    text: 'Terjadi kesalahan dalam proses transaksi.',
                                     confirmButtonText: 'OK'
                                 });
                             }
@@ -1106,10 +1066,13 @@
                         // Show error and let user create a new payment
                         Toast.fire({
                             icon: 'error',
-                            title: 'Token pembayaran tidak ditemukan, membuat pembayaran baru'
+                            title: 'Token transaksi tidak ditemukan, membuat transaksi baru'
                         });
                         document.getElementById('paymentModal').classList.remove('hidden');
-                        toggleGiftMode('preset');
+                        // Focus on custom input
+                        setTimeout(() => {
+                            document.getElementById('customAmount').focus();
+                        }, 100);
                     }
                     // If payment is already settled, show message
                     else if (data.has_payment && data.status === 'settlement') {
@@ -1123,188 +1086,27 @@
                     // If no payment or expired pending payment, show modal
                     else {
                         document.getElementById('paymentModal').classList.remove('hidden');
-                        // Initialize with preset mode
-                        toggleGiftMode('preset');
+                        // Focus on custom input
+                        setTimeout(() => {
+                            document.getElementById('customAmount').focus();
+                        }, 100);
                     }
                 })
                 .catch(error => {
                     console.error('Error checking payment status:', error);
                     // If error occurs, fallback to showing the modal
                     document.getElementById('paymentModal').classList.remove('hidden');
-                    // Initialize with preset mode
-                    toggleGiftMode('preset');
+                    // Focus on custom input
+                    setTimeout(() => {
+                        document.getElementById('customAmount').focus();
+                    }, 100);
                 });
         }
 
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.add('hidden');
             // Reset form
-            document.getElementById('giftAmount').value = '50000';
             document.getElementById('customAmount').value = '';
-            toggleGiftMode('preset');
-        }
-
-        function processPayment() {
-            // Prevent multiple payment processing
-            if (isProcessingPayment) {
-                console.log('Payment already in progress, ignoring duplicate request');
-                return;
-            }
-
-            let amount;
-
-            // Get amount based on current mode
-            if (currentGiftMode === 'preset') {
-                amount = document.getElementById('giftAmount').value;
-            } else {
-                const customAmount = document.getElementById('customAmount').value;
-
-                // Validate custom amount
-                if (!customAmount || customAmount < 10000) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Nominal Tidak Valid',
-                        text: 'Minimal nominal hadiah adalah Rp 10.000',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-                if (customAmount > 10000000) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Nominal Terlalu Besar',
-                        text: 'Maksimal nominal hadiah adalah Rp 10.000.000',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-                amount = customAmount;
-            }
-
-            // Final validation
-            if (!amount || amount < 10000) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Nominal Tidak Valid!',
-                    text: 'Silakan pilih nominal hadiah minimal Rp 10.000.',
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-
-            const paymentBtn = document.querySelector('#paymentModal button[onclick="processPayment()"]');
-            const originalText = paymentBtn.innerHTML;
-
-            // Set processing flag and update UI
-            isProcessingPayment = true;
-            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
-            paymentBtn.disabled = true;
-
-            // Format amount for display
-            const formattedAmount = new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
-            }).format(amount);
-
-            // Show loading toast
-            Toast.fire({
-                icon: 'info',
-                title: `Memproses pembayaran sebesar ${formattedAmount}...`
-            });
-
-            fetch('{{ url("/payment/create/{$invitation->slug}/{$guest->guest_id_qr_code}") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        amount: amount
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show appropriate message for reused payment
-                        if (data.reused) {
-                            Toast.fire({
-                                icon: 'info',
-                                title: data.message || 'Melanjutkan pembayaran sebelumnya'
-                            });
-                        }
-
-                        snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                closePaymentModal();
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Pembayaran Berhasil!',
-                                    text: `Terima kasih atas hadiah sebesar ${formattedAmount}.`,
-                                    confirmButtonText: 'OK'
-                                });
-
-                                // Celebrate successful payment
-                                createFallingHearts();
-                            },
-                            onPending: function(result) {
-                                closePaymentModal();
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Pembayaran Pending',
-                                    text: 'Silakan selesaikan transaksi Anda.',
-                                    confirmButtonText: 'OK'
-                                });
-                            },
-                            onError: function(result) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Pembayaran Gagal!',
-                                    text: 'Terjadi kesalahan dalam proses pembayaran.',
-                                    confirmButtonText: 'OK'
-                                });
-                            },
-                            onClose: function() {
-                                // Reset processing flag when modal closes
-                                isProcessingPayment = false;
-                            }
-                        });
-                    } else if (data.already_paid) {
-                        // Handle already paid case
-                        closePaymentModal();
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Sudah Memberikan Hadiah',
-                            text: data.message,
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        // Handle other errors
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal Memproses!',
-                            text: data.message || 'Terjadi kesalahan dalam memproses pembayaran.',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan sistem.',
-                        confirmButtonText: 'OK'
-                    });
-                })
-                .finally(() => {
-                    // Reset UI and processing flag
-                    paymentBtn.innerHTML = originalText;
-                    paymentBtn.disabled = false;
-                    isProcessingPayment = false;
-                });
         }
 
         // Add input formatter for custom amount
@@ -1318,29 +1120,15 @@
                     // Remove leading zeros
                     value = value.replace(/^0+/, '');
 
-                    // Ensure minimum value
-                    if (value && parseInt(value) < 10000) {
-                        // Don't prevent typing, but show visual feedback
+                    // Ensure minimum value visual feedback only
+                    if (value && parseInt(value) < 1000) {
+                        // Show visual feedback but don't auto-correct
                         e.target.style.borderColor = '#ef4444';
                     } else {
                         e.target.style.borderColor = '#d1d5db';
                     }
 
                     e.target.value = value;
-                });
-
-                customAmountInput.addEventListener('blur', function(e) {
-                    let value = parseInt(e.target.value);
-
-                    if (value && value < 10000) {
-                        e.target.value = '10000';
-                        e.target.style.borderColor = '#d1d5db';
-
-                        Toast.fire({
-                            icon: 'info',
-                            title: 'Nominal minimal diatur ke Rp 10.000'
-                        });
-                    }
                 });
             }
         });

@@ -25,7 +25,16 @@ class PaymentController extends Controller
         $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
             ->where('invitation_id', $invitation->invitation_id)
             ->firstOrFail();
-        $amount = $request->input('amount', 50000); // Default 50k
+        
+        $amount = $request->input('amount', 1000); // Default 1k
+        
+        // Validate minimum amount
+        if ($amount < 1000) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nominal hadiah minimal adalah Rp 1.000.'
+            ], 400);
+        }
 
         // Check existing payment for this guest & invitation
         $existingPayment = Payment::where('guest_id', $guest->guest_id)

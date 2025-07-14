@@ -11,14 +11,14 @@
 
                 @forelse($invitations as $invitation)
                     <div class="card card-outline card-secondary mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
                             <div class="flex-grow-1">
                                 <h5 class="card-title mb-0 d-inline">
                                     <i class="fas fa-heart text-danger"></i>
                                     <strong>{{ $invitation['name'] }}</strong>
                                 </h5>
                             </div>
-                            <div class="ms-auto">
+                            <div class="ms-auto mt-2 mt-md-0">
                                 <a href="{{ url('/invitation/' . $invitation['id'] . '/show') }}"
                                     class="btn btn-sm btn-primary">
                                     <i class="fas fa-external-link-alt"></i> Details
@@ -27,8 +27,8 @@
                         </div>
                         <div class="card-body">
                             <!-- Informasi Pasangan -->
-                            <div class="row mb-3">
-                                <div class="col-lg-5 col-md-5 col-12">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-lg-5 col-md-5 col-12 mb-2 mb-md-0">
                                     <div
                                         class="info-box bg-gradient-primary d-flex align-items-center justify-content-center h-100">
                                         <div class="info-box-content text-center">
@@ -37,7 +37,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-2 col-md-2 col-12 d-flex align-items-center justify-content-center">
+                                <div class="col-lg-2 col-md-2 col-12 d-flex align-items-center justify-content-center mb-2 mb-md-0">
                                     <div class="text-center">
                                         <i class="fas fa-heart text-danger fa-5x"></i>
                                     </div>
@@ -55,7 +55,7 @@
 
                             <!-- Informasi Acara -->
                             <div class="row mb-4">
-                                <div class="col-lg-6 col-md-6 col-12">
+                                <div class="col-lg-6 col-md-6 col-12 mb-2 mb-md-0">
                                     <div class="info-box bg-gradient-info h-100">
                                         <span class="info-box-icon">
                                             <i class="fas fa-calendar-alt fa-lg"></i>
@@ -86,7 +86,7 @@
 
                             <!-- Main Summaries -->
                             <div class="row mb-4">
-                                <div class="col-md-3">
+                                <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
                                     <div class="info-box bg-light h-100">
                                         <span class="info-box-icon bg-primary">
                                             <i class="fas fa-users"></i>
@@ -97,7 +97,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
                                     <div class="info-box bg-light h-100">
                                         <span class="info-box-icon bg-purple">
                                             <i class="fas fa-check-circle"></i>
@@ -109,7 +109,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
                                     <div class="info-box bg-light h-100">
                                         <span class="info-box-icon bg-info">
                                             <i class="fas fa-sign-in-alt"></i>
@@ -121,7 +121,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-3 col-sm-6 col-12">
                                     <div class="info-box bg-light h-100">
                                         <span class="info-box-icon bg-success">
                                             <i class="fas fa-gift"></i>
@@ -152,4 +152,29 @@
             </div>
         </div>
     </div>
+    <style>
+        @media (max-width: 767.98px) {
+            .info-box .info-box-icon {
+                min-width: 40px !important;
+                font-size: 1.5rem !important;
+            }
+            .info-box-content h1,
+            .info-box-content h5 {
+                font-size: 1.1rem !important;
+            }
+            .info-box-content .info-box-number {
+                font-size: 1rem !important;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .card-header.d-flex {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .ms-auto {
+                margin-left: 0 !important;
+                margin-top: 10px !important;
+            }
+        }
+    </style>
 @endsection

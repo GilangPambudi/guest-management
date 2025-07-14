@@ -17,7 +17,7 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-sm table-hover table-striped" id="invitation-table">
+            <table class="table table-bordered table-sm table-hover table-striped text-nowrap" id="invitation-table">
                 <thead>
                     <tr>
                         <th>No</th>

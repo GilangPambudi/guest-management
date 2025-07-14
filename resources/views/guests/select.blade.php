@@ -16,17 +16,17 @@
                             <div class="card-body">
                                 <p class="card-text">
                                     <strong>{{ $invitation->groom_name }} & {{ $invitation->bride_name }}</strong><br>
-                                    <i class="fa fa-calendar text-muted"></i> 
+                                    <i class="fa fa-calendar text-muted"></i>
                                     {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }}<br>
-                                    <i class="fa fa-map-marker-alt text-muted"></i> 
+                                    <i class="fa fa-map-marker-alt text-muted"></i>
                                     {{ $invitation->wedding_venue }}<br>
-                                    <i class="fa fa-users text-muted"></i> 
+                                    <i class="fa fa-users text-muted"></i>
                                     {{ $invitation->guests_count }} guest(s)
                                 </p>
                             </div>
                             <div class="card-footer">
-                                <a href="{{ url('/invitation/' . $invitation->invitation_id . '/guests') }}" 
-                                   class="btn btn-primary btn-block rounded-lg">
+                                <a href="{{ url('/invitation/' . $invitation->invitation_id . '/guests') }}"
+                                    class="btn btn-primary btn-block rounded-lg">
                                     <i class="fa fa-users"></i> Manage Guests
                                 </a>
                             </div>
