@@ -65,14 +65,24 @@
                         </p>
                     </a>
                 </li>
+                @if(Auth::check() && Auth::user()->role === 'admin')
                 <li class="nav-item">
+                    <a href="{{ url('/users') }}" class="nav-link {{ $activeMenu == 'users' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-cog"></i>
+                        <p>
+                            User Management
+                        </p>
+                    </a>
+                </li>
+                @endif
+                {{-- <li class="nav-item">
                     <a href="{{ url('/dashboard') }}" class="nav-link {{ $activeMenu == '' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-circle"></i>
                         <p>
                             Link
                         </p>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

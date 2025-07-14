@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\Invitation;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -48,7 +49,7 @@ class HomeController extends Controller
                 ->count();
             
             // Calculate total gift amount (like in GiftController)
-            $payments = \App\Models\Payment::where('invitation_id', $invitation->invitation_id)
+            $payments = Payment::where('invitation_id', $invitation->invitation_id)
                 ->where('transaction_status', 'settlement')
                 ->get();
             $totalGiftAmount = $payments->sum('gross_amount');

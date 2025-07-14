@@ -10,14 +10,33 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PublicInvitationController;
 use App\Http\Controllers\GiftController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
-Auth::routes();
+// Auth routes without register
+Auth::routes(['register' => false]);
+
+// Custom register route with /auth prefix for security
+// Route::group(['prefix' => 'auth'], function () {
+//     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+//     Route::post('/register', [RegisterController::class, 'register']);
+// });
 
 Route::get('/dashboard', [HomeController::class, 'index']);
+
+// Profile Routes
+Route::group(['prefix' => 'profile', 'middleware' => 'auth'], function () {
+    Route::get('/', [ProfileController::class, 'index']);
+    Route::get('/edit_ajax', [ProfileController::class, 'edit']);
+    Route::put('/update_ajax', [ProfileController::class, 'update']);
+    Route::get('/password_ajax', [ProfileController::class, 'editPassword']);
+    Route::put('/password_ajax', [ProfileController::class, 'updatePassword']);
+});
 
 Route::group(['prefix' => 'qr'], function () {
     Route::get('/', [QRCodeController::class, 'index']);
@@ -99,3 +118,16 @@ Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation_letter']);
 Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax']);
+
+// User Management Routes
+Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/list', [UserController::class, 'list']);
+    Route::get('/create_ajax', [UserController::class, 'create_ajax']);
+    Route::post('/store_ajax', [UserController::class, 'store_ajax']);
+    Route::get('/{id}/show_ajax', [UserController::class, 'show_ajax']);
+    Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
+    Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
+    Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);
+    Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
+});
