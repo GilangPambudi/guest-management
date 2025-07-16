@@ -10,7 +10,7 @@
     <div class="sidebar">
 
         <div class="user-panel mt-1 pb-1 mb-1 d-flex">
-            <div class="info"><a href="{{ url('/dashboard') }}" class="d-block text-primary">{{ config('app.name') }}</a>
+            <div class="info"><a href="{{ url('/dashboard') }}" class="d-block text-primary">Quick Response Elegant Wedding</a>
             </div>
         </div>
 
