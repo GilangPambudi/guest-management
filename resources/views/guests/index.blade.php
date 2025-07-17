@@ -651,7 +651,7 @@
             var btn = $(this);
 
             // Get guest name from the row data for better confirmation message
-            var guestName = $(this).closest('tr').find('td').eq(3).text(); // Assuming guest name is in 4th column
+            var guestName = $(this).closest('tr').find('td').eq(2).text(); // Assuming guest name is in 4th column
 
             // Show confirmation modal using SweetAlert
             Swal.fire({
