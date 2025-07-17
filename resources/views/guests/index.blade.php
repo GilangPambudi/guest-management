@@ -29,10 +29,18 @@
         /* Ensure table content doesn't wrap */
         #guest-table {
             min-width: 1200px;
+            width: 100% !important; /* Force full width */
             white-space: nowrap;
         }
         #guest-table td, #guest-table th {
             white-space: nowrap;
+        }
+        /* Make sure DataTables wrapper uses full width */
+        .dataTables_wrapper {
+            width: 100% !important;
+        }
+        .dataTables_scrollBody {
+            width: 100% !important;
         }
         /* Hilangkan responsive controls DataTables */
         .dtr-control {
