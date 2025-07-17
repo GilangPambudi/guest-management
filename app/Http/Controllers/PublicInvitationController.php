@@ -6,6 +6,7 @@ use App\Models\Guest;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class PublicInvitationController extends Controller
 {
@@ -31,14 +32,19 @@ class PublicInvitationController extends Controller
             abort(404, 'Guest not found or does not belong to this invitation');
         }
 
-        // Update invitation status to "Opened" when guest opens the invitation letter
-        // Only update if status is currently "Sent" and hasn't been opened yet
-        if ($guest->guest_invitation_status === 'Sent' && !$guest->invitation_opened_at) {
-            $guest->update([
-                'guest_invitation_status' => 'Opened',
-                'invitation_opened_at' => now()
-            ]);
-        }
+        // Jangan langsung update status di sini
+        // Biarkan JavaScript di frontend yang handle update status setelah user interaction
+        
+        // Log untuk debugging
+        Log::info('Guest accessed invitation letter', [
+            'guest_id' => $guest->guest_id,
+            'guest_name' => $guest->guest_name,
+            'invitation_id' => $invitation->invitation_id,
+            'user_agent' => request()->header('User-Agent'),
+            'ip_address' => request()->ip(),
+            'current_status' => $guest->guest_invitation_status,
+            'timestamp' => now()
+        ]);
 
         // Ambil data dari undangan
         $groomName = $invitation->groom_name;
@@ -171,5 +177,66 @@ class PublicInvitationController extends Controller
             'already_checked_in' => $alreadyCheckedIn,
             'arrival_time' => now()->setTimezone('Asia/Jakarta')->format('H:i:s')
         ]);
+    }
+
+    /**
+     * Mark invitation as opened after user interaction
+     */
+    public function mark_as_opened($slug, $guest_id_qr_code)
+    {
+        try {
+            // Cari invitation berdasarkan slug
+            $invitation = Invitation::where('slug', $slug)->first();
+            if (!$invitation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invitation not found'
+                ], 404);
+            }
+
+            // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
+            $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+                ->where('invitation_id', $invitation->invitation_id)
+                ->first();
+
+            if (!$guest) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guest not found'
+                ], 404);
+            }
+
+            // Update invitation status to "Opened" hanya jika masih "Sent"
+            if ($guest->guest_invitation_status === 'Sent' && !$guest->invitation_opened_at) {
+                Log::info('Guest invitation status changed to Opened by user interaction', [
+                    'guest_id' => $guest->guest_id,
+                    'guest_name' => $guest->guest_name,
+                    'invitation_id' => $invitation->invitation_id,
+                    'user_agent' => request()->header('User-Agent'),
+                    'ip_address' => request()->ip(),
+                    'timestamp' => now()
+                ]);
+                
+                $guest->update([
+                    'guest_invitation_status' => 'Opened',
+                    'invitation_opened_at' => now()
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Status updated to opened'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Status already updated or not eligible'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

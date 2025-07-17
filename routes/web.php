@@ -118,6 +118,7 @@ Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 Route::get('/invitation/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation_letter']);
 Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax']);
+Route::post('/mark-opened/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'mark_as_opened']);
 
 // User Management Routes
 Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {

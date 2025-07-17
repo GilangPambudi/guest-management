@@ -523,6 +523,76 @@
             }
         });
 
+        // Track user interaction to mark invitation as opened
+        let hasInteracted = false;
+        let interactionTimer = null;
+
+        function markAsOpened() {
+            if (hasInteracted) return; // Prevent multiple calls
+            
+            hasInteracted = true;
+            
+            fetch('/mark-opened/{{ $invitation->slug }}/{{ $guest->guest_id_qr_code }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Invitation marked as opened:', data);
+            }).catch(error => {
+                console.error('Error marking invitation as opened:', error);
+            });
+        }
+
+        // Multiple ways to detect real user interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect scroll (real users usually scroll)
+            let scrollThreshold = 100; // pixels
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > scrollThreshold) {
+                    markAsOpened();
+                }
+            });
+
+            // Detect mouse movement (bots usually don't move mouse)
+            let mouseMoveCount = 0;
+            document.addEventListener('mousemove', function(e) {
+                mouseMoveCount++;
+                if (mouseMoveCount > 5) { // After several mouse movements
+                    markAsOpened();
+                }
+            });
+
+            // Detect touch interaction (mobile users)
+            document.addEventListener('touchstart', function() {
+                markAsOpened();
+            });
+
+            // Detect any click
+            document.addEventListener('click', function() {
+                markAsOpened();
+            });
+
+            // Fallback: mark as opened after 10 seconds of page load (but only if page is visible)
+            if (!document.hidden) {
+                setTimeout(function() {
+                    markAsOpened();
+                }, 10000);
+            }
+
+            // Handle page visibility change (when user switches tabs)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // User came back to tab
+                    setTimeout(function() {
+                        markAsOpened();
+                    }, 2000);
+                }
+            });
+        });
+
         // SweetAlert2 Toast
         const Toast = Swal.mixin({
             toast: true,

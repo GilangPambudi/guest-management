@@ -115,10 +115,20 @@
                                 }
                             });
                         } else {
+                            let errorMessage = response.message;
+                            
+                            // Jika ada errors array, tampilkan detail error
+                            if (response.errors && response.errors.length > 0) {
+                                errorMessage += '\n\nDetail Errors:\n';
+                                response.errors.forEach(function(error, index) {
+                                    errorMessage += (index + 1) + '. ' + error + '\n';
+                                });
+                            }
+                            
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Import Failed',
-                                text: response.message
+                                html: errorMessage.replace(/\n/g, '<br>')
                             });
                             $('.error-text').text('');
                             if (response.msgField) {

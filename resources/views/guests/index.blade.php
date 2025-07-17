@@ -1,6 +1,67 @@
 @extends('layouts.template')
 
 @section('content')
+    <style>
+        /* Debug pagination clicks */
+        .dataTables_paginate .paginate_button {
+            pointer-events: auto !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        .dataTables_paginate .paginate_button.disabled {
+            pointer-events: none !important;
+        }
+        /* Ensure table wrapper doesn't interfere */
+        .table-responsive {
+            overflow-x: visible !important;
+        }
+        /* Custom table scroll that doesn't break pagination */
+        .custom-datatable-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling di mobile */
+        }
+        .custom-datatable-wrapper table {
+            min-width: 1200px; /* Pastikan table punya min-width yang cukup */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        /* Ensure table content doesn't wrap */
+        #guest-table {
+            min-width: 1200px;
+            white-space: nowrap;
+        }
+        #guest-table td, #guest-table th {
+            white-space: nowrap;
+        }
+        /* Hilangkan responsive controls DataTables */
+        .dtr-control {
+            display: none !important;
+        }
+        .dtr-details {
+            display: none !important;
+        }
+        /* Pastikan pagination tidak terpotong */
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 15px;
+            clear: both;
+        }
+        /* DataTables horizontal scroll styling */
+        .dataTables_wrapper .dataTables_scroll {
+            clear: both;
+        }
+        .dataTables_wrapper .dataTables_scrollBody {
+            border: 1px solid #dee2e6;
+        }
+        /* Smooth scrolling */
+        .dataTables_scrollBody {
+            -webkit-overflow-scrolling: touch;
+        }
+        /* Prevent badge wrapping */
+        .badge {
+            white-space: nowrap;
+        }
+    </style>
     <div class="card card-outline card-primary">
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -185,10 +246,10 @@
                 </div>
             </div>
 
-            <table class="table table-bordered table-sm table-hover table-striped text-nowrap" id="guest-table">
+            <table class="table table-bordered table-sm table-hover table-striped" id="guest-table">
                 <thead>
                     <tr>
-                        <th width="30px">
+                        <th>
                             <input type="checkbox" id="select-all" title="Select All">
                         </th>
                         <th>No</th>
@@ -287,18 +348,8 @@
             updateBulkActions();
         }
 
-        $('#guest-table').on('draw.dt', function() {
-            // Wrap hanya elemen table, bukan seluruh DataTables wrapper
-            const table = document.querySelector('#guest-table');
-            if (!table.closest('.custom-table-scroll')) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'custom-table-scroll';
-                wrapper.style.overflowX = 'auto';
-                wrapper.style.width = '100%';
-                wrapper.appendChild(table.cloneNode(true));
-                table.replaceWith(wrapper);
-            }
-        });
+        // Removed problematic DOM manipulation that was breaking DataTables pagination
+        // DataTables handles responsive behavior internally
 
 
         $(document).ready(function() {
@@ -311,6 +362,13 @@
                 processing: true,
                 serverSide: true,
                 deferRender: true,
+                responsive: false, // Disable responsive untuk scroll horizontal
+                paging: true,
+                info: true,
+                searching: true,
+                ordering: true,
+                scrollX: true, // Enable horizontal scrolling
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                 ajax: {
                     url: "{{ url('/invitation/' . $invitation->invitation_id . '/guests/list') }}",
                     type: "POST",
@@ -319,11 +377,16 @@
                         d.gender = $('#filter-gender').val();
                         d.attendance_status = $('#filter-attendance-status').val();
                         d.invitation_status = $('#filter-invitation-status').val();
+                        console.log('DataTables sending data:', d); // Debug log
                     },
                     error: function(xhr, error, code) {
                         console.error('DataTable AJAX Error:', xhr.responseText);
                         console.error('Error Code:', code);
                         toastr.error('Failed to load guests data. Please refresh the page.');
+                    },
+                    complete: function(xhr, status) {
+                        console.log('DataTables AJAX complete:', status); // Debug log
+                        console.log('Response:', xhr.responseText.substring(0, 200)); // First 200 chars
                     }
                 },
                 columns: [{
@@ -331,7 +394,6 @@
                         name: 'guest_id',
                         orderable: false,
                         searchable: false,
-                        width: '30px',
                         render: function(data, type, row) {
                             return '<input type="checkbox" name="guest_ids[]" value="' + data +
                                 '" class="guest-checkbox">';
@@ -341,40 +403,27 @@
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: true,
-                        searchable: false,
-                        width: '50px'
+                        searchable: false
                     },
-                    // {
-                    //     data: 'guest_id_qr_code',
-                    //     name: 'guest_id_qr_code',
-                    //     className: 'text-nowrap',
-                    //     render: function(data, type, row) {
-                    //         if (data && data.length > 10) {
-                    //             return '<span title="' + data + '">' + data.substr(0, 10) + '...</span>';
-                    //         }
-                    //         return data;
-                    //     }
-                    // },
                     {
                         data: 'guest_name',
                         name: 'guest_name',
-                        className: 'text-nowrap',
-                        orderable: true,
+                        orderable: true
                     },
                     {
                         data: 'guest_gender',
                         name: 'guest_gender',
-                        orderable: false,
+                        orderable: false
                     },
                     {
                         data: 'guest_category',
                         name: 'guest_category',
-                        orderable: false,
+                        orderable: false
                     },
                     {
                         data: 'guest_contact',
                         name: 'guest_contact',
-                        orderable: false,
+                        orderable: false
                     },
                     {
                         data: 'guest_address',
@@ -384,8 +433,7 @@
                                 '<span title="' + data + '">' + data.substr(0, 30) + '...</span>' :
                                 data;
                         },
-                        orderable: false,
-                        className: 'text-nowrap'
+                        orderable: false
                     },
                     {
                         data: 'guest_invitation_status',
@@ -405,7 +453,7 @@
                                     data + '</span>';
                             }
                         },
-                        orderable: false,
+                        orderable: false
                     },
                     {
                         data: 'guest_attendance_status',
@@ -419,25 +467,24 @@
                                 return '<span class="badge badge-secondary">' + data + '</span>';
                             }
                         },
-                        orderable: false,
+                        orderable: false
                     }, {
                         data: 'guest_arrival_time',
                         name: 'guest_arrival_time',
                         render: function(data, type, row) {
                             if (data && data !== '-') {
-                                return data; // Data sudah diformat dari controller dengan WIB
+                                return data;
                             }
                             return '-';
                         },
-                        orderable: false,
-                        className: 'text-nowrap'
+                        orderable: false
                     },
                     {
                         data: 'action',
                         name: 'action',
                         orderable: false,
                         searchable: false,
-                        className: 'text-center text-nowrap'
+                        className: 'text-center'
                     },
                 ],
                 order: [
@@ -461,8 +508,93 @@
                         visibleCheckboxes.length > 0 && visibleCheckboxes.length ===
                         visibleCheckedCheckboxes.length
                     );
+                    
+                    // Debug pagination clicks
+                    $('#guest-table_paginate .paginate_button').off('click.debug').on('click.debug', function(e) {
+                        console.log('Pagination button clicked:', this);
+                        console.log('Event:', e);
+                        console.log('Has class disabled:', $(this).hasClass('disabled'));
+                        console.log('Has class current:', $(this).hasClass('current'));
+                        
+                        // Check if there are any overlaying elements
+                        var rect = this.getBoundingClientRect();
+                        var elementBelow = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+                        console.log('Element at click point:', elementBelow);
+                        
+                        if ($(this).hasClass('disabled')) {
+                            console.log('Button is disabled - preventing default');
+                            e.preventDefault();
+                            return false;
+                        }
+                    });
                 }
-            }); // Select All checkbox
+            }); // Add pagination click debugging
+            
+            // Debug DataTables initialization
+            setTimeout(function() {
+                console.log('=== DataTables Debug ===');
+                console.log('DataTable instance:', dataGuest);
+                console.log('Table ID exists:', $('#guest-table').length > 0);
+                console.log('Is DataTable:', $.fn.DataTable.isDataTable('#guest-table'));
+                console.log('Pagination controls:', $('#guest-table_paginate').length);
+                console.log('Pagination buttons:', $('#guest-table_paginate .paginate_button').length);
+                if (dataGuest && dataGuest.page) {
+                    console.log('Page info:', dataGuest.page.info());
+                }
+                
+                // Check for event conflicts
+                var $paginationButtons = $('#guest-table_paginate .paginate_button');
+                $paginationButtons.each(function(index, button) {
+                    var events = $._data(button, 'events');
+                    console.log('Button', index, 'events:', events);
+                });
+                
+                console.log('========================');
+                
+                // Test direct click handler
+                $('#guest-table_paginate').off('click.test').on('click.test', '.paginate_button:not(.disabled)', function(e) {
+                    console.log('Direct pagination click detected!');
+                    var $this = $(this);
+                    var pageNum = $this.text();
+                    console.log('Page number:', pageNum);
+                    console.log('Button classes:', $this.attr('class'));
+                    
+                    // Check if it's a valid page number
+                    if (!isNaN(pageNum)) {
+                        console.log('Navigating to page:', parseInt(pageNum) - 1);
+                        dataGuest.page(parseInt(pageNum) - 1).draw('page');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    } else if ($this.hasClass('next')) {
+                        console.log('Next page clicked');
+                        dataGuest.page('next').draw('page');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    } else if ($this.hasClass('previous')) {
+                        console.log('Previous page clicked');
+                        dataGuest.page('previous').draw('page');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    } else if ($this.hasClass('first')) {
+                        console.log('First page clicked');
+                        dataGuest.page('first').draw('page');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    } else if ($this.hasClass('last')) {
+                        console.log('Last page clicked');
+                        dataGuest.page('last').draw('page');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                });
+                
+            }, 2000);
+            
             $(document).on('change', '#select-all', function() {
                 var isChecked = $(this).is(':checked');
 

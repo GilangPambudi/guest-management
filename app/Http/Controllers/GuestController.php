@@ -135,7 +135,7 @@ class GuestController extends Controller
 
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</button> ';
 
-                 $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
+                $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
                 // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</button> ';
                 // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> ';
                 return $btn;
@@ -509,14 +509,105 @@ class GuestController extends Controller
             $spreadsheet = $reader->load($file->getRealPath());
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray(null, false, true, true);
+
+            // Validasi Header Excel
+            if (count($data) < 1) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'File Excel kosong atau tidak memiliki data'
+                ]);
+            }
+
+            // Expected headers
+            $expectedHeaders = [
+                'A' => 'guest_name',
+                'B' => 'guest_gender',
+                'C' => 'guest_category',
+                'D' => 'guest_contact',
+                'E' => 'guest_address'
+            ];
+
+            // Validate headers (row 1)
+            $actualHeaders = $data[1] ?? []; // Row pertama (index 1)
+            $headerErrors = [];
+
+            foreach ($expectedHeaders as $column => $expectedHeader) {
+                $actualHeader = $actualHeaders[$column] ?? '';
+
+                // Normalize header (lowercase, trim spaces)
+                $normalizedActual = strtolower(trim($actualHeader));
+                $normalizedExpected = strtolower(trim($expectedHeader));
+
+                if ($normalizedActual !== $normalizedExpected) {
+                    $headerErrors[] = "Column {$column} should be '{$expectedHeader}', but found '{$actualHeader}'";
+                }
+            }
+
+            if (!empty($headerErrors)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Header Excel tidak sesuai format yang diharapkan',
+                    'errors' => $headerErrors,
+                    'expected_format' => 'Row 1 harus berisi: guest_name | guest_gender | guest_category | guest_contact | guest_address'
+                ]);
+            }
+
             $insert = [];
+            $rowErrors = [];
 
             if (count($data) > 1) {
                 foreach ($data as $row => $value) {
-                    if ($row > 1) {
+                    if ($row > 1) { // Skip header row
+                        // Validasi data per row
+                        $rowData = [
+                            'guest_name' => trim($value['A'] ?? ''),
+                            'guest_gender' => trim($value['B'] ?? ''),
+                            'guest_category' => trim($value['C'] ?? ''),
+                            'guest_contact' => trim($value['D'] ?? ''),
+                            'guest_address' => trim($value['E'] ?? '')
+                        ];
+
+                        // Validasi required fields
+                        $requiredFields = ['guest_name', 'guest_gender', 'guest_category', 'guest_contact', 'guest_address'];
+                        $missingFields = [];
+
+                        foreach ($requiredFields as $field) {
+                            if (empty($rowData[$field])) {
+                                $missingFields[] = $field;
+                            }
+                        }
+
+                        if (!empty($missingFields)) {
+                            $rowErrors[] = "Row {$row}: Missing required fields: " . implode(', ', $missingFields);
+                            continue;
+                        }
+
+                        // Validasi gender
+                        if (!in_array($rowData['guest_gender'], ['Male', 'Female'])) {
+                            $rowErrors[] = "Row {$row}: Gender must be 'Male' or 'Female', found '{$rowData['guest_gender']}'";
+                            continue;
+                        }
+
+                        // Validasi contact (harus berupa angka dan minimal 10 digit)
+                        if (!preg_match('/^[0-9]{10,15}$/', $rowData['guest_contact'])) {
+                            $rowErrors[] = "Row {$row}: Contact number must be 10-15 digits, found '{$rowData['guest_contact']}'";
+                            continue;
+                        }
+
+                        // Check duplicate contact dalam invitation yang sama
+                        $existingContact = Guest::where('guest_contact', $rowData['guest_contact'])
+                            ->where('invitation_id', $invitation_id)
+                            ->exists();
+
+                        if ($existingContact) {
+                            $rowErrors[] = "Row {$row}: Contact number '{$rowData['guest_contact']}' already exists in this invitation";
+                            continue;
+                        }
+
+                        // Generate unique ID dan QR Code
                         $client = new Client();
-                        $nanoId = $client->generateId(10); // Generate 10 character NanoID
-                        $guestNameSlug = str_replace(' ', '-', strtolower($value['A']));
+                        $nanoId = $client->generateId(10);
+                        $guestNameSlug = str_replace(' ', '-', strtolower($rowData['guest_name']));
                         $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
                         // Generate QR Code
@@ -525,12 +616,12 @@ class GuestController extends Controller
                         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
                         $insert[] = [
-                            'guest_name' => $value['A'],
+                            'guest_name' => $rowData['guest_name'],
                             'guest_id_qr_code' => $guestIdQrCode,
-                            'guest_gender' => $value['B'],
-                            'guest_category' => $value['C'],
-                            'guest_contact' => $value['D'],
-                            'guest_address' => $value['E'],
+                            'guest_gender' => $rowData['guest_gender'],
+                            'guest_category' => $rowData['guest_category'],
+                            'guest_contact' => $rowData['guest_contact'],
+                            'guest_address' => $rowData['guest_address'],
                             'guest_qr_code' => "storage/{$qrCodePath}",
                             'guest_attendance_status' => '-',
                             'guest_invitation_status' => '-',
@@ -541,19 +632,33 @@ class GuestController extends Controller
                     }
                 }
 
+                // Jika ada error pada row data
+                if (!empty($rowErrors)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Terdapat ' . count($rowErrors) . ' error pada data Excel. Silakan perbaiki data berikut dan upload ulang file.',
+                        'errors' => $rowErrors
+                    ]);
+                }
+
                 if (count($insert) > 0) {
                     Guest::insertOrIgnore($insert);
                     return response()->json([
                         'status' => true,
-                        'message' => 'Data successfully imported',
+                        'message' => count($insert) . ' data berhasil diimpor',
                         'refresh' => true
                     ]);
                 } else {
                     return response()->json([
                         'status' => false,
-                        'message' => 'No data to import'
+                        'message' => 'Tidak ada data valid untuk diimpor'
                     ]);
                 }
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'File Excel tidak memiliki data selain header'
+                ]);
             }
         }
         return redirect('/');
@@ -867,7 +972,7 @@ class GuestController extends Controller
                 $guest = Guest::where('guest_id', $guestId)
                     ->where('invitation_id', $invitation_id)
                     ->first();
-                    
+
                 if (!$guest || !$guest->guest_contact) {
                     $failedCount++;
                     continue;
@@ -877,19 +982,19 @@ class GuestController extends Controller
                 $url = url("/invitation/{$slug}/{$guest->guest_id_qr_code}");
 
                 $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
-                . "━━━━━━━━━━━━━━━━━━━━\n"
-                . "💌 *Quick Response Elegant Wedding — Invitation*\n"
-                . "━━━━━━━━━━━━━━━━━━━━\n\n"
-                . "Halo {$guest->guest_name},\n\n"
-                . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
-                . "🗓️ *Tanggal:* " . \Carbon\Carbon::parse($invitation->wedding_date)->translatedFormat('d F Y') . "\n"
-                . "⏰ *Waktu:* " . \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') . " - " . \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') . "\n"
-                . "🏛️ *Tempat:* {$invitation->wedding_venue}\n\n"
-                . "📍 *Link Undangan Digital:*\n{$url}\n\n"
-                . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
-                . "Salam hangat,\n"
-                . "*{$invitation->groom_name} & {$invitation->bride_name}*\n\n"
-                . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
+                    . "━━━━━━━━━━━━━━━━━━━━\n"
+                    . "💌 *Quick Response Elegant Wedding — Invitation*\n"
+                    . "━━━━━━━━━━━━━━━━━━━━\n\n"
+                    . "Halo {$guest->guest_name},\n\n"
+                    . "Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir di acara pernikahan kami.\n\n"
+                    . "🗓️ *Tanggal:* " . \Carbon\Carbon::parse($invitation->wedding_date)->translatedFormat('d F Y') . "\n"
+                    . "⏰ *Waktu:* " . \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') . " - " . \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') . "\n"
+                    . "🏛️ *Tempat:* {$invitation->wedding_venue}\n\n"
+                    . "📍 *Link Undangan Digital:*\n{$url}\n\n"
+                    . "Kami sangat menantikan kehadiran dan doa restu Anda.\n\n"
+                    . "Salam hangat,\n"
+                    . "*{$invitation->groom_name} & {$invitation->bride_name}*\n\n"
+                    . "_(Pesan ini dikirim untuk keperluan testing skripsi oleh GILANG PAMBUDI)_";
 
                 $response = Http::withHeaders([
                     'Authorization' => $token
