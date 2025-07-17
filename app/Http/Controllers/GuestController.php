@@ -277,8 +277,9 @@ class GuestController extends Controller
         $guest_contact = $request->input('guest_contact');
         $guest_id = $request->input('guest_id'); // For edit mode
 
-        // Check if contact exists in ANY invitation (global check)
-        $query = Guest::where('guest_contact', $guest_contact);
+        // Check if contact exists in CURRENT invitation only (per invitation check)
+        $query = Guest::where('guest_contact', $guest_contact)
+            ->where('invitation_id', $invitation_id);
 
         // Exclude current guest when editing
         if ($guest_id) {
@@ -297,7 +298,17 @@ class GuestController extends Controller
             'guest_name' => 'required',
             'guest_gender' => 'required|in:Male,Female',
             'guest_category' => 'required',
-            'guest_contact' => 'required|unique:guests,guest_contact',
+            'guest_contact' => [
+                'required',
+                function ($attribute, $value, $fail) use ($invitation_id) {
+                    $exists = Guest::where('guest_contact', $value)
+                        ->where('invitation_id', $invitation_id)
+                        ->exists();
+                    if ($exists) {
+                        $fail('The contact number has already been taken for this invitation.');
+                    }
+                }
+            ],
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
             'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
@@ -356,7 +367,18 @@ class GuestController extends Controller
             'guest_name' => 'required',
             'guest_gender' => 'required|in:Male,Female',
             'guest_category' => 'required',
-            'guest_contact' => 'required|unique:guests,guest_contact,' . $id . ',guest_id',
+            'guest_contact' => [
+                'required',
+                function ($attribute, $value, $fail) use ($invitation_id, $id) {
+                    $exists = Guest::where('guest_contact', $value)
+                        ->where('invitation_id', $invitation_id)
+                        ->where('guest_id', '!=', $id)
+                        ->exists();
+                    if ($exists) {
+                        $fail('The contact number has already been taken for this invitation.');
+                    }
+                }
+            ],
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
             'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
@@ -842,7 +864,10 @@ class GuestController extends Controller
             $failedCount = 0;
 
             foreach ($guestIds as $guestId) {
-                $guest = Guest::find($guestId);
+                $guest = Guest::where('guest_id', $guestId)
+                    ->where('invitation_id', $invitation_id)
+                    ->first();
+                    
                 if (!$guest || !$guest->guest_contact) {
                     $failedCount++;
                     continue;
