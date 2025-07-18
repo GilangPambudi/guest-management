@@ -89,6 +89,19 @@ Route::get('/guests', [GuestController::class, 'guestSelect'])->name('guests.sel
 Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner.select');
 Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
+// User Management Routes - moved up to avoid conflicts
+Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/list', [UserController::class, 'list']);
+    Route::get('/create_ajax', [UserController::class, 'create_ajax']);
+    Route::post('/store_ajax', [UserController::class, 'store_ajax']);
+    Route::get('/{id}/show_ajax', [UserController::class, 'show_ajax']);
+    Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
+    Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
+    Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);
+    Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
+});
+
 // Gift Management Routes
 Route::get('/gifts', [GiftController::class, 'select'])->name('gifts.select');
 Route::get('/gifts/{invitation_id}', [GiftController::class, 'index'])->name('gifts.index');
@@ -121,19 +134,14 @@ Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 
 
 // Route::get('/old/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'old_invitation_letter']);
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
-Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'letter'])->name('public.invitation-letter');
+
+// Invitation route with constraints to avoid conflicts
+Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'letter'])
+    ->where([
+        'slug' => '[a-z0-9\-]+',  // Only lowercase letters, numbers, and hyphens
+        'guest_id_qr_code' => '[a-zA-Z0-9_\-]+' // Letters, numbers, underscore, hyphens
+    ])
+    ->name('public.invitation-letter');
+
 Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax'])->name('public.update-attendance-ajax');
 Route::post('/mark-opened/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'mark_as_opened'])->name('public.mark-as-opened');
-
-// User Management Routes
-Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::post('/list', [UserController::class, 'list']);
-    Route::get('/create_ajax', [UserController::class, 'create_ajax']);
-    Route::post('/store_ajax', [UserController::class, 'store_ajax']);
-    Route::get('/{id}/show_ajax', [UserController::class, 'show_ajax']);
-    Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
-    Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
-    Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);
-    Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
-});
