@@ -28,8 +28,8 @@
         
         /* Ensure body can scroll when modal is closed */
         body:not(.modal-open) {
-            overflow-x: hidden;
-            overflow-y: auto;
+            /* overflow-x: hidden;
+            overflow-y: auto; */
         }
 
  #navbar-menu-wrapper {

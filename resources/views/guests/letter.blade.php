@@ -86,12 +86,12 @@
         </div>
     </div>
 
-    {{-- <!-- Music Control Button - FLOATING OUTSIDE CONTENT -->
+    <!-- Music Control Button - FLOATING OUTSIDE CONTENT -->
     <div id="music-control">
         <button id="music-toggle" class="btn btn-dark rounded-circle shadow-lg" onclick="toggleMusic()" title="Play/Pause Music">
             <i id="music-icon" class="fa-solid fa-play"></i>
         </button>
-    </div> --}}
+    </div>
 
     <!-- Konten Undangan (Tersembunyi saat modal aktif) -->
     <div id="invitation-content" class="invitation-content bg-body-tertiary">
