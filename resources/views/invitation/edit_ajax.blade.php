@@ -32,7 +32,7 @@
                         <label class="col-sm-3 col-form-label">Wedding Name</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->wedding_name }}" type="text" name="wedding_name"
-                                id="wedding_name" class="form-control" required>
+                                id="wedding_name" class="form-control" >
                             <small id="error-wedding_name" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -49,7 +49,7 @@
                         <label class="col-sm-3 col-form-label">Groom Name</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->groom_name }}" type="text" name="groom_name" id="groom_name"
-                                class="form-control" required>
+                                class="form-control" >
                             <small id="error-groom_name" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -57,15 +57,105 @@
                         <label class="col-sm-3 col-form-label">Bride Name</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->bride_name }}" type="text" name="bride_name" id="bride_name"
-                                class="form-control" required>
+                                class="form-control" >
                             <small id="error-bride_name" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    
+                    <!-- Groom Details Section -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Groom Alias</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->groom_alias }}" type="text" name="groom_alias" id="groom_alias" class="form-control">
+                            <small id="error-groom_alias" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Groom Image</label>
+                        <div class="col-sm-9">
+                            @if($invitation->groom_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset($invitation->groom_image) }}" alt="Current Groom Image" style="max-width: 100px; max-height: 100px;">
+                                    <small class="form-text text-muted d-block">Current image</small>
+                                </div>
+                            @endif
+                            <input type="file" name="groom_image" id="groom_image" class="form-control" accept="image/*">
+                            <small class="form-text text-muted">Upload new groom photo (JPEG, PNG, JPG, WEBP, max 2MB) - leave empty to keep current</small>
+                            <small id="error-groom_image" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Groom Child Number</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->groom_child_number }}" type="number" name="groom_child_number" id="groom_child_number" class="form-control" min="1">
+                            <small class="form-text text-muted">Birth order (1st child, 2nd child, etc.)</small>
+                            <small id="error-groom_child_number" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Groom Father</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->groom_father }}" type="text" name="groom_father" id="groom_father" class="form-control">
+                            <small id="error-groom_father" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Groom Mother</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->groom_mother }}" type="text" name="groom_mother" id="groom_mother" class="form-control">
+                            <small id="error-groom_mother" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    
+                    <!-- Bride Details Section -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Bride Alias</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->bride_alias }}" type="text" name="bride_alias" id="bride_alias" class="form-control">
+                            <small id="error-bride_alias" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Bride Image</label>
+                        <div class="col-sm-9">
+                            @if($invitation->bride_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset($invitation->bride_image) }}" alt="Current Bride Image" style="max-width: 100px; max-height: 100px;">
+                                    <small class="form-text text-muted d-block">Current image</small>
+                                </div>
+                            @endif
+                            <input type="file" name="bride_image" id="bride_image" class="form-control" accept="image/*">
+                            <small class="form-text text-muted">Upload new bride photo (JPEG, PNG, JPG, WEBP, max 2MB) - leave empty to keep current</small>
+                            <small id="error-bride_image" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Bride Child Number</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->bride_child_number }}" type="number" name="bride_child_number" id="bride_child_number" class="form-control" min="1">
+                            <small class="form-text text-muted">Birth order (1st child, 2nd child, etc.)</small>
+                            <small id="error-bride_child_number" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Bride Father</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->bride_father }}" type="text" name="bride_father" id="bride_father" class="form-control">
+                            <small id="error-bride_father" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Bride Mother</label>
+                        <div class="col-sm-9">
+                            <input value="{{ $invitation->bride_mother }}" type="text" name="bride_mother" id="bride_mother" class="form-control">
+                            <small id="error-bride_mother" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label"> Date</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->wedding_date }}" type="date" name="wedding_date"
-                                id="wedding_date" class="form-control" required>
+                                id="wedding_date" class="form-control" >
                             <small id="error-wedding_date" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -73,7 +163,7 @@
                         <label class="col-sm-3 col-form-label">Time Start</label>
                         <div class="col-sm-9">
                             <input value="{{ substr($invitation->wedding_time_start, 0, 5) }}" type="time"
-                                name="wedding_time_start" id="wedding_time_start" class="form-control" required>
+                                name="wedding_time_start" id="wedding_time_start" class="form-control" >
                             <small id="error-wedding_time_start" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -81,7 +171,7 @@
                         <label class="col-sm-3 col-form-label">Time End</label>
                         <div class="col-sm-9">
                             <input value="{{ substr($invitation->wedding_time_end, 0, 5) }}" type="time"
-                                name="wedding_time_end" id="wedding_time_end" class="form-control" required>
+                                name="wedding_time_end" id="wedding_time_end" class="form-control" >
                             <small id="error-wedding_time_end" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -89,15 +179,15 @@
                         <label class="col-sm-3 col-form-label">Venue</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->wedding_venue }}" type="text" name="wedding_venue"
-                                id="wedding_venue" class="form-control" required>
+                                id="wedding_venue" class="form-control" >
                             <small id="error-wedding_venue" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">Location</label>
+                        <label class="col-sm-3 col-form-label">Address</label>
                         <div class="col-sm-9">
                             <input value="{{ $invitation->wedding_location }}" type="text" name="wedding_location"
-                                id="wedding_location" class="form-control" required>
+                                id="wedding_location" class="form-control" >
                             <small id="error-wedding_location" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -110,30 +200,19 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">New Image</label>
+                        <label class="col-sm-3 col-form-label">Wedding Image</label>
                         <div class="col-sm-9">
-                            <input type="file" name="wedding_image" id="wedding_image" class="form-control">
+                            @if($invitation->wedding_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset($invitation->wedding_image) }}" alt="Current Wedding Image" style="max-width: 100px; max-height: 100px;">
+                                    <small class="form-text text-muted d-block">Current image</small>
+                                </div>
+                            @endif
+                            <input type="file" name="wedding_image" id="wedding_image" class="form-control" accept="image/*">
+                            <small class="form-text text-muted">Upload new wedding photo (JPEG, PNG, JPG, WEBP, max 2MB) - leave empty to keep current</small>
                             <small id="error-wedding_image" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="wedding_image" class="col-sm-3 col-form-label">Old Image</label>
-                        <div class="col-sm-8">
-                            @if ($invitation->wedding_image)
-                                <div class="spoiler">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#weddingImageSpoiler" aria-expanded="false" aria-controls="weddingImageSpoiler">
-                                        Show Image
-                                    </button>
-                                    <div class="collapse mt-2" id="weddingImageSpoiler">
-                                        <img src="{{ asset($invitation->wedding_image) }}" alt="Wedding Image" class="img-fluid">
-                                    </div>
-                                </div>
-                            @else
-                                <p>No image available</p>
-                            @endif                        </div>
-                    </div>
-                    <input type="hidden" name="groom_alias" id="groom_alias">
-                    <input type="hidden" name="bride_alias" id="bride_alias">
                 </div>
                 
                 <div class="modal-footer">
@@ -148,39 +227,67 @@
             $("#form-edit-invitation").validate({
                 rules: {
                     wedding_name: {
-                        required: true,
                         minlength: 3,
                         maxlength: 255
                     },
                     groom_name: {
-                        required: true,
                         minlength: 3,
                         maxlength: 255
                     },
                     bride_name: {
-                        required: true,
+                        minlength: 3,
+                        maxlength: 255
+                    },
+                    groom_alias: {
+                        minlength: 2,
+                        maxlength: 50
+                    },
+                    groom_image: {
+                        extension: "jpg|jpeg|png|webp"
+                    },
+                    groom_child_number: {
+                        min: 1
+                    },
+                    groom_father: {
+                        minlength: 3,
+                        maxlength: 255
+                    },
+                    groom_mother: {
+                        minlength: 3,
+                        maxlength: 255
+                    },
+                    bride_alias: {
+                        minlength: 2,
+                        maxlength: 50
+                    },
+                    bride_image: {
+                        extension: "jpg|jpeg|png|webp"
+                    },
+                    bride_child_number: {
+                        min: 1
+                    },
+                    bride_father: {
+                        minlength: 3,
+                        maxlength: 255
+                    },
+                    bride_mother: {
                         minlength: 3,
                         maxlength: 255
                     },
                     wedding_date: {
-                        required: true,
                         date: true
                     },
                     wedding_time_start: {
-                        required: true,
                         pattern: /^([01]\d|2[0-3]):([0-5]\d)$/
                     },
                     wedding_time_end: {
-                        required: true,
                         pattern: /^([01]\d|2[0-3]):([0-5]\d)$/
                     },
                     wedding_venue: {
-                        required: true,
                         minlength: 3,
                         maxlength: 255
                     },
                     wedding_location: {
-                        required: true,
                         minlength: 3,
                         maxlength: 255
                     },
@@ -188,7 +295,7 @@
                         url: true
                     },
                     wedding_image: {
-                        extension: "jpg|jpeg|png|gif"
+                        extension: "jpg|jpeg|png|webp"
                     },
                 },
                 submitHandler: function(form) {

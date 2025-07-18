@@ -30,8 +30,7 @@
                         <i class="fa fa-ban"></i> Delete ({{ $totalGuests }} guests)
                     </button>
                 @else
-                    <button
-                        onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/delete_ajax') }}')"
+                    <button onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/delete_ajax') }}')"
                         class="btn btn-danger">
                         <i class="fa fa-trash"></i> Delete Invitation
                     </button>
@@ -51,99 +50,159 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-8">
-                                    <h2 class="text-primary mb-3">{{ $invitation->wedding_name }}</h2>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <table class="table table-sm table-borderless">
-                                                <tr>
-                                                    <td width="120"><strong>Groom:</strong></td>
-                                                    <td>{{ $invitation->groom_name }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Bride:</strong></td>
-                                                    <td>{{ $invitation->bride_name }}</td>
-                                                </tr>
-                                                @if ($invitation->groom_alias)
-                                                    <tr>
-                                                        <td><strong>Groom Alias:</strong></td>
-                                                        <td>{{ $invitation->groom_alias }}</td>
-                                                    </tr>
-                                                @endif
-                                                @if ($invitation->bride_alias)
-                                                    <tr>
-                                                        <td><strong>Bride Alias:</strong></td>
-                                                        <td>{{ $invitation->bride_alias }}</td>
-                                                    </tr>
-                                                @endif
+                                <div class="col-md-12">
+                                    <h2 class="text-primary mb-4">{{ $invitation->wedding_name }}</h2>
+                                    <div class="border rounded p-0 mb-3 bg-white">
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Slug</div>
+                                            <div class="col-sm-8">
                                                 @if ($invitation->slug)
-                                                    <tr>
-                                                        <td><strong>Slug:</strong></td>
-                                                        <td><code>{{ $invitation->slug }}</code></td>
-                                                    </tr>
+                                                    <code>{{ $invitation->slug }}</code>
+                                                @else
+                                                    <span class="text-muted">-</span>
                                                 @endif
-                                            </table>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <table class="table table-sm table-borderless">
-                                                <tr>
-                                                    <td width="120"><strong>Date:</strong></td>
-                                                    <td>
-                                                        <i class="fa fa-calendar text-primary"></i>
-                                                        {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('l, d F Y') }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Time:</strong></td>
-                                                    <td>
-                                                        <i class="fa fa-clock text-primary"></i>
-                                                        {{ $invitation->wedding_time_start }} -
-                                                        {{ $invitation->wedding_time_end }} WIB
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Venue:</strong></td>
-                                                    <td>
-                                                        <i class="fa fa-building text-primary"></i>
-                                                        {{ $invitation->wedding_venue }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Location:</strong></td>
-                                                    <td>
-                                                        <i class="fa fa-map-marker-alt text-primary"></i>
-                                                        {{ $invitation->wedding_location }}
-                                                    </td>
-                                                </tr>
-                                                @if ($invitation->wedding_maps)
-                                                    <tr>
-                                                        <td><strong>Maps:</strong></td>
-                                                        <td>
-                                                            <a href="{{ $invitation->wedding_maps }}" target="_blank"
-                                                                class="btn btn-primary btn-sm">
-                                                                <i class="fa fa-external-link-alt"></i> View Map
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    @if ($invitation->wedding_image)
-                                        <div class="text-center">
-                                            <img src="{{ asset($invitation->wedding_image) }}" alt="Wedding Image"
-                                                class="img-fluid rounded shadow">
-                                        </div>
-                                    @else
-                                        <div class="text-center">
-                                            <div class="bg-light rounded p-4">
-                                                <i class="fas fa-image fa-3x text-muted"></i>
-                                                <p class="text-muted mt-2">No image available</p>
                                             </div>
                                         </div>
-                                    @endif
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Groom Name</div>
+                                            <div class="col-sm-8">{{ $invitation->groom_name }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Groom Alias</div>
+                                            <div class="col-sm-8">{{ $invitation->groom_alias }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Groom Child Number</div>
+                                            <div class="col-sm-8">{{ $invitation->groom_child_number }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Groom Father</div>
+                                            <div class="col-sm-8">{{ $invitation->groom_father }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Groom Mother</div>
+                                            <div class="col-sm-8">{{ $invitation->groom_mother }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Bride Name</div>
+                                            <div class="col-sm-8">{{ $invitation->bride_name }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Bride Alias</div>
+                                            <div class="col-sm-8">{{ $invitation->bride_alias }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Bride Child Number</div>
+                                            <div class="col-sm-8">{{ $invitation->bride_child_number }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Bride Father</div>
+                                            <div class="col-sm-8">{{ $invitation->bride_father }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Bride Mother</div>
+                                            <div class="col-sm-8">{{ $invitation->bride_mother }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Date</div>
+                                            <div class="col-sm-8">
+                                                {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('l, d F Y') }}
+                                            </div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Time</div>
+                                            <div class="col-sm-8">{{ $invitation->wedding_time_start }} -
+                                                {{ $invitation->wedding_time_end }} WIB</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Venue</div>
+                                            <div class="col-sm-8">{{ $invitation->wedding_venue }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Location</div>
+                                            <div class="col-sm-8">{{ $invitation->wedding_location }}</div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Maps</div>
+                                            <div class="col-sm-8">
+                                                @if ($invitation->wedding_maps)
+                                                    <a href="{{ $invitation->wedding_maps }}" target="_blank"
+                                                        class="btn btn-primary btn-sm">
+                                                        <i class="fa fa-external-link-alt"></i> View Map
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="row m-0 border-bottom py-2">
+                                            <div class="col-sm-4 font-weight-bold">Created</div>
+                                            <div class="col-sm-8">{{ $invitation->created_at->format('d M Y') }}</div>
+                                        </div>
+                                        <div class="row m-0 py-2">
+                                            <div class="col-sm-4 font-weight-bold">Last Updated</div>
+                                            <div class="col-sm-8">{{ $invitation->updated_at->format('d M Y H:i') }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- Spoiler/collapse for photo -->
+                                    <div class="mb-3">
+                                        <button class="btn btn-outline-secondary btn-block" type="button"
+                                            data-toggle="collapse" data-target="#collapsePhoto" aria-expanded="false"
+                                            aria-controls="collapsePhoto">
+                                            <i class="fas fa-image"></i> Show/Hide Wedding Photo
+                                        </button>
+                                        <div class="collapse mt-3" id="collapsePhoto">
+                                            <div class="card card-body text-center">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-4 mb-3 mb-md-0">
+                                                        <div>
+                                                            <strong>Groom Image</strong>
+                                                        </div>
+                                                        @if ($invitation->groom_image)
+                                                            <img src="{{ asset($invitation->groom_image) }}"
+                                                                alt="Groom Image" class="img-fluid rounded shadow"
+                                                                style="max-width: 150px;">
+                                                        @else
+                                                            <div class="bg-light rounded p-3">
+                                                                <i class="fas fa-user fa-2x text-muted"></i>
+                                                                <div class="text-muted mt-2">No image</div>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="col-md-4 mb-3 mb-md-0">
+                                                        <div>
+                                                            <strong>Wedding Image</strong>
+                                                        </div>
+                                                        @if ($invitation->wedding_image)
+                                                            <img src="{{ asset($invitation->wedding_image) }}"
+                                                                alt="Wedding Image" class="img-fluid rounded shadow"
+                                                                style="max-width: 150px;">
+                                                        @else
+                                                            <div class="bg-light rounded p-3">
+                                                                <i class="fas fa-image fa-2x text-muted"></i>
+                                                                <div class="text-muted mt-2">No image</div>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="col-md-4 mb-3 mb-md-0">
+                                                        <div>
+                                                            <strong>Bride Image</strong>
+                                                        </div>
+                                                        @if ($invitation->bride_image)
+                                                            <img src="{{ asset($invitation->bride_image) }}"
+                                                                alt="Bride Image" class="img-fluid rounded shadow"
+                                                                style="max-width: 150px;">
+                                                        @else
+                                                            <div class="bg-light rounded p-3">
+                                                                <i class="fas fa-user fa-2x text-muted"></i>
+                                                                <div class="text-muted mt-2">No image</div>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -370,7 +429,7 @@
             // Handle modal form submissions
             $('#myModal').on('submit', 'form', function(e) {
                 e.preventDefault();
-                
+
                 let form = $(this);
                 let formData = new FormData(this);
                 let url = form.attr('action');
@@ -385,7 +444,7 @@
                     success: function(response) {
                         if (response.success) {
                             $('#myModal').modal('hide');
-                            
+
                             // Show success message
                             Swal.fire({
                                 icon: 'success',
@@ -403,16 +462,17 @@
                         if (xhr.status === 422) {
                             // Validation errors
                             let errors = xhr.responseJSON.errors;
-                            
+
                             // Clear previous errors
                             $('.is-invalid').removeClass('is-invalid');
                             $('.invalid-feedback').remove();
-                            
+
                             // Show validation errors
                             $.each(errors, function(key, value) {
                                 let input = $('[name="' + key + '"]');
                                 input.addClass('is-invalid');
-                                input.after('<div class="invalid-feedback">' + value[0] + '</div>');
+                                input.after('<div class="invalid-feedback">' + value[
+                                    0] + '</div>');
                             });
                         } else {
                             // Other errors
@@ -430,9 +490,9 @@
             // Handle delete confirmation specifically
             $('#myModal').on('click', '.btn-danger[onclick*="delete"]', function(e) {
                 e.preventDefault();
-                
+
                 let deleteUrl = $(this).data('url') || $(this).closest('form').attr('action');
-                
+
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",
@@ -440,7 +500,9 @@
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -448,7 +510,7 @@
                             type: 'DELETE',
                             success: function(response) {
                                 $('#myModal').modal('hide');
-                                
+
                                 if (response.success) {
                                     Swal.fire({
                                         icon: 'success',
@@ -458,12 +520,14 @@
                                         showConfirmButton: false
                                     }).then(() => {
                                         // Redirect to invitation index after successful delete
-                                        window.location.href = '{{ url("/invitation") }}';
+                                        window.location.href =
+                                            '{{ url('/invitation') }}';
                                     });
                                 }
                             },
                             error: function(xhr) {
-                                let message = xhr.responseJSON?.message || 'Delete failed';
+                                let message = xhr.responseJSON?.message ||
+                                    'Delete failed';
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error!',

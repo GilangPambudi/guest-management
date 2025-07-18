@@ -5,6 +5,7 @@ use App\Models\Guest;
 use App\Models\Payment;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -175,5 +176,35 @@ class PaymentController extends Controller
         }
         
         return response('OK');
+    }
+
+    /**
+     * Create gift record from successful payment
+     */
+    private function createGiftFromPayment($payment)
+    {
+        try {
+            // Check if gift already exists
+            $existingGift = \App\Models\Gift::where('guest_id', $payment->guest_id)
+                ->where('invitation_id', $payment->invitation_id)
+                ->first();
+
+            if (!$existingGift) {
+                \App\Models\Gift::create([
+                    'guest_id' => $payment->guest_id,
+                    'invitation_id' => $payment->invitation_id,
+                    'gift_amount' => $payment->gross_amount,
+                    'gift_method' => 'Digital Payment',
+                    'gift_notes' => 'Payment via Midtrans - Order ID: ' . $payment->order_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to create gift from payment: ' . $e->getMessage(), [
+                'payment_id' => $payment->payment_id,
+                'order_id' => $payment->order_id
+            ]);
+        }
     }
 }

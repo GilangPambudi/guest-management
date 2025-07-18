@@ -15,7 +15,8 @@ class PublicInvitationController extends Controller
     /**
      * Display invitation letter for guest
      */
-    public function invitation_letter($slug, $guest_id_qr_code)
+
+    public function old_invitation_letter($slug, $guest_id_qr_code)
     {
         // Cari invitation berdasarkan slug
         $invitation = Invitation::where('slug', $slug)->first();
@@ -57,7 +58,7 @@ class PublicInvitationController extends Controller
         $weddingMaps = $invitation->wedding_maps;
         $weddingImage = $invitation->wedding_image;
 
-        return view('guests.invitation_letter', [
+        return view('guests.old_invitation_letter', [
             'guest' => $guest,
             'invitation' => $invitation,
             'groomName' => $groomName,
@@ -69,6 +70,64 @@ class PublicInvitationController extends Controller
             'weddingLocation' => $weddingLocation,
             'weddingMaps' => $weddingMaps,
             'weddingImage' => $weddingImage
+        ]);
+    }
+    
+    public function letter($slug, $guest_id_qr_code)
+    {
+        // Cari invitation berdasarkan slug
+        $invitation = Invitation::where('slug', $slug)->first();
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+
+        // Cari guest berdasarkan guest_id_qr_code dan pastikan dia milik invitation yang benar
+        $guest = Guest::where('guest_id_qr_code', $guest_id_qr_code)
+            ->where('invitation_id', $invitation->invitation_id)
+            ->first();
+
+        if (!$guest) {
+            abort(404, 'Guest not found or does not belong to this invitation');
+        }
+
+        // Jangan langsung update status di sini
+        // Biarkan JavaScript di frontend yang handle update status setelah user interaction
+        
+        // Log untuk debugging
+        Log::info('Guest accessed invitation letter', [
+            'guest_id' => $guest->guest_id,
+            'guest_name' => $guest->guest_name,
+            'invitation_id' => $invitation->invitation_id,
+            'user_agent' => request()->header('User-Agent'),
+            'ip_address' => request()->ip(),
+            'current_status' => $guest->guest_invitation_status,
+            'timestamp' => now()
+        ]);
+
+        // Kirim semua data invitation ke template
+        return view('guests.letter', [
+            'guest' => $guest,
+            'invitation' => $invitation,
+            // Data yang sesuai dengan migration fields
+            'groom_name' => $invitation->groom_name,
+            'bride_name' => $invitation->bride_name,
+            'groom_alias' => $invitation->groom_alias,
+            'bride_alias' => $invitation->bride_alias,
+            'groom_image' => $invitation->groom_image,
+            'bride_image' => $invitation->bride_image,
+            'groom_child_number' => $invitation->groom_child_number,
+            'bride_child_number' => $invitation->bride_child_number,
+            'groom_father' => $invitation->groom_father,
+            'groom_mother' => $invitation->groom_mother,
+            'bride_father' => $invitation->bride_father,
+            'bride_mother' => $invitation->bride_mother,
+            'wedding_date' => $invitation->wedding_date,
+            'wedding_time_start' => $invitation->wedding_time_start,
+            'wedding_time_end' => $invitation->wedding_time_end,
+            'wedding_venue' => $invitation->wedding_venue,
+            'wedding_location' => $invitation->wedding_location,
+            'wedding_maps' => $invitation->wedding_maps,
+            'wedding_image' => $invitation->wedding_image
         ]);
     }
 

@@ -19,20 +19,79 @@
             </h3>
             <div class="card-tools">
                 @if(isset($invitation))
-                    <a href="{{ route('wishes.select') }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ route('wishes.select') }}" class="btn btn-secondary">
                         <i class="fa fa-arrow-left"></i> Back to Select
                     </a>
-                    <a href="{{ url('/invitation/' . $invitation->invitation_id . '/show') }}" class="btn btn-info btn-sm">
+                    <a href="{{ url('/invitation/' . $invitation->invitation_id . '/show') }}" class="btn btn-info">
                         <i class="fa fa-eye"></i> View Invitation
                     </a>
                 @endif
-                <button id="refresh-table" class="btn btn-info btn-sm">
+                <button id="refresh-table" class="btn btn-info">
                     <i class="fa fa-sync"></i> Refresh
                 </button>
             </div>
         </div>
 
         <div class="card-body">
+            <!-- Wedding Information Cards -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="row">
+                        <!-- Card 1: Nama Pengantin -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <h5 class="mb-1 font-weight-bold text-primary" style="font-size: 1.2rem;">
+                                        {{ $invitation->groom_name }}  
+                                    </h5>
+                                    <h5 class="mb-1 font-weight-bold" style="font-size: 1.2rem; color: #e75480;">
+                                        <i class="fa fa-heart mx-1"></i>
+                                    </h5>
+                                    <h5 class="mb-1 font-weight-bold text-pink" style="font-size: 1.2rem; color: #d63384;">
+                                        {{ $invitation->bride_name }}
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2: Tanggal -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-calendar fa-2x mb-2" style="color: #a370f7;"></i>
+                                    <div class="font-weight-bold text-secondary">Tanggal</div>
+                                    <div class="text-dark">
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('d M Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3: Waktu -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-clock fa-2x mb-2" style="color: #00bcd4;"></i>
+                                    <div class="font-weight-bold text-secondary">Waktu</div>
+                                    <div class="text-dark">
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 4: Tempat -->
+                        <div class="col-md-3 mb-2">
+                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
+                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fa fa-map-marker-alt fa-2x mb-2" style="color: #ffc107;"></i>
+                                    <div class="font-weight-bold text-secondary">Tempat</div>
+                                    <div class="text-dark">
+                                        {{ $invitation->wedding_venue }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Filters Row -->
             <div class="row mb-3">
@@ -307,7 +366,9 @@
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete them!'
+                    confirmButtonText: 'Yes, delete them!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         bulkAction('delete', selectedWishes);

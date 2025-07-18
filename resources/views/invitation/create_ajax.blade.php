@@ -39,10 +39,86 @@
                         <small id="error-bride_name" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
-                <input type="hidden" name="groom_alias" id="groom_alias" required>
-                <input type="hidden" name="bride_alias" id="bride_alias" required>
+                
+                <!-- Groom Details Section -->
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Date</label>
+                    <label class="col-sm-3 col-form-label">Groom Alias</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="groom_alias" id="groom_alias" class="form-control" required>
+                        <small id="error-groom_alias" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Groom Image</label>
+                    <div class="col-sm-9">
+                        <input type="file" name="groom_image" id="groom_image" class="form-control" accept="image/*" required>
+                        <small class="form-text text-muted">Upload groom photo (JPEG, PNG, JPG, WEBP, max 2MB)</small>
+                        <small id="error-groom_image" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Groom Child Number</label>
+                    <div class="col-sm-9">
+                        <input type="number" name="groom_child_number" id="groom_child_number" class="form-control" min="1" required>
+                        <small class="form-text text-muted">Birth order (1st child, 2nd child, etc.)</small>
+                        <small id="error-groom_child_number" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Groom Father</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="groom_father" id="groom_father" class="form-control" required>
+                        <small id="error-groom_father" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Groom Mother</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="groom_mother" id="groom_mother" class="form-control" required>
+                        <small id="error-groom_mother" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                
+                <!-- Bride Details Section -->
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Bride Alias</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="bride_alias" id="bride_alias" class="form-control" required>
+                        <small id="error-bride_alias" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Bride Image</label>
+                    <div class="col-sm-9">
+                        <input type="file" name="bride_image" id="bride_image" class="form-control" accept="image/*" required>
+                        <small class="form-text text-muted">Upload bride photo (JPEG, PNG, JPG, WEBP, max 2MB)</small>
+                        <small id="error-bride_image" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Bride Child Number</label>
+                    <div class="col-sm-9">
+                        <input type="number" name="bride_child_number" id="bride_child_number" class="form-control" min="1" required>
+                        <small class="form-text text-muted">Birth order (1st child, 2nd child, etc.)</small>
+                        <small id="error-bride_child_number" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Bride Father</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="bride_father" id="bride_father" class="form-control" required>
+                        <small id="error-bride_father" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Bride Mother</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="bride_mother" id="bride_mother" class="form-control" required>
+                        <small id="error-bride_mother" class="error-text form-text text-danger"></small>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Date</label>
                     <div class="col-sm-9">
                         <input type="date" name="wedding_date" id="wedding_date" class="form-control" required>
                         <small id="error-wedding_date" class="error-text form-text text-danger"></small>
@@ -50,7 +126,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Time Start</label>
+                    <label class="col-sm-3 col-form-label">Time Start</label>
                     <div class="col-sm-9">
                         <input type="time" name="wedding_time_start" id="wedding_time_start" class="form-control"
                             required>
@@ -59,7 +135,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Time End</label>
+                    <label class="col-sm-3 col-form-label">Time End</label>
                     <div class="col-sm-9">
                         <input type="time" name="wedding_time_end" id="wedding_time_end" class="form-control"
                             required>
@@ -67,14 +143,14 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Venue</label>
+                    <label class="col-sm-3 col-form-label">Venue</label>
                     <div class="col-sm-9">
                         <input type="text" name="wedding_venue" id="wedding_venue" class="form-control" required>
                         <small id="error-wedding_venue" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Location</label>
+                    <label class="col-sm-3 col-form-label">Location Address</label>
                     <div class="col-sm-9">
                         <input type="text" name="wedding_location" id="wedding_location" class="form-control"
                             required>
@@ -82,21 +158,30 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Maps (URL)</label>
+                    <label class="col-sm-3 col-form-label">Maps (URL)</label>
                     <div class="col-sm-9">
                         <input type="url" name="wedding_maps" id="wedding_maps" class="form-control">
                         <small id="error-wedding_maps" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">Wedding Image</label>
+                    <label class="col-sm-3 col-form-label">Couple Image</label>
                     <div class="col-sm-9">
-                        <input type="file" name="wedding_image" id="wedding_image" class="form-control">
+                        <input type="file" name="wedding_image" id="wedding_image" class="form-control" accept="image/*" required>
+                        <small class="form-text text-muted">Upload wedding photo (JPEG, PNG, JPG, WEBP, max 2MB)</small>
                         <small id="error-wedding_image" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
+                 <div class="col-12 mb-2">
+                    <input type="text" class="form-control" value="You're logged in as: {{ Auth::check() ? Auth::user()->name : 'User is not authenticated.' }}" disabled readonly>
+                </div>
+                <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-warning btn-sm" id="btn-clear-form">
+                        <i class="fas fa-eraser"></i> Clear Form
+                    </button>
+                </div>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="submit" class="btn btn-primary">Save</button>
             </div>
@@ -118,6 +203,52 @@
                     maxlength: 255
                 },
                 bride_name: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 255
+                },
+                groom_alias: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                groom_image: {
+                    required: true,
+                    extension: "jpg|jpeg|png|webp"
+                },
+                groom_child_number: {
+                    required: true,
+                    min: 1
+                },
+                groom_father: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 255
+                },
+                groom_mother: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 255
+                },
+                bride_alias: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                bride_image: {
+                    required: true,
+                    extension: "jpg|jpeg|png|webp"
+                },
+                bride_child_number: {
+                    required: true,
+                    min: 1
+                },
+                bride_father: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 255
+                },
+                bride_mother: {
                     required: true,
                     minlength: 3,
                     maxlength: 255
@@ -147,7 +278,8 @@
                     url: true
                 },
                 wedding_image: {
-                    extension: "jpg|jpeg|png"
+                    required: true,
+                    extension: "jpg|jpeg|png|webp"
                 }
             },
             submitHandler: function(form) {
@@ -291,6 +423,33 @@
         // Hapus data form dari localStorage saat form berhasil disubmit
         $(`#${formId}`).on('submit', function() {
             localStorage.removeItem(storageKey);
+        });
+    });
+    // Clear form button
+    $('#btn-clear-form').on('click', function() {
+        Swal.fire({
+            title: 'Clear Form?',
+            text: 'Are you sure you want to clear all form data?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Clear form fields
+                $('#form-create-invitation')[0].reset();
+                $('#form-create-invitation input, #form-create-invitation select, #form-create-invitation textarea').removeClass('is-invalid is-valid');
+                $('.error-text').text('');
+                
+                // Clear localStorage
+                const storageKey = "form-create-invitation-data";
+                localStorage.removeItem(storageKey);
+
+                toastr.success('Form has been cleared');
+            }
         });
     });
 </script>

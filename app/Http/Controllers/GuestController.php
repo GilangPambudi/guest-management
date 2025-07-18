@@ -25,6 +25,40 @@ class GuestController extends Controller
     }
 
     /**
+     * Normalize phone number to 62XXX format for WhatsApp compatibility
+     */
+    private function normalizePhoneNumber($phoneNumber)
+    {
+        // Remove all non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
+        
+        // Handle different formats
+        if (substr($phone, 0, 3) === '620') {
+            // 6208xxx -> 628xxx (remove leading 0 after 62)
+            $phone = '62' . substr($phone, 3);
+        } elseif (substr($phone, 0, 2) === '62') {
+            // Already in 62xxx format, keep as is
+            $phone = $phone;
+        } elseif (substr($phone, 0, 1) === '0') {
+            // 08xxx -> 628xxx
+            $phone = '62' . substr($phone, 1);
+        } elseif (substr($phone, 0, 1) === '8') {
+            // 8xxx -> 628xxx
+            $phone = '62' . $phone;
+        } else {
+            // Other formats, prepend 62
+            $phone = '62' . $phone;
+        }
+        
+        // Validate final format (should be 62 followed by 8-13 digits)
+        if (!preg_match('/^62[0-9]{8,13}$/', $phone)) {
+            return false; // Invalid format
+        }
+        
+        return $phone;
+    }
+
+    /**
      * Display a listing of guests for specific invitation.
      */
     public function index($invitation_id)
@@ -277,8 +311,14 @@ class GuestController extends Controller
         $guest_contact = $request->input('guest_contact');
         $guest_id = $request->input('guest_id'); // For edit mode
 
+        // Normalize the phone number before checking
+        $normalizedPhone = $this->normalizePhoneNumber($guest_contact);
+        if ($normalizedPhone === false) {
+            return response()->json(false); // Invalid format, return false (not available)
+        }
+
         // Check if contact exists in CURRENT invitation only (per invitation check)
-        $query = Guest::where('guest_contact', $guest_contact)
+        $query = Guest::where('guest_contact', $normalizedPhone)
             ->where('invitation_id', $invitation_id);
 
         // Exclude current guest when editing
@@ -294,6 +334,19 @@ class GuestController extends Controller
 
     public function store_ajax(Request $request, $invitation_id)
     {
+        // Normalize phone number before validation
+        $normalizedPhone = $this->normalizePhoneNumber($request->input('guest_contact'));
+        if ($normalizedPhone === false) {
+            return response()->json([
+                'errors' => [
+                    'guest_contact' => ['Invalid phone number format. Please enter a valid Indonesian phone number.']
+                ]
+            ]);
+        }
+        
+        // Replace the contact in request with normalized version
+        $request->merge(['guest_contact' => $normalizedPhone]);
+
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
             'guest_gender' => 'required|in:Male,Female',
@@ -363,6 +416,19 @@ class GuestController extends Controller
 
     public function update_ajax(Request $request, $invitation_id, $id)
     {
+        // Normalize phone number before validation
+        $normalizedPhone = $this->normalizePhoneNumber($request->input('guest_contact'));
+        if ($normalizedPhone === false) {
+            return response()->json([
+                'errors' => [
+                    'guest_contact' => ['Invalid phone number format. Please enter a valid Indonesian phone number.']
+                ]
+            ]);
+        }
+        
+        // Replace the contact in request with normalized version
+        $request->merge(['guest_contact' => $normalizedPhone]);
+
         $validator = Validator::make($request->all(), [
             'guest_name' => 'required',
             'guest_gender' => 'required|in:Male,Female',
@@ -893,7 +959,7 @@ class GuestController extends Controller
             }
 
             $slug = $invitation->slug;
-            $url = url("/invitation/{$slug}/{$guest->guest_id_qr_code}");
+            $url = url("/{$slug}/{$guest->guest_id_qr_code}");
 
             $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
                 . "━━━━━━━━━━━━━━━━━━━━\n"
@@ -979,7 +1045,7 @@ class GuestController extends Controller
                 }
 
                 $slug = $invitation->slug;
-                $url = url("/invitation/{$slug}/{$guest->guest_id_qr_code}");
+                $url = url("/{$slug}/{$guest->guest_id_qr_code}");
 
                 $message = "> *Pesan Otomatis* — Mohon balas pesan ini agar link dapat dibuka\n\n"
                     . "━━━━━━━━━━━━━━━━━━━━\n"

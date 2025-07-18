@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Administrator',
-                'password' => Hash::make('@password123'),
+                'password' => Hash::make('admin@admin.com'),
                 'role' => 'admin',
                 'email_verified_at' => now(),
             ]
@@ -30,14 +30,14 @@ class UserSeeder extends Seeder
             ['email' => 'user@user.com'],
             [
                 'name' => 'Regular User',
-                'password' => Hash::make('@password123'),
+                'password' => Hash::make('user@user.com'),
                 'role' => 'user',
                 'email_verified_at' => now(),
             ]
         );
 
         $this->command->info('Users created/updated successfully!');
-        $this->command->info('Admin: admin@admin.com / password123');
-        $this->command->info('User: user@user.com / password123');
+        $this->command->info('Admin: admin@admin.com / admin@admin.com');
+        $this->command->info('User: user@user.com / user@user.com');
     }
 }

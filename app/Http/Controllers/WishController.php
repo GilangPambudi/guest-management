@@ -287,7 +287,7 @@ class WishController extends Controller
             return response()->json([
                 'success' => true,
                 'has_wish' => $existingWish ? true : false,
-                'wish' => $existingWish ? [
+                'user_wish' => $existingWish ? [
                     'wish_id' => $existingWish->wish_id,
                     'message' => $existingWish->message,
                     'created_at_formatted' => $existingWish->created_at_formatted

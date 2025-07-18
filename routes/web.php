@@ -44,14 +44,18 @@ Route::group(['prefix' => 'qr'], function () {
 });
 
 Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
-    Route::get('/', [InvitationController::class, 'index']);
+    Route::get('/', [InvitationController::class, 'index'])->name('invitation.index');
     Route::post('/list', [InvitationController::class, 'list']);
-    Route::get('/{id}/show_ajax', [InvitationController::class, 'show_ajax']);
-    Route::get('/create_ajax', [InvitationController::class, 'create_ajax']);
-    Route::post('/store_ajax', [InvitationController::class, 'store_ajax']);
+    // Route::get('/create', [InvitationController::class, 'create'])->name('invitation.create'); // Halaman create baru
+    // Route::post('/store', [InvitationController::class, 'store'])->name('invitation.store'); // Store untuk halaman
     Route::get('/{id}/show', [InvitationController::class, 'show']);
-    Route::get('/{id}/edit_ajax', [InvitationController::class, 'edit_ajax']);
-    Route::put('/{id}/update_ajax', [InvitationController::class, 'update_ajax']);
+    // Route::get('/{id}/edit', [InvitationController::class, 'edit'])->name('invitation.edit'); // Halaman edit baru
+    // Route::put('/{id}/update', [InvitationController::class, 'update'])->name('invitation.update'); // Update untuk halaman
+    Route::get('/{id}/show_ajax', [InvitationController::class, 'show_ajax']);
+    Route::get('/create_ajax', [InvitationController::class, 'create_ajax']); // Keep untuk modal jika diperlukan
+    Route::post('/store_ajax', [InvitationController::class, 'store_ajax']); // Keep untuk modal jika diperlukan
+    Route::get('/{id}/edit_ajax', [InvitationController::class, 'edit_ajax']); // Keep untuk modal jika diperlukan
+    Route::put('/{id}/update_ajax', [InvitationController::class, 'update_ajax']); // Keep untuk modal jika diperlukan
     Route::get('/{id}/delete_ajax', [InvitationController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [InvitationController::class, 'delete_ajax']);
     Route::get('/{invitation_id}/scanner', [GuestController::class, 'scanner'])->name('guest.scanner');
@@ -115,10 +119,11 @@ Route::get('/wishes/{slug}/{guest_id_qr_code}/check', [WishController::class, 'c
 Route::post('/wishes/create/{slug}/{guest_id_qr_code}', [WishController::class, 'storeGuestWish']);
 Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 'update']);
 
+// Route::get('/old/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'old_invitation_letter']);
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
-Route::get('/invitation/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation_letter']);
-Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax']);
-Route::post('/mark-opened/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'mark_as_opened']);
+Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'letter'])->name('public.invitation-letter');
+Route::post('/update-attendance/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'update_attendance_ajax'])->name('public.update-attendance-ajax');
+Route::post('/mark-opened/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'mark_as_opened'])->name('public.mark-as-opened');
 
 // User Management Routes
 Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {

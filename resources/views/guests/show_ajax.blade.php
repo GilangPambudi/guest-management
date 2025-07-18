@@ -83,13 +83,13 @@
                             @if($guest->invitation_sent_at)
                             <tr>
                                 <th class="text-right">Invitation Sent At:</th>
-                                <td>{{ \Carbon\Carbon::parse($guest->invitation_sent_at)->format('d M Y, H:i:s') }} WIB</td>
+                                <td>{{ \Carbon\Carbon::parse($guest->invitation_sent_at)->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} WIB</td>
                             </tr>
                             @endif
                             @if($guest->invitation_opened_at)
                             <tr>
                                 <th class="text-right">Opened At:</th>
-                                <td>{{ \Carbon\Carbon::parse($guest->invitation_opened_at)->format('d M Y, H:i:s') }} WIB</td>
+                                <td>{{ \Carbon\Carbon::parse($guest->invitation_opened_at)->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} WIB</td>
                             </tr>
                             @endif                            @if ($guest->guest_arrival_time && $guest->guest_arrival_time != '-')
                                 <tr>
@@ -141,13 +141,13 @@
                             <div class="card-header text-center">
                                 <strong>Quick Actions</strong>
                             </div>                            <div class="card-body text-center">
-                                <a href="{{ url('/invitation/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}" target="_blank"
+                                <a href="{{ url('/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}" target="_blank"
                                     class="btn btn-info btn-sm btn-block mb-2">
                                     <i class="fas fa-external-link-alt"></i> View
                                 </a>
 
                                 <button
-                                    onclick="copyInvitationLink('{{ url('/invitation/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}')"
+                                    onclick="copyInvitationLink('{{ url('/' . $invitation->slug . '/' . $guest->guest_id_qr_code) }}')"
                                     class="btn btn-secondary btn-sm btn-block mb-2">
                                     <i class="fas fa-copy"></i> Copy Link
                                 </button>
@@ -198,7 +198,9 @@
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, mark as attended!'
+                confirmButtonText: 'Yes, mark as attended!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Show loading state

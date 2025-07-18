@@ -643,7 +643,9 @@
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete them!'
+                    confirmButtonText: 'Yes, delete them!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         bulkAction('delete', selectedGuests);
@@ -665,7 +667,9 @@
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, mark as sent!'
+                    confirmButtonText: 'Yes, mark as sent!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         bulkAction('mark_sent', selectedGuests);
@@ -687,7 +691,9 @@
                     showCancelButton: true,
                     confirmButtonColor: '#ffc107',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, mark as pending!'
+                    confirmButtonText: 'Yes, mark as pending!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         bulkAction('mark_pending', selectedGuests);
@@ -802,7 +808,8 @@
             confirmButtonColor: '#25d366',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Yes, Send!',
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
             }).then((result) => {
             if (result.isConfirmed) {
                 // Show loading state
@@ -854,7 +861,8 @@
                 confirmButtonColor: '#25d366',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Ya, Kirim!',
-                cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     var btn = $(this);

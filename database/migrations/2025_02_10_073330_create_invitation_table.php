@@ -20,13 +20,21 @@ return new class extends Migration
             $table->string('bride_name', 255);
             $table->string('groom_alias', 255);
             $table->string('bride_alias', 255);
+            $table->string('groom_image', 255);
+            $table->string('bride_image', 255);
+            $table->integer('groom_child_number');
+            $table->integer('bride_child_number');
+            $table->string('groom_father', 255);
+            $table->string('groom_mother', 255);
+            $table->string('bride_father', 255);
+            $table->string('bride_mother', 255);
             $table->date('wedding_date');
             $table->time('wedding_time_start');
             $table->time('wedding_time_end');
             $table->string('wedding_venue', 255);
             $table->string('wedding_location', 255);
             $table->string('wedding_maps', 255);
-            $table->string('wedding_image', 255)->nullable();
+            $table->string('wedding_image', 255);
             $table->timestamps();
         });
     }

@@ -23,6 +23,58 @@
                     <td class="col-9">{{ $invitation->bride_name }}</td>
                 </tr>
                 <tr>
+                    <th class="text-right col-3">Groom Alias:</th>
+                    <td class="col-9">{{ $invitation->groom_alias ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Groom Photo:</th>
+                    <td class="col-9">
+                        @if($invitation->groom_image)
+                            <img src="{{ asset($invitation->groom_image) }}" alt="Groom Photo" style="max-width: 100px; max-height: 100px;" class="img-thumbnail">
+                        @else
+                            <span class="text-muted">No photo uploaded</span>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Groom Child Number:</th>
+                    <td class="col-9">{{ $invitation->groom_child_number ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Groom's Father:</th>
+                    <td class="col-9">{{ $invitation->groom_father ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Groom's Mother:</th>
+                    <td class="col-9">{{ $invitation->groom_mother ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Bride Alias:</th>
+                    <td class="col-9">{{ $invitation->bride_alias ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Bride Photo:</th>
+                    <td class="col-9">
+                        @if($invitation->bride_image)
+                            <img src="{{ asset($invitation->bride_image) }}" alt="Bride Photo" style="max-width: 100px; max-height: 100px;" class="img-thumbnail">
+                        @else
+                            <span class="text-muted">No photo uploaded</span>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Bride Child Number:</th>
+                    <td class="col-9">{{ $invitation->bride_child_number ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Bride's Father:</th>
+                    <td class="col-9">{{ $invitation->bride_father ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th class="text-right col-3">Bride's Mother:</th>
+                    <td class="col-9">{{ $invitation->bride_mother ?? '-' }}</td>
+                </tr>
+                <tr>
                     <th class="text-right col-3">Date:</th>
                     <td class="col-9">{{ $invitation->wedding_date }}</td>
                 </tr>
@@ -49,19 +101,12 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-3">Image:</th>
+                    <th class="text-right col-3">Wedding Image:</th>
                     <td class="col-9">
-                        @if ($invitation->wedding_image)
-                            <div class="spoiler">
-                                <button type="button" class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#weddingImageSpoiler" aria-expanded="false" aria-controls="weddingImageSpoiler">
-                                    Show Image
-                                </button>
-                                <div class="collapse mt-2" id="weddingImageSpoiler">
-                                    <img src="{{ asset($invitation->wedding_image) }}" alt="Wedding Image" class="img-fluid">
-                                </div>
-                            </div>
+                        @if($invitation->wedding_image)
+                            <img src="{{ asset($invitation->wedding_image) }}" alt="Wedding Photo" style="max-width: 150px; max-height: 150px;" class="img-thumbnail">
                         @else
-                            <p>No image available</p>
+                            <span class="text-muted">No photo uploaded</span>
                         @endif
                     </td>
                 </tr>

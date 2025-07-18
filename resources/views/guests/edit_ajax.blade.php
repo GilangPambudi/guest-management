@@ -71,7 +71,15 @@
                         <label class="col-sm-3 col-form-label">Guest Contact</label>
                         <div class="col-sm-9">
                             <input value="{{ $guest->guest_contact }}" type="text" name="guest_contact"
-                                id="guest_contact" class="form-control" required>
+                                id="guest_contact" class="form-control" required placeholder="e.g. +62 812-3456-7890 or 08123456789">
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                You can enter: +62 812-3456-7890, 0812-3456-7890, or 6281234567890
+                            </small>
+                            <small id="phone-preview" class="form-text text-success d-none">
+                                <i class="fas fa-check-circle"></i> 
+                                Will be saved as: <span id="preview-text"></span>
+                            </small>
                             <small id="error-guest_contact" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -161,6 +169,62 @@
                 return;
             }
 
+            // Phone number formatting function
+            function normalizePhoneNumber(phoneNumber) {
+                // Remove all non-numeric characters
+                let phone = phoneNumber.replace(/[^0-9]/g, '');
+                
+                // Handle different formats
+                if (phone.startsWith('620')) {
+                    // 6208xxx -> 628xxx (remove leading 0 after 62)
+                    phone = '62' + phone.substring(3);
+                } else if (phone.startsWith('62')) {
+                    // Already in 62xxx format, keep as is
+                    phone = phone;
+                } else if (phone.startsWith('0')) {
+                    // 08xxx -> 628xxx
+                    phone = '62' + phone.substring(1);
+                } else if (phone.startsWith('8')) {
+                    // 8xxx -> 628xxx
+                    phone = '62' + phone;
+                } else if (phone.length > 0) {
+                    // Other formats, prepend 62
+                    phone = '62' + phone;
+                }
+                
+                // Validate final format (should be 62 followed by 8-13 digits)
+                if (phone.match(/^62[0-9]{8,13}$/)) {
+                    return phone;
+                }
+                
+                return null; // Invalid format
+            }
+            
+            // Phone number input handler
+            $('#guest_contact').on('input', function() {
+                const inputValue = $(this).val();
+                const normalized = normalizePhoneNumber(inputValue);
+                
+                if (inputValue.length > 0) {
+                    if (normalized) {
+                        $('#phone-preview').removeClass('d-none');
+                        $('#preview-text').text(normalized);
+                        $(this).removeClass('is-invalid');
+                    } else {
+                        $('#phone-preview').addClass('d-none');
+                        if (inputValue.length > 3) { // Only show error after user typed something meaningful
+                            $(this).addClass('is-invalid');
+                        }
+                    }
+                } else {
+                    $('#phone-preview').addClass('d-none');
+                    $(this).removeClass('is-invalid');
+                }
+            });
+            
+            // Trigger format check for existing value
+            $('#guest_contact').trigger('input');
+
             $("#form-edit-guest").validate({
                 rules: {
                     guest_name: {
@@ -180,14 +244,15 @@
                         required: true,
                         minlength: 8,
                         maxlength: 20,
-                        digits: true,
                         remote: {
                             url: "{{ url('/invitation/' . $guest->invitation_id . '/guests/check-contact') }}",
                             type: "POST",
                             data: {
                                 _token: "{{ csrf_token() }}",
                                 guest_contact: function() {
-                                    return $("#guest_contact").val();
+                                    // Send normalized phone number for checking
+                                    const normalized = normalizePhoneNumber($("#guest_contact").val());
+                                    return normalized || $("#guest_contact").val();
                                 },
                                 guest_id: {{ $guest->guest_id }} // Exclude current guest from check
                             },
@@ -227,7 +292,6 @@
                         required: "Contact number is required",
                         minlength: "Contact number must be at least 8 digits",
                         maxlength: "Contact number cannot exceed 20 digits",
-                        digits: "Please enter valid phone number (digits only)",
                         remote: "This contact number is already registered"
                     },
                     guest_address: {
