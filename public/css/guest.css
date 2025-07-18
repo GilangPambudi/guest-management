@@ -1,4 +1,17 @@
-@import url("common.css");
+@im        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fff 0%, var(--bs-body-bg, #f8f9fa) 100%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }mmon.css");
 @import url("animation.css");
 
 .modal-overlay {
@@ -28,8 +41,8 @@
         
         /* Ensure body can scroll when modal is closed */
         body:not(.modal-open) {
-            /* overflow-x: hidden;
-            overflow-y: auto; */
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
  #navbar-menu-wrapper {
@@ -97,6 +110,11 @@
 html {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
 }
 
 .with-scrollbar {
