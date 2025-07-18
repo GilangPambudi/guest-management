@@ -51,97 +51,124 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h2 class="text-primary mb-4">{{ $invitation->wedding_name }}</h2>
-                                    <div class="border rounded p-0 mb-3 bg-white">
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Slug</div>
-                                            <div class="col-sm-8">
-                                                @if ($invitation->slug)
-                                                    <code>{{ $invitation->slug }}</code>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-primary h-100">
+                                                <div class="card-header bg-primary text-white">
+                                                    <strong>Groom</strong>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Name</div>
+                                                        <div class="col-6">{{ $invitation->groom_name }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Alias</div>
+                                                        <div class="col-6">{{ $invitation->groom_alias }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Child Number</div>
+                                                        <div class="col-6">{{ $invitation->groom_child_number }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Father</div>
+                                                        <div class="col-6">{{ $invitation->groom_father }}</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-6 font-weight-bold">Mother</div>
+                                                        <div class="col-6">{{ $invitation->groom_mother }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Groom Name</div>
-                                            <div class="col-sm-8">{{ $invitation->groom_name }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Groom Alias</div>
-                                            <div class="col-sm-8">{{ $invitation->groom_alias }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Groom Child Number</div>
-                                            <div class="col-sm-8">{{ $invitation->groom_child_number }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Groom Father</div>
-                                            <div class="col-sm-8">{{ $invitation->groom_father }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Groom Mother</div>
-                                            <div class="col-sm-8">{{ $invitation->groom_mother }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Bride Name</div>
-                                            <div class="col-sm-8">{{ $invitation->bride_name }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Bride Alias</div>
-                                            <div class="col-sm-8">{{ $invitation->bride_alias }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Bride Child Number</div>
-                                            <div class="col-sm-8">{{ $invitation->bride_child_number }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Bride Father</div>
-                                            <div class="col-sm-8">{{ $invitation->bride_father }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Bride Mother</div>
-                                            <div class="col-sm-8">{{ $invitation->bride_mother }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Date</div>
-                                            <div class="col-sm-8">
-                                                {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('l, d F Y') }}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-danger h-100">
+                                                <div class="card-header bg-danger text-white">
+                                                    <strong>Bride</strong>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Name</div>
+                                                        <div class="col-6">{{ $invitation->bride_name }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Alias</div>
+                                                        <div class="col-6">{{ $invitation->bride_alias }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Child Number</div>
+                                                        <div class="col-6">{{ $invitation->bride_child_number }}</div>
+                                                    </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-6 font-weight-bold">Father</div>
+                                                        <div class="col-6">{{ $invitation->bride_father }}</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-6 font-weight-bold">Mother</div>
+                                                        <div class="col-6">{{ $invitation->bride_mother }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Time</div>
-                                            <div class="col-sm-8">{{ $invitation->wedding_time_start }} -
-                                                {{ $invitation->wedding_time_end }} WIB</div>
+                                    </div>
+
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <strong>Invitation Info</strong>
                                         </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Venue</div>
-                                            <div class="col-sm-8">{{ $invitation->wedding_venue }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Location</div>
-                                            <div class="col-sm-8">{{ $invitation->wedding_location }}</div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Maps</div>
-                                            <div class="col-sm-8">
-                                                @if ($invitation->wedding_maps)
-                                                    <a href="{{ $invitation->wedding_maps }}" target="_blank"
-                                                        class="btn btn-primary btn-sm">
-                                                        <i class="fa fa-external-link-alt"></i> View Map
-                                                    </a>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
+                                        <div class="card-body p-3">
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Slug</div>
+                                                <div class="col-sm-8">
+                                                    @if ($invitation->slug)
+                                                        <code>{{ $invitation->slug }}</code>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row m-0 border-bottom py-2">
-                                            <div class="col-sm-4 font-weight-bold">Created</div>
-                                            <div class="col-sm-8">{{ $invitation->created_at->format('d M Y') }}</div>
-                                        </div>
-                                        <div class="row m-0 py-2">
-                                            <div class="col-sm-4 font-weight-bold">Last Updated</div>
-                                            <div class="col-sm-8">{{ $invitation->updated_at->format('d M Y H:i') }}</div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Date</div>
+                                                <div class="col-sm-8">
+                                                    {{ \Carbon\Carbon::parse($invitation->wedding_date)->format('l, d F Y') }}
+                                                </div>
+                                            </div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Time</div>
+                                                <div class="col-sm-8">{{ $invitation->wedding_time_start }} -
+                                                    {{ $invitation->wedding_time_end }} WIB</div>
+                                            </div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Venue</div>
+                                                <div class="col-sm-8">{{ $invitation->wedding_venue }}</div>
+                                            </div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Location</div>
+                                                <div class="col-sm-8">{{ $invitation->wedding_location }}</div>
+                                            </div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Maps</div>
+                                                <div class="col-sm-8">
+                                                    @if ($invitation->wedding_maps)
+                                                        <a href="{{ $invitation->wedding_maps }}" target="_blank"
+                                                            class="btn btn-primary btn-sm">
+                                                            <i class="fa fa-external-link-alt"></i> View Map
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="row m-0 border-bottom py-2">
+                                                <div class="col-sm-4 font-weight-bold">Created</div>
+                                                <div class="col-sm-8">{{ $invitation->created_at->format('d M Y') }}
+                                                </div>
+                                            </div>
+                                            <div class="row m-0 py-2">
+                                                <div class="col-sm-4 font-weight-bold">Last Updated</div>
+                                                <div class="col-sm-8">
+                                                    {{ $invitation->updated_at->format('d M Y H:i') }}</div>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Spoiler/collapse for photo -->
