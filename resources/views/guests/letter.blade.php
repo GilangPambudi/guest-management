@@ -430,18 +430,23 @@
                 <div class="bg-white rounded-4 shadow p-4">
                     @if ($guest && $guest->guest_id_qr_code)
                         <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code Tamu" class="img-fluid"
-                            style="max-width: 200px;">
+                            style="max-width: 200px; cursor:pointer;"
+                            id="qr-code-img"
+                            data-bs-toggle="modal"
+                            data-bs-target="#qrCodeModal"
+                        >
                     @else
                         <div class="d-flex justify-content-center align-items-center bg-light rounded" 
                              style="width: 200px; height: 200px;">
                             <i class="fa-solid fa-qrcode fa-3x text-muted"></i>
-                        </div> @endif
+                        </div>
+                    @endif
                     <div class="mt-3">
-    <small class="text-secondary">ID: {{ $guest->guest_id_qr_code ?? 'QR Tamu Undangan' }}</small>
-    </div>
-    </div>
-    </div>
-    </div>
+                        <small class="text-secondary">ID: {{ $guest->guest_id_qr_code ?? 'QR Tamu Undangan' }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Wave Separator -->
@@ -681,6 +686,33 @@
             </ul>
         </div>
     </nav>
+
+    <!-- Modal QR Code -->
+    <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title font-esthetic" id="qrCodeModalLabel">
+                        <i class="fa-solid fa-qrcode me-2"></i>Kode QR Tamu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body text-center">
+                    @if ($guest && $guest->guest_id_qr_code)
+                        <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code Besar" class="img-fluid mb-3" style="max-width: 350px;">
+                        <div>
+                            <small class="text-secondary">ID: {{ $guest->guest_id_qr_code }}</small>
+                        </div>
+                    @else
+                        <div class="d-flex justify-content-center align-items-center bg-light rounded" 
+                             style="width: 250px; height: 250px; margin:0 auto;">
+                            <i class="fa-solid fa-qrcode fa-4x text-muted"></i>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 
     </body>
 
