@@ -8,63 +8,83 @@
             position: relative !important;
             z-index: 1 !important;
         }
+
         .dataTables_paginate .paginate_button.disabled {
             pointer-events: none !important;
         }
+
         /* Ensure table wrapper doesn't interfere */
         .table-responsive {
             overflow-x: visible !important;
         }
+
         /* Custom table scroll that doesn't break pagination */
         .custom-datatable-wrapper {
             width: 100%;
             overflow-x: auto;
             overflow-y: visible;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling di mobile */
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scrolling di mobile */
         }
+
         .custom-datatable-wrapper table {
-            min-width: 1200px; /* Pastikan table punya min-width yang cukup */
-            white-space: nowrap; /* Prevent text wrapping */
+            min-width: 1200px;
+            /* Pastikan table punya min-width yang cukup */
+            white-space: nowrap;
+            /* Prevent text wrapping */
         }
+
         /* Ensure table content doesn't wrap */
         #guest-table {
             min-width: 1200px;
-            width: 100% !important; /* Force full width */
+            width: 100% !important;
+            /* Force full width */
             white-space: nowrap;
         }
-        #guest-table td, #guest-table th {
+
+        #guest-table td,
+        #guest-table th {
             white-space: nowrap;
         }
+
         /* Make sure DataTables wrapper uses full width */
         .dataTables_wrapper {
             width: 100% !important;
         }
+
         .dataTables_scrollBody {
             width: 100% !important;
         }
+
         /* Hilangkan responsive controls DataTables */
         .dtr-control {
             display: none !important;
         }
+
         .dtr-details {
             display: none !important;
         }
+
         /* Pastikan pagination tidak terpotong */
         .dataTables_wrapper .dataTables_paginate {
             margin-top: 15px;
             clear: both;
         }
+
         /* DataTables horizontal scroll styling */
         .dataTables_wrapper .dataTables_scroll {
             clear: both;
         }
+
         .dataTables_wrapper .dataTables_scrollBody {
             border: 1px solid #dee2e6;
         }
+
         /* Smooth scrolling */
         .dataTables_scrollBody {
             -webkit-overflow-scrolling: touch;
         }
+
         /* Prevent badge wrapping */
         .badge {
             white-space: nowrap;
@@ -104,10 +124,12 @@
                     <div class="row">
                         <!-- Card 1: Nama Pengantin -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <h5 class="mb-1 font-weight-bold text-primary" style="font-size: 1.2rem;">
-                                        {{ $invitation->groom_name }}  
+                                        {{ $invitation->groom_name }}
                                     </h5>
                                     <h5 class="mb-1 font-weight-bold" style="font-size: 1.2rem; color: #e75480;">
                                         <i class="fa fa-heart mx-1"></i>
@@ -120,8 +142,10 @@
                         </div>
                         <!-- Card 2: Tanggal -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-calendar fa-2x mb-2" style="color: #a370f7;"></i>
                                     <div class="font-weight-bold text-secondary">Tanggal</div>
                                     <div class="text-dark">
@@ -132,20 +156,25 @@
                         </div>
                         <!-- Card 3: Waktu -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-clock fa-2x mb-2" style="color: #00bcd4;"></i>
                                     <div class="font-weight-bold text-secondary">Waktu</div>
                                     <div class="text-dark">
-                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} -
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <!-- Card 4: Tempat -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-map-marker-alt fa-2x mb-2" style="color: #ffc107;"></i>
                                     <div class="font-weight-bold text-secondary">Tempat</div>
                                     <div class="text-dark">
@@ -163,6 +192,9 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header p-2 d-flex justify-content-end">
+                            <button id="refresh-table" class="btn mr-1 btn-sm btn-outline-success" title="Refresh Data Table">
+                                <i class="fa fa-sync"></i> Refresh Table
+                            </button>
                             <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
                                 data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
                                 <i class="fas fa-filter"></i> Filters
@@ -199,7 +231,8 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="filter-invitation-status" class="form-label">Invitation Status:</label>
+                                        <label for="filter-invitation-status" class="form-label">Invitation
+                                            Status:</label>
                                         <select id="filter-invitation-status" class="form-control">
                                             <option value="">All Status</option>
                                             @foreach ($invitationStatuses as $status)
@@ -516,28 +549,30 @@
                         visibleCheckboxes.length > 0 && visibleCheckboxes.length ===
                         visibleCheckedCheckboxes.length
                     );
-                    
+
                     // Debug pagination clicks
-                    $('#guest-table_paginate .paginate_button').off('click.debug').on('click.debug', function(e) {
-                        console.log('Pagination button clicked:', this);
-                        console.log('Event:', e);
-                        console.log('Has class disabled:', $(this).hasClass('disabled'));
-                        console.log('Has class current:', $(this).hasClass('current'));
-                        
-                        // Check if there are any overlaying elements
-                        var rect = this.getBoundingClientRect();
-                        var elementBelow = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
-                        console.log('Element at click point:', elementBelow);
-                        
-                        if ($(this).hasClass('disabled')) {
-                            console.log('Button is disabled - preventing default');
-                            e.preventDefault();
-                            return false;
-                        }
-                    });
+                    $('#guest-table_paginate .paginate_button').off('click.debug').on('click.debug',
+                        function(e) {
+                            console.log('Pagination button clicked:', this);
+                            console.log('Event:', e);
+                            console.log('Has class disabled:', $(this).hasClass('disabled'));
+                            console.log('Has class current:', $(this).hasClass('current'));
+
+                            // Check if there are any overlaying elements
+                            var rect = this.getBoundingClientRect();
+                            var elementBelow = document.elementFromPoint(rect.left + rect.width / 2,
+                                rect.top + rect.height / 2);
+                            console.log('Element at click point:', elementBelow);
+
+                            if ($(this).hasClass('disabled')) {
+                                console.log('Button is disabled - preventing default');
+                                e.preventDefault();
+                                return false;
+                            }
+                        });
                 }
             }); // Add pagination click debugging
-            
+
             // Debug DataTables initialization
             setTimeout(function() {
                 console.log('=== DataTables Debug ===');
@@ -549,60 +584,62 @@
                 if (dataGuest && dataGuest.page) {
                     console.log('Page info:', dataGuest.page.info());
                 }
-                
+
                 // Check for event conflicts
                 var $paginationButtons = $('#guest-table_paginate .paginate_button');
                 $paginationButtons.each(function(index, button) {
                     var events = $._data(button, 'events');
                     console.log('Button', index, 'events:', events);
                 });
-                
+
                 console.log('========================');
-                
+
                 // Test direct click handler
-                $('#guest-table_paginate').off('click.test').on('click.test', '.paginate_button:not(.disabled)', function(e) {
-                    console.log('Direct pagination click detected!');
-                    var $this = $(this);
-                    var pageNum = $this.text();
-                    console.log('Page number:', pageNum);
-                    console.log('Button classes:', $this.attr('class'));
-                    
-                    // Check if it's a valid page number
-                    if (!isNaN(pageNum)) {
-                        console.log('Navigating to page:', parseInt(pageNum) - 1);
-                        dataGuest.page(parseInt(pageNum) - 1).draw('page');
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    } else if ($this.hasClass('next')) {
-                        console.log('Next page clicked');
-                        dataGuest.page('next').draw('page');
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    } else if ($this.hasClass('previous')) {
-                        console.log('Previous page clicked');
-                        dataGuest.page('previous').draw('page');
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    } else if ($this.hasClass('first')) {
-                        console.log('First page clicked');
-                        dataGuest.page('first').draw('page');
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    } else if ($this.hasClass('last')) {
-                        console.log('Last page clicked');
-                        dataGuest.page('last').draw('page');
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    }
-                });
-                
+                $('#guest-table_paginate').off('click.test').on('click.test',
+                    '.paginate_button:not(.disabled)',
+                    function(e) {
+                        console.log('Direct pagination click detected!');
+                        var $this = $(this);
+                        var pageNum = $this.text();
+                        console.log('Page number:', pageNum);
+                        console.log('Button classes:', $this.attr('class'));
+
+                        // Check if it's a valid page number
+                        if (!isNaN(pageNum)) {
+                            console.log('Navigating to page:', parseInt(pageNum) - 1);
+                            dataGuest.page(parseInt(pageNum) - 1).draw('page');
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return false;
+                        } else if ($this.hasClass('next')) {
+                            console.log('Next page clicked');
+                            dataGuest.page('next').draw('page');
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return false;
+                        } else if ($this.hasClass('previous')) {
+                            console.log('Previous page clicked');
+                            dataGuest.page('previous').draw('page');
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return false;
+                        } else if ($this.hasClass('first')) {
+                            console.log('First page clicked');
+                            dataGuest.page('first').draw('page');
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return false;
+                        } else if ($this.hasClass('last')) {
+                            console.log('Last page clicked');
+                            dataGuest.page('last').draw('page');
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return false;
+                        }
+                    });
+
             }, 2000);
-            
+
             $(document).on('change', '#select-all', function() {
                 var isChecked = $(this).is(':checked');
 
@@ -801,48 +838,48 @@
 
             // Show confirmation modal using SweetAlert
             Swal.fire({
-            title: 'Confirm Send WhatsApp',
-            text: `Send WhatsApp invitation to ${guestName}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#25d366',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, Send!',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true
+                title: 'Confirm Send WhatsApp',
+                text: `Send WhatsApp invitation to ${guestName}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#25d366',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Send!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
             }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading state
-                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                if (result.isConfirmed) {
+                    // Show loading state
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 
-                $.ajax({
-                url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(res) {
-                    if (res.success) {
-                    toastr.success('WhatsApp message sent successfully!');
-                    // Refresh DataTable to update status
-                    dataGuest.ajax.reload(null, false);
-                    } else {
-                    toastr.error(res.message || 'Failed to send WhatsApp.');
-                    }
-                },
-                error: function(err) {
-                    var errorMessage = 'Failed to send WhatsApp.';
-                    if (err.responseJSON && err.responseJSON.message) {
-                    errorMessage = err.responseJSON.message;
-                    }
-                    toastr.error(errorMessage);
-                },
-                complete: function() {
-                    btn.prop('disabled', false).html(
-                    '<i class="fab fa-whatsapp"></i> Send WA');
+                    $.ajax({
+                        url: `/invitation/${invitationId}/guests/${guestId}/send-wa`,
+                        type: 'POST',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                toastr.success('WhatsApp message sent successfully!');
+                                // Refresh DataTable to update status
+                                dataGuest.ajax.reload(null, false);
+                            } else {
+                                toastr.error(res.message || 'Failed to send WhatsApp.');
+                            }
+                        },
+                        error: function(err) {
+                            var errorMessage = 'Failed to send WhatsApp.';
+                            if (err.responseJSON && err.responseJSON.message) {
+                                errorMessage = err.responseJSON.message;
+                            }
+                            toastr.error(errorMessage);
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).html(
+                                '<i class="fab fa-whatsapp"></i> Send WA');
+                        }
+                    });
                 }
-                });
-            }
             });
         });
 
@@ -904,5 +941,12 @@
                 }
             });
         });
+
+        $(document).on('click', '#refresh-table', function() {
+        if (window.dataGuest && $.fn.DataTable.isDataTable('#guest-table')) {
+            window.dataGuest.ajax.reload(null, false);
+            toastr.success('Data table refreshed');
+        }
+    });
     </script>
 @endsection
