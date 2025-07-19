@@ -31,7 +31,7 @@ class GuestController extends Controller
     {
         // Remove all non-numeric characters
         $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
-        
+
         // Handle different formats
         if (substr($phone, 0, 3) === '620') {
             // 6208xxx -> 628xxx (remove leading 0 after 62)
@@ -49,12 +49,12 @@ class GuestController extends Controller
             // Other formats, prepend 62
             $phone = '62' . $phone;
         }
-        
+
         // Validate final format (should be 62 followed by 8-13 digits)
         if (!preg_match('/^62[0-9]{8,13}$/', $phone)) {
             return false; // Invalid format
         }
-        
+
         return $phone;
     }
 
@@ -168,9 +168,8 @@ class GuestController extends Controller
                 $btn = '<button onclick="copyToClipboard(\'' . $guest->guest_id_qr_code . '\')" class="btn btn-primary btn-sm"><i class="fas fa-copy"></i> Copy ID</button> ';
 
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/show_ajax') . '\')" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</button> ';
-
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</button> ';
                 $btn .= '<button class="btn btn-success btn-sm btn-send-wa" data-guest-id="' . $guest->guest_id . '" data-invitation-id="' . $invitation_id . '"><i class="fab fa-whatsapp"></i> Send WA</button> ';
-                // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</button> ';
                 // $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $invitation_id . '/guests/' . $guest->guest_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> ';
                 return $btn;
             })
@@ -343,7 +342,7 @@ class GuestController extends Controller
                 ]
             ]);
         }
-        
+
         // Replace the contact in request with normalized version
         $request->merge(['guest_contact' => $normalizedPhone]);
 
@@ -425,7 +424,7 @@ class GuestController extends Controller
                 ]
             ]);
         }
-        
+
         // Replace the contact in request with normalized version
         $request->merge(['guest_contact' => $normalizedPhone]);
 
@@ -496,15 +495,15 @@ class GuestController extends Controller
         // Jika invitation status diubah ke "Sent", kosongkan invitation_opened_at
         if ($request->input('guest_invitation_status') === 'Sent') {
             $request->merge([
-            'invitation_opened_at' => null,
+                'invitation_opened_at' => null,
             ]);
         }
 
         // Jika invitation status diubah ke "-", kosongkan sent_at dan opened_at
         if ($request->input('guest_invitation_status') === '-') {
             $request->merge([
-            'invitation_sent_at' => null,
-            'invitation_opened_at' => null,
+                'invitation_sent_at' => null,
+                'invitation_opened_at' => null,
             ]);
         }
 
