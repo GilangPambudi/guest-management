@@ -493,11 +493,18 @@ class GuestController extends Controller
             ]);
         }
 
+        // Jika invitation status diubah ke "Sent", kosongkan invitation_opened_at
+        if ($request->input('guest_invitation_status') === 'Sent') {
+            $request->merge([
+            'invitation_opened_at' => null,
+            ]);
+        }
+
         // Jika invitation status diubah ke "-", kosongkan sent_at dan opened_at
         if ($request->input('guest_invitation_status') === '-') {
             $request->merge([
-                'invitation_sent_at' => null,
-                'invitation_opened_at' => null,
+            'invitation_sent_at' => null,
+            'invitation_opened_at' => null,
             ]);
         }
 
