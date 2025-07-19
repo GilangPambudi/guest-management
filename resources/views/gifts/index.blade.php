@@ -355,7 +355,7 @@
                     }
                 ],
                 order: [
-                    [8, 'desc']
+                    [7, 'desc']
                 ], // Order by created_at desc
                 drawCallback: function() {
                     // Refresh summary when table redraws (optional, might be too frequent)

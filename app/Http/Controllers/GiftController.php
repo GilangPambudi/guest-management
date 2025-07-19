@@ -145,10 +145,16 @@ class GiftController extends Controller
                 return $payment->payment_type ?: 'Not Set';
             })
             ->addColumn('transaction_time', function ($payment) {
-                return $payment->created_at->format('d/m/Y H:i');
+                // Convert to Asia/Jakarta timezone (UTC+7)
+                return $payment->created_at
+                    ? $payment->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i')
+                    : '-';
             })
             ->addColumn('updated_time', function ($payment) {
-                return $payment->updated_at->format('d/m/Y H:i');
+                // Convert to Asia/Jakarta timezone (UTC+7)
+                return $payment->updated_at
+                    ? $payment->updated_at->timezone('Asia/Jakarta')->format('d/m/Y H:i')
+                    : '-';
             })
             ->addColumn('action', function ($payment) {
                 $btn = '<button class="btn btn-info btn-sm mr-1" onclick="showPaymentDetail(' . $payment->payment_id . ')" title="View payment details">

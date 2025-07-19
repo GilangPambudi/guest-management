@@ -494,7 +494,7 @@
                                     data + '</span>';
                             }
                         },
-                        orderable: false
+                        orderable: true
                     },
                     {
                         data: 'guest_attendance_status',
@@ -508,7 +508,7 @@
                                 return '<span class="badge badge-secondary">' + data + '</span>';
                             }
                         },
-                        orderable: false
+                        orderable: true
                     }, {
                         data: 'guest_arrival_time',
                         name: 'guest_arrival_time',
