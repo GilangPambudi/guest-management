@@ -127,16 +127,17 @@ class PaymentController extends Controller
         
         $createdAt = \Carbon\Carbon::parse($existingPayment->created_at);
         $now = \Carbon\Carbon::now();
+        $minutesSinceCreated = $now->diffInMinutes($createdAt);
         $hoursSinceCreated = $now->diffInHours($createdAt);
-        
+
         $message = '';
         if ($existingPayment->transaction_status === 'settlement') {
-            $message = 'Terima kasih telah memberikan hadiah untuk pernikahan ' . $invitation->groom_name . ' & ' . $invitation->bride_name . '. Kontribusi Anda sangat berarti bagi kami! 💝';
+          $message = 'Terima kasih telah memberikan hadiah, kontribusi Anda sangat berarti bagi kami! 💝';
         } elseif ($existingPayment->transaction_status === 'pending') {
-            if ($hoursSinceCreated < 3) {
-                $message = 'Anda memiliki pembayaran yang sedang pending. Silakan selesaikan atau lanjutkan pembayaran tersebut.';
+            if ($minutesSinceCreated < 15) {
+            $message = 'Anda memiliki pembayaran yang sedang pending. Silakan selesaikan atau lanjutkan pembayaran tersebut.';
             } else {
-                $message = 'Pembayaran sebelumnya sudah expired. Anda dapat membuat pembayaran baru.';
+            $message = 'Pembayaran sebelumnya sudah expired. Anda dapat membuat pembayaran baru.';
             }
         }
         
