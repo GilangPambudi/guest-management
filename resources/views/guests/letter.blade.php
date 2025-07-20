@@ -57,7 +57,7 @@
 <body class="modal-open">
     <!-- Modal Pembuka Undangan -->
     <div id="invitation-modal" class="modal-overlay">
-        {{-- <div class="d-flex justify-content-center align-items-center vh-100 overflow-y-auto"> --}}
+        <div class="d-flex justify-content-center align-items-center vh-100 overflow-y-auto">
             <div class="d-flex flex-column text-center p-4">
                 <h2 class="font-esthetic mb-4 text-black" style="font-size: 2.25rem;">The Wedding Of</h2>
 
@@ -84,7 +84,7 @@
                     <i class="fa-solid fa-envelope-open fa-bounce me-2"></i>Buka Undangan
                 </button>
             </div>
-        {{-- </div> --}}
+        </div>
     </div>
 
     <!-- Music Control Button - FLOATING OUTSIDE CONTENT -->
