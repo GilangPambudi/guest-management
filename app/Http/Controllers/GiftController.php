@@ -191,7 +191,8 @@ class GiftController extends Controller
         $payments = Payment::where('invitation_id', $invitation_id)->get();
 
         $totalPayments = $payments->count();
-        $totalAmount = $payments->sum('gross_amount');
+        // Only sum gross_amount for payments with 'settlement' status
+        $totalAmount = $payments->where('transaction_status', 'settlement')->sum('gross_amount');
         $averageAmount = $totalPayments > 0 ? $totalAmount / $totalPayments : 0;
         
         $successfulPayments = $payments->where('transaction_status', 'settlement')->count();
