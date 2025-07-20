@@ -20,10 +20,12 @@
                     <div class="row">
                         <!-- Card 1: Nama Pengantin -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #f3e8ff 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <h5 class="mb-1 font-weight-bold text-primary" style="font-size: 1.2rem;">
-                                        {{ $invitation->groom_name }}  
+                                        {{ $invitation->groom_name }}
                                     </h5>
                                     <h5 class="mb-1 font-weight-bold" style="font-size: 1.2rem; color: #e75480;">
                                         <i class="fa fa-heart mx-1"></i>
@@ -36,8 +38,10 @@
                         </div>
                         <!-- Card 2: Tanggal -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #ffe5ec 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-calendar fa-2x mb-2" style="color: #a370f7;"></i>
                                     <div class="font-weight-bold text-secondary">Tanggal</div>
                                     <div class="text-dark">
@@ -48,20 +52,25 @@
                         </div>
                         <!-- Card 3: Waktu -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #e0f7fa 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-clock fa-2x mb-2" style="color: #00bcd4;"></i>
                                     <div class="font-weight-bold text-secondary">Waktu</div>
                                     <div class="text-dark">
-                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_start)->format('H:i') }} -
+                                        {{ \Carbon\Carbon::parse($invitation->wedding_time_end)->format('H:i') }} WIB
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <!-- Card 4: Tempat -->
                         <div class="col-md-3 mb-2">
-                            <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
-                                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                            <div class="card h-100 shadow-sm"
+                                style="background: linear-gradient(135deg, #f8fafc 60%, #fff3cd 100%); border: none;">
+                                <div
+                                    class="card-body text-center d-flex flex-column justify-content-center align-items-center">
                                     <i class="fa fa-map-marker-alt fa-2x mb-2" style="color: #ffc107;"></i>
                                     <div class="font-weight-bold text-secondary">Tempat</div>
                                     <div class="text-dark">
@@ -121,12 +130,19 @@
             <div class="row mt-4">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">History</h5>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="card-title">Recent Check-ins</h5>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-outline-primary btn-sm" onclick="$('#recentCheckinsTable').DataTable().ajax.reload(null, false)">
+                                    <i class="fa fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-sm">
+                                <table class="table table-sm" id="recentCheckinsTable">
                                     <thead>
                                         <tr>
                                             <th>Time</th>
@@ -134,8 +150,8 @@
                                             <th>Category</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="recentCheckins">
-                                        <!-- Will be populated via AJAX -->
+                                    <tbody>
+                                        <!-- DataTables will populate -->
                                     </tbody>
                                 </table>
                             </div>
@@ -151,20 +167,24 @@
     <script>
         const invitationId = {{ $invitation->invitation_id }};
 
-        // Configure SweetAlert Toast - Simple and stable
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: false,
-            showClass: {
-            popup: 'animate__animated animate__fadeInDown animate__faster'
-            },
-            hideClass: {
-            popup: 'animate__animated animate__fadeOutUp animate__faster'
-            }
-        });
+        // Toastr config (copy dari guests/index)
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
 
         // Handle manual scan
         function handleManualScan() {
@@ -173,10 +193,7 @@
                 processGuestCheckin(input);
                 document.getElementById('manualScanInput').value = '';
             } else {
-                Toast.fire({
-                    icon: 'warning',
-                    title: 'Please enter a guest QR code'
-                });
+                toastr.warning('Please enter a guest QR code');
             }
             // Always keep focus on input
             setTimeout(() => {
@@ -188,87 +205,74 @@
         function processGuestCheckin(guestIdQrCode) {
             // Make request to welcome gate immediately
             fetch(`/invitation/${invitationId}/welcome-gate/${guestIdQrCode}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show quick success toast
-                        if (data.already_checked_in) {
-                            Toast.fire({
-                                icon: 'info',
-                                title: `${data.guest_name} - Already checked in`
-
-                            });
-                        } else {
-                            Toast.fire({
-                                icon: 'success',
-                                title: `${data.guest_name} - Check-in successful!`
-                            });
-                        }
-
-                        // Refresh recent check-ins
-                        loadRecentCheckins();
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show quick success toast
+                    if (data.already_checked_in) {
+                        toastr.info(`${data.guest_name} - Already checked in`);
                     } else {
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Guest not found',
-                            timer: 3000
-                        });
+                        toastr.success(`${data.guest_name} - Check-in successful!`);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Check-in failed, please enter valid guest ID',
-                        timer: 3000
-                    });
-                })
-                .finally(() => {
-                    // Always keep focus on input
-                    setTimeout(() => {
-                        document.getElementById('manualScanInput').focus();
-                    }, 100);
-                });
+                    // Refresh recent check-ins
+                    $('#recentCheckinsTable').DataTable().ajax.reload(null, false);
+                } else {
+                    toastr.error('Guest not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Check-in failed, please enter valid guest ID');
+            })
+            .finally(() => {
+                // Always keep focus on input
+                setTimeout(() => {
+                    document.getElementById('manualScanInput').focus();
+                }, 100);
+            });
         }
 
         // Load recent check-ins
-        function loadRecentCheckins() {
-            fetch(`/invitation/${invitationId}/recent-checkins`)
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.getElementById('recentCheckins');
-                    tbody.innerHTML = '';
+        $(document).ready(function() {
 
-                    if (data.length === 0) {
-                        tbody.innerHTML =
-                            '<tr><td colspan="3" class="text-center text-muted">No check-ins today</td></tr>';
-                        return;
-                    }
 
-                    data.forEach(guest => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${new Date(guest.guest_arrival_time).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</td>
-                            <td>${guest.guest_name}</td>
-                            <td>${guest.guest_category || '-'}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading recent check-ins:', error);
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Failed to load recent check-ins'
-                    });
-                });
-        }
+            // Inisialisasi DataTable
+            $('#recentCheckinsTable').DataTable({
+                ajax: {
+                    url: '/invitation/{{ $invitation->invitation_id }}/recent-checkins',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'guest_arrival_time', defaultContent: '-' },
+                    { data: 'guest_name', defaultContent: '-' },
+                    { data: 'guest_category', defaultContent: '-' }
+                ],
+                paging: false,
+                searching: false,
+                info: false,
+                order: [[0, 'desc']],
+                language: {
+                    emptyTable: "No check-ins today"
+                }
+            });
+
+            // Optional: auto-refresh setiap 15 detik
+            setInterval(function() {
+                $('#recentCheckinsTable').DataTable().ajax.reload(null, false);
+            }, 120000);
+
+            // Tambah: tombol refresh manual dengan toastr
+            $(document).on('click', '.btn-outline-primary.btn-sm', function() {
+                $('#recentCheckinsTable').DataTable().ajax.reload(null, false);
+                toastr.success('Recent check-ins refreshed!');
+            });
+        });
 
         // Function to maintain focus on input
         function maintainFocus() {
@@ -313,21 +317,14 @@
 
         // Load recent check-ins on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Show welcome toast
-            Toast.fire({
-                icon: 'success',
-                title: 'Scanner Ready!'
-            });
+
+            // Show welcome toastr
+            toastr.success('Scanner Ready!');
 
             // Ensure input is focused on page load
             setTimeout(() => {
                 document.getElementById('manualScanInput').focus();
             }, 100);
-
-            loadRecentCheckins();
-
-            // Auto-refresh recent check-ins every 15 seconds
-            setInterval(loadRecentCheckins, 15000);
 
             // Maintain focus every 2 seconds (as backup)
             setInterval(maintainFocus, 2000);

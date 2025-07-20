@@ -333,7 +333,7 @@
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(function() {
                     toastr.options = {
-                        "positionClass": "toast-top-center",
+                        "positionClass": "toast-top-right",
                     };
                     toastr.success('QR Code ID copied to clipboard!');
                 }).catch(function(err) {
@@ -356,7 +356,7 @@
             document.execCommand("copy");
             document.body.removeChild(tempInput);
             toastr.options = {
-                "positionClass": "toast-bottom-right",
+                "positionClass": "toast-top-right",
             };
             toastr.success('QR Code ID copied to clipboard!');
         }
@@ -754,9 +754,9 @@
                 $('#clear-selection').click();
 
                 toastr.options = {
-                    "positionClass": "toast-bottom-right",
+                    "positionClass": "toast-top-right",
                 };
-                toastr.info('Filters have been reset');
+                toastr.success('Filters have been reset');
             }); // Reload DataTable when modal is closed (after create/update)
             $('#myModal').on('hidden.bs.modal', function() {
                 // Optional: Additional reload for safety, but AJAX success handlers should handle it

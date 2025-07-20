@@ -373,7 +373,8 @@ class GuestController extends Controller
         // Generate guest_id_qr_code
         $client = new Client();
         $nanoId = $client->generateId(10); // Generate 10 character NanoID
-        $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
+        $cleanName = preg_replace('/[^a-zA-Z0-9 ]/', '', $request->input('guest_name')); // Hapus simbol
+        $guestNameSlug = str_replace(' ', '-', strtolower($cleanName));
         $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
         // Generate QR Code
@@ -469,7 +470,8 @@ class GuestController extends Controller
             // Generate guest_id_qr_code baru
             $client = new Client();
             $nanoId = $client->generateId(10); // Generate 10 character NanoID
-            $guestNameSlug = str_replace(' ', '-', strtolower($request->input('guest_name')));
+            $cleanName = preg_replace('/[^a-zA-Z0-9 ]/', '', $request->input('guest_name')); // Hapus simbol
+            $guestNameSlug = str_replace(' ', '-', strtolower($cleanName));
             $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
             // Generate QR Code baru
@@ -679,7 +681,8 @@ class GuestController extends Controller
                         // Generate unique ID dan QR Code
                         $client = new Client();
                         $nanoId = $client->generateId(10);
-                        $guestNameSlug = str_replace(' ', '-', strtolower($rowData['guest_name']));
+                        $cleanName = preg_replace('/[^a-zA-Z0-9 ]/', '', $rowData['guest_name']); // Hapus simbol
+                        $guestNameSlug = str_replace(' ', '-', strtolower($cleanName));
                         $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
                         // Generate QR Code
@@ -924,15 +927,15 @@ class GuestController extends Controller
             ->limit(10)
             ->get(['guest_name', 'guest_category', 'guest_attendance_status', 'guest_arrival_time'])
             ->map(function ($guest) {
-                if ($guest->guest_arrival_time) {
-                    $guest->guest_arrival_time_formatted = \Carbon\Carbon::parse($guest->guest_arrival_time)
-                        ->setTimezone('Asia/Jakarta')
-                        ->format('H:i:s');
-                }
+                // Format waktu untuk kolom DataTable
+                $guest->guest_arrival_time = $guest->guest_arrival_time
+                    ? \Carbon\Carbon::parse($guest->guest_arrival_time)->setTimezone('Asia/Jakarta')->format('H:i:s')
+                    : '-';
                 return $guest;
             });
 
-        return response()->json($guests);
+        // DataTables expects { data: [...] }
+        return response()->json(['data' => $guests]);
     }
 
     public function sendWhatsapp($invitation_id, $guest_id)
