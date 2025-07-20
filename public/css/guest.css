@@ -28,6 +28,10 @@ body {
     align-items: center;
     overflow: hidden;
     box-sizing: border-box;
+    #navbar-menu-wrapper {
+        display: none !important; /* Hide navbar on mobile */
+    }
+
 }
 
 .invitation-content {
@@ -94,9 +98,6 @@ body:not(.modal-open) {
 @media (max-width: 991.98px) {
     .invitation-content {
         padding-bottom: 4rem;
-    }
-    .modal-overlay {
-        display: none !important;
     }
 }
 
