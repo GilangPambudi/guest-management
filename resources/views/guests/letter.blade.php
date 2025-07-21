@@ -745,7 +745,7 @@
                     .finally(() => {
                         // Hide modal and show invitation content
                         setTimeout(() => {
-                            modal.style.display = 'none';
+                            modal.classList.add('hidden');
                             document.body.classList.remove('modal-open');
                             invitationContent.classList.add('show');
 
@@ -790,7 +790,7 @@
 
             function onScroll() {
                 let scrollPos = window.scrollY || window.pageYOffset;
-                let offset = 80; // adjust if needed for sticky nav height
+                let offset = window.innerWidth <= 991.98 ? 120 : 80; // Higher offset for mobile due to bottom navbar
                 let activeIdx = 0;
                 for (let i = 0; i < sections.length; i++) {
                     const sec = document.getElementById(sections[i].id);
@@ -814,12 +814,15 @@
             navLinks.forEach(link => {
                 link.addEventListener("click", function(e) {
                     const href = this.getAttribute("href");
+                    console.log('Navbar clicked:', href); // Debug log
                     if (href && href.startsWith("#")) {
                         e.preventDefault();
                         const target = document.querySelector(href);
+                        console.log('Target element:', target); // Debug log
                         if (target) {
-                            const y = target.getBoundingClientRect().top + window.pageYOffset -
-                                70; // adjust offset
+                            const offset = window.innerWidth <= 991.98 ? 100 : 70; // Higher offset for mobile
+                            const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                            console.log('Scrolling to:', y); // Debug log
                             window.scrollTo({
                                 top: y,
                                 behavior: "smooth"
