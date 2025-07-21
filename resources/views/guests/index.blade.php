@@ -195,6 +195,9 @@
                             <button id="refresh-table" class="btn mr-1 btn-sm btn-outline-success" title="Refresh Data Table">
                                 <i class="fa fa-sync"></i> Refresh Table
                             </button>
+                            <a href="{{ url('/' . $invitation->slug . '/preview') }}" class="btn btn-outline-info btn-sm mr-1" target="_blank">
+                                <i class="fa fa-external-link"></i> Preview Invitation
+                            </a>
                             <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
                                 data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
                                 <i class="fas fa-filter"></i> Filters

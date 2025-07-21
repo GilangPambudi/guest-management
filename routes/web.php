@@ -135,6 +135,13 @@ Route::post('/wishes/update/{slug}/{guest_id_qr_code}', [WishController::class, 
 // Route::get('/old/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'old_invitation_letter']);
 Route::get('/welcome-gate/{guest_id_qr_code}', [GuestController::class, 'welcome_gate']);
 
+// Route for previewing the invitation letter
+Route::get('/{slug}/preview', [PublicInvitationController::class, 'preview'])
+    ->where([
+        'slug' => '[a-z0-9\-]+',  // Only lowercase letters, numbers, and hyphens
+    ])
+    ->name('public.invitation-preview');
+
 // Invitation route with constraints to avoid conflicts
 Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'letter'])
     ->where([

@@ -61,8 +61,9 @@ class InvitationController extends Controller
             ->addIndexColumn()
             ->addColumn('action', function ($event) {
                 $btn = '<a href="' . url('/invitation/' . $event->invitation_id) . '/show' . '" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</a> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit </button> ';
                 $btn .= '<a href="' . url('/invitation/' . $event->invitation_id . '/guests') . '" class="btn btn-success btn-sm"><i class="fas fa-users"></i> Manage Guests</a> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm ml-1"><i class="fas fa-edit"></i> Edit </button> ';
+                $btn .= '<a href="' . url($event->slug . '/preview') . '" class="btn btn-primary btn-sm" target="_blank"><i class="fa fa-external-link"></i> Preview</a> ';
 
                 return $btn;
             })

@@ -72,6 +72,41 @@ class PublicInvitationController extends Controller
             'weddingImage' => $weddingImage
         ]);
     }
+
+    public function preview($slug)
+    {
+        // Cari invitation berdasarkan slug
+        $invitation = Invitation::where('slug', $slug)->first();
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+
+        // Kirim semua data invitation ke template
+        return view('guests.preview', [
+            'invitation' => $invitation,
+            // Data yang sesuai dengan migration fields
+            'groom_name' => $invitation->groom_name,
+            'bride_name' => $invitation->bride_name,
+            'groom_alias' => $invitation->groom_alias,
+            'bride_alias' => $invitation->bride_alias,
+            'groom_image' => $invitation->groom_image,
+            'bride_image' => $invitation->bride_image,
+            'groom_child_number' => $invitation->groom_child_number,
+            'bride_child_number' => $invitation->bride_child_number,
+            'groom_father' => $invitation->groom_father,
+            'groom_mother' => $invitation->groom_mother,
+            'bride_father' => $invitation->bride_father,
+            'bride_mother' => $invitation->bride_mother,
+            'wedding_date' => $invitation->wedding_date,
+            'wedding_time_start' => $invitation->wedding_time_start,
+            'wedding_time_end' => $invitation->wedding_time_end,
+            'wedding_venue' => $invitation->wedding_venue,
+            'wedding_location' => $invitation->wedding_location,
+            'wedding_maps' => $invitation->wedding_maps,
+            'wedding_image' => $invitation->wedding_image
+        ]);
+        
+    }
     
     public function letter($slug, $guest_id_qr_code)
     {
