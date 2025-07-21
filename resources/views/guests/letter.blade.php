@@ -746,8 +746,15 @@
                         // Hide modal and show invitation content
                         setTimeout(() => {
                             modal.classList.add('hidden');
+                            modal.style.display = 'none'; // Extra fallback
                             document.body.classList.remove('modal-open');
                             invitationContent.classList.add('show');
+                            
+                            // Reset scroll to top and initialize navbar
+                            window.scrollTo(0, 0);
+                            setTimeout(() => {
+                                initializeNavbar();
+                            }, 100);
 
                             // Show music control and auto-play music after modal is closed
                             setTimeout(() => {
@@ -788,16 +795,35 @@
             ];
             const navLinks = document.querySelectorAll("#navbar-menu .nav-link");
 
+            // Initialize navbar with Home as active
+            function initializeNavbar() {
+                console.log('Initializing navbar - setting Home as active');
+                navLinks.forEach((link, idx) => {
+                    if (idx === 0) { // Home is index 0
+                        link.classList.add("active");
+                        console.log('Set active:', link.href);
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            }
+
             function onScroll() {
                 let scrollPos = window.scrollY || window.pageYOffset;
                 let offset = window.innerWidth <= 991.98 ? 120 : 80; // Higher offset for mobile due to bottom navbar
                 let activeIdx = 0;
+                console.log('OnScroll - scrollPos:', scrollPos, 'offset:', offset);
+                
                 for (let i = 0; i < sections.length; i++) {
                     const sec = document.getElementById(sections[i].id);
                     if (sec && sec.offsetTop - offset <= scrollPos) {
                         activeIdx = i;
+                        console.log('Active section:', sections[i].id, 'offsetTop:', sec.offsetTop);
                     }
                 }
+                
+                console.log('Setting active index:', activeIdx, 'section:', sections[activeIdx]?.id);
+                
                 navLinks.forEach((link, idx) => {
                     if (idx === activeIdx) {
                         link.classList.add("active");
@@ -807,8 +833,19 @@
                 });
             }
 
+            // Initialize navbar first
+            initializeNavbar();
+            
             window.addEventListener("scroll", onScroll);
-            onScroll();
+            
+            // Run onScroll after a short delay to ensure content is ready
+            setTimeout(() => {
+                if (document.body.classList.contains('modal-open')) {
+                    // If modal is still open, don't run scrollspy yet
+                    return;
+                }
+                onScroll();
+            }, 1000);
 
             // Smooth scroll for navbar links
             navLinks.forEach(link => {
