@@ -869,12 +869,13 @@
                         success: function(res) {
                             if (res.success) {
                                 toastr.success('WhatsApp message sent successfully!');
-                                // Refresh DataTable to update status
-                                dataGuest.ajax.reload(null, false);
                             } else {
                                 toastr.error(res.message || 'Failed to send WhatsApp.');
-                                dataGuest.ajax.reload(null, false);
                             }
+                            
+                            // ALWAYS refresh DataTable since status is always updated in database
+                            // (either "Sent" for valid numbers or "Not Found" for invalid numbers)
+                            dataGuest.ajax.reload(null, false);
                         },
                         error: function(err) {
                             var errorMessage = 'Failed to send WhatsApp.';
@@ -923,17 +924,19 @@
                         },
                         success: function(res) {
                             if (res.success) {
-                                toastr.success(
-                                    'Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
-                                // Refresh DataTable untuk memperbarui status
-                                dataGuest.ajax.reload(null, false);
-                                // Clear selection after successful bulk send
-                                selectedGuests = [];
-                                updateBulkActions();
-                                $('.guest-checkbox').prop('checked', false);
+                                toastr.success(res.message || 'Pesan WhatsApp berhasil dikirim ke tamu terpilih!');
                             } else {
                                 toastr.error(res.message || 'Gagal mengirim WhatsApp bulk.');
                             }
+                            
+                            // ALWAYS refresh DataTable since status is always updated in database
+                            // (either "Sent" for valid numbers or "Not Found" for invalid numbers)
+                            dataGuest.ajax.reload(null, false);
+                            
+                            // Clear selection after bulk operation
+                            selectedGuests = [];
+                            updateBulkActions();
+                            $('.guest-checkbox').prop('checked', false);
                         },
                         error: function(err) {
                             var errorMessage = 'Gagal mengirim WhatsApp bulk.';
