@@ -192,10 +192,12 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header p-2 d-flex justify-content-end">
-                            <button id="refresh-table" class="btn mr-1 btn-sm btn-outline-success" title="Refresh Data Table">
+                            <button id="refresh-table" class="btn mr-1 btn-sm btn-outline-success"
+                                title="Refresh Data Table">
                                 <i class="fa fa-sync"></i> Refresh Table
                             </button>
-                            <a href="{{ url('/' . $invitation->slug . '/preview') }}" class="btn btn-outline-info btn-sm mr-1" target="_blank">
+                            <a href="{{ url('/' . $invitation->slug . '/preview') }}"
+                                class="btn btn-outline-info btn-sm mr-1" target="_blank">
                                 <i class="fa fa-external-link"></i> Preview Invitation
                             </a>
                             <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse"
@@ -491,6 +493,9 @@
                                     data + '</span>';
                             } else if (data === 'Pending') {
                                 return '<span class="badge badge-warning" title="Invitation pending">' +
+                                    data + '</span>';
+                            } else if (data === 'Not Found') {
+                                return '<span class="badge badge-danger" title="Invitation Not Found">' +
                                     data + '</span>';
                             } else {
                                 return '<span class="badge badge-secondary" title="Invitation not sent">' +
@@ -868,6 +873,7 @@
                                 dataGuest.ajax.reload(null, false);
                             } else {
                                 toastr.error(res.message || 'Failed to send WhatsApp.');
+                                dataGuest.ajax.reload(null, false);
                             }
                         },
                         error: function(err) {
@@ -946,10 +952,10 @@
         });
 
         $(document).on('click', '#refresh-table', function() {
-        if (window.dataGuest && $.fn.DataTable.isDataTable('#guest-table')) {
-            window.dataGuest.ajax.reload(null, false);
-            toastr.success('Data table refreshed');
-        }
-    });
+            if (window.dataGuest && $.fn.DataTable.isDataTable('#guest-table')) {
+                window.dataGuest.ajax.reload(null, false);
+                toastr.success('Data table refreshed');
+            }
+        });
     </script>
 @endsection

@@ -363,7 +363,7 @@ class GuestController extends Controller
             ],
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
-            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
+            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending,Not Found',
         ]);
 
         if ($validator->fails()) {
@@ -447,7 +447,7 @@ class GuestController extends Controller
             ],
             'guest_address' => 'required',
             'guest_attendance_status' => 'required',
-            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending',
+            'guest_invitation_status' => 'required|in:-,Sent,Opened,Pending,Not Found',
         ]);
 
         if ($validator->fails()) {
@@ -503,6 +503,14 @@ class GuestController extends Controller
 
         // Jika invitation status diubah ke "-", kosongkan sent_at dan opened_at
         if ($request->input('guest_invitation_status') === '-') {
+            $request->merge([
+                'invitation_sent_at' => null,
+                'invitation_opened_at' => null,
+            ]);
+        }
+
+        // Jika invitation status diubah ke "Not Found", kosongkan sent_at dan opened_at
+        if ($request->input('guest_invitation_status') === 'Not Found') {
             $request->merge([
                 'invitation_sent_at' => null,
                 'invitation_opened_at' => null,
@@ -994,17 +1002,34 @@ class GuestController extends Controller
             ]);
 
             if ($response->successful()) {
-                // Update invitation status to "Sent" when WhatsApp is successfully sent
-                $guest->update([
-                    'guest_invitation_status' => 'Sent',
-                    'invitation_sent_at' => now()
-                ]);
+                $responseData = $response->json();
+                
+                // Check if the API response indicates success
+                if (isset($responseData['status']) && $responseData['status'] === true) {
+                    // Update invitation status to "Sent" when WhatsApp is successfully sent
+                    $guest->update([
+                        'guest_invitation_status' => 'Sent',
+                        'invitation_sent_at' => now()
+                    ]);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'WhatsApp message sent successfully',
-                    'data' => $response->json()
-                ]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'WhatsApp message sent successfully',
+                        'data' => $responseData
+                    ]);
+                } else {
+                    // API returned success HTTP status but operation failed (e.g., invalid number)
+                    $guest->update([
+                        'guest_invitation_status' => 'Not Found'
+                    ]);
+
+                    $reason = $responseData['reason'] ?? 'Unknown error';
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Failed to send WhatsApp message: {$reason}",
+                        'data' => $responseData
+                    ]);
+                }
             } else {
                 return response()->json([
                     'success' => false,
@@ -1042,6 +1067,7 @@ class GuestController extends Controller
             $results = [];
             $successCount = 0;
             $failedCount = 0;
+            $notFoundCount = 0;
 
             foreach ($guestIds as $guestId) {
                 $guest = Guest::where('guest_id', $guestId)
@@ -1050,6 +1076,12 @@ class GuestController extends Controller
 
                 if (!$guest || !$guest->guest_contact) {
                     $failedCount++;
+                    $results[] = [
+                        'guest_id' => $guestId,
+                        'guest_name' => $guest ? $guest->guest_name : 'Unknown',
+                        'success' => false,
+                        'reason' => 'Guest not found or no contact number'
+                    ];
                     continue;
                 }
 
@@ -1079,22 +1111,48 @@ class GuestController extends Controller
                 ]);
 
                 if ($response->successful()) {
-                    $successCount++;
-                    // Update invitation status to "Sent" when WhatsApp is successfully sent
-                    $guest->update([
-                        'guest_invitation_status' => 'Sent',
-                        'invitation_sent_at' => now()
-                    ]);
+                    $responseData = $response->json();
+                    
+                    // Check if the API response indicates success
+                    if (isset($responseData['status']) && $responseData['status'] === true) {
+                        $successCount++;
+                        // Update invitation status to "Sent" when WhatsApp is successfully sent
+                        $guest->update([
+                            'guest_invitation_status' => 'Sent',
+                            'invitation_sent_at' => now()
+                        ]);
+                        
+                        $results[] = [
+                            'guest_id' => $guestId,
+                            'guest_name' => $guest->guest_name,
+                            'success' => true,
+                            'response' => $responseData
+                        ];
+                    } else {
+                        // API returned success HTTP status but operation failed (e.g., invalid number)
+                        $notFoundCount++;
+                        $guest->update([
+                            'guest_invitation_status' => 'Not Found'
+                        ]);
+                        
+                        $results[] = [
+                            'guest_id' => $guestId,
+                            'guest_name' => $guest->guest_name,
+                            'success' => false,
+                            'reason' => $responseData['reason'] ?? 'Number not found or invalid',
+                            'response' => $responseData
+                        ];
+                    }
                 } else {
                     $failedCount++;
+                    $results[] = [
+                        'guest_id' => $guestId,
+                        'guest_name' => $guest->guest_name,
+                        'success' => false,
+                        'reason' => 'HTTP request failed',
+                        'response' => $response->json()
+                    ];
                 }
-
-                $results[] = [
-                    'guest_id' => $guestId,
-                    'guest_name' => $guest->guest_name,
-                    'success' => $response->successful(),
-                    'response' => $response->json()
-                ];
 
                 // Add small delay to prevent rate limiting
                 usleep(rand(5, 10) * 1000000); // 5-10 second delay
@@ -1102,10 +1160,11 @@ class GuestController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "WhatsApp sent: {$successCount} success, {$failedCount} failed",
+                'message' => "WhatsApp sent: {$successCount} success, {$notFoundCount} not found, {$failedCount} failed",
                 'data' => [
                     'total' => count($guestIds),
                     'success_count' => $successCount,
+                    'not_found_count' => $notFoundCount,
                     'failed_count' => $failedCount,
                     'results' => $results
                 ]
