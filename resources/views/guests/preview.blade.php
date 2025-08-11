@@ -388,14 +388,14 @@
         </svg>
     </div>
 
-    <!-- RSVP -->
-    <section class="bg-body-tertiary py-5 animate-section" id="rsvp" data-animation="zoom-in">
+    <!-- RVSP -->
+    <section class="bg-body-tertiary py-5 animate-section" id="rvsp" data-animation="zoom-in">
         <div class="container text-center">
             <h2 class="font-esthetic mb-4" style="font-size: 2rem;">Konfirmasi Kehadiran</h2>
             <p class="mb-2" style="font-size: 0.95rem;">Mohon konfirmasi kehadiran Anda pada acara pernikahan kami:</p>
             
-            <!-- Default RSVP Buttons -->
-            <div id="rsvp-buttons" class="d-flex justify-content-center gap-3">
+            <!-- Default RVSP Buttons -->
+            <div id="rvsp-buttons" class="d-flex justify-content-center gap-3">
                 <button class="btn btn-sm btn-outline-danger btn-lg rounded-pill px-4" type="button" onclick="confirmAttendance('No')">
                     <i class="fa-solid fa-xmark me-2"></i>Tidak Hadir
                 </button>
@@ -404,23 +404,23 @@
                 </button>
             </div>
 
-            <!-- RSVP Status Display (Hidden by default) -->
-            <div id="rsvp-status" class="d-none">
+            <!-- RVSP Status Display (Hidden by default) -->
+            <div id="rvsp-status" class="d-none">
                 <div class="mb-3">
-                    <h4 class="mb-2" id="rsvp-status-title">
+                    <h4 class="mb-2" id="rvsp-status-title">
                         <!-- Will be populated by JavaScript -->
                     </h4>
-                    <p class="mb-3" id="rsvp-status-message">
+                    <p class="mb-3" id="rvsp-status-message">
                         <!-- Will be populated by JavaScript -->
                     </p>
                 </div>
-                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" onclick="editRSVP()">
+                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" onclick="editRVSP()">
                     <i class="fa-solid fa-pen-to-square me-2"></i>Ubah Konfirmasi
                 </button>
             </div>
 
-            <!-- Edit RSVP Options (Hidden by default) -->
-            <div id="rsvp-edit" class="d-none">
+            <!-- Edit RVSP Options (Hidden by default) -->
+            <div id="rvsp-edit" class="d-none">
                 <div class="d-flex justify-content-center gap-2 mb-3">
                     <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="confirmAttendance('No')">
                         <i class="fa-solid fa-xmark me-2"></i>Tidak Hadir
@@ -871,7 +871,7 @@
             });
         });
 
-        // RSVP Functions (Demo Mode)
+        // RVSP Functions (Demo Mode)
         function confirmAttendance(status) {
             // Show loading in SweetAlert
             Swal.fire({
@@ -886,18 +886,18 @@
 
             // Simulate API call with delay
             setTimeout(() => {
-                // Hide all RSVP sections first
-                document.getElementById('rsvp-buttons').classList.add('d-none');
-                document.getElementById('rsvp-edit').classList.add('d-none');
+                // Hide all RVSP sections first
+                document.getElementById('rvsp-buttons').classList.add('d-none');
+                document.getElementById('rvsp-edit').classList.add('d-none');
 
                 // Show status section
-                document.getElementById('rsvp-status').classList.remove('d-none');
+                document.getElementById('rvsp-status').classList.remove('d-none');
 
                 if (status === 'Yes') {
                     // Attending
-                    document.getElementById('rsvp-status-title').innerHTML =
-                        '<button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RSVP: Hadir</button>';
-                    document.getElementById('rsvp-status-message').innerHTML =
+                    document.getElementById('rvsp-status-title').innerHTML =
+                        '<button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RVSP: Hadir</button>';
+                    document.getElementById('rvsp-status-message').innerHTML =
                         'Terima kasih sudah konfirmasi!<br>Kami sangat senang bisa merayakan hari istimewa kami bersama Anda.';
 
                     // Show QR Code section
@@ -912,9 +912,9 @@
                     });
                 } else {
                     // Not attending
-                    document.getElementById('rsvp-status-title').innerHTML =
-                        '<button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RSVP: Tidak Hadir</button>';
-                    document.getElementById('rsvp-status-message').innerHTML =
+                    document.getElementById('rvsp-status-title').innerHTML =
+                        '<button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RVSP: Tidak Hadir</button>';
+                    document.getElementById('rvsp-status-message').innerHTML =
                         'Kami akan merindukan Anda!<br>Terima kasih sudah memberitahu kami. Kami mengerti dan berharap bisa merayakan bersama di lain waktu.';
 
                     // Hide QR Code section
@@ -931,16 +931,16 @@
             }, 1500); // 1.5 second delay to simulate API call
         }
 
-        function editRSVP() {
+        function editRVSP() {
             // Hide status section and show edit options
-            document.getElementById('rsvp-status').classList.add('d-none');
-            document.getElementById('rsvp-edit').classList.remove('d-none');
+            document.getElementById('rvsp-status').classList.add('d-none');
+            document.getElementById('rvsp-edit').classList.remove('d-none');
         }
 
         function cancelEdit() {
             // Hide edit options and show status section
-            document.getElementById('rsvp-edit').classList.add('d-none');
-            document.getElementById('rsvp-status').classList.remove('d-none');
+            document.getElementById('rvsp-edit').classList.add('d-none');
+            document.getElementById('rvsp-status').classList.remove('d-none');
         }
 
         // ==========================================

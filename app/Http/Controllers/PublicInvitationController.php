@@ -7,6 +7,7 @@ use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PublicInvitationController extends Controller
 {
@@ -167,7 +168,7 @@ class PublicInvitationController extends Controller
     }
 
     /**
-     * Update guest attendance status via RSVP
+     * Update guest attendance status via RVSP
      */
     public function update_attendance_ajax(Request $request, $slug, $guest_id_qr_code)
     {
@@ -205,6 +206,24 @@ class PublicInvitationController extends Controller
                 ], 404);
             }
 
+            // Cek apakah RVSP masih bisa dilakukan (3 hari sebelum acara)
+            $weddingDate = \Carbon\Carbon::parse($invitation->wedding_date);
+            $today = \Carbon\Carbon::now();
+            $daysUntilWedding = $today->diffInDays($weddingDate, false);
+
+            if ($daysUntilWedding < 3) {
+                // Hitung tanggal deadline (3 hari sebelum wedding_date)
+                $deadlineDate = $weddingDate->copy()->subDays(3);
+                $deadlineDateFormatted = $deadlineDate->locale('id')->translatedFormat('l, j F Y \p\u\k\u\l H:i');
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Konfirmasi RVSP ditutup pada {$deadlineDateFormatted} WIB.",
+                    'deadline_reached' => true,
+                    'deadline_date' => $deadlineDateFormatted
+                ], 403);
+            }
+
             $newStatus = $request->attendance_status;
             $oldStatus = $guest->guest_attendance_status;
 
@@ -220,9 +239,10 @@ class PublicInvitationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'RSVP status updated successfully',
+                'message' => 'RVSP status updated successfully',
                 'new_status' => $newStatus,
-                'old_status' => $oldStatus
+                'old_status' => $oldStatus,
+                'days_until_wedding' => $daysUntilWedding
             ]);
         } catch (\Exception $e) {
             return response()->json([

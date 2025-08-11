@@ -4,20 +4,69 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\Invitation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class InvitationController extends Controller
 {
     /**
+     * Check if the current user has access to the specified invitation
+     * Returns invitation object if accessible, aborts with 403/404 if not
+     */
+    private function checkInvitationAccess($invitation_id)
+    {
+        $invitation = Invitation::find($invitation_id);
+        
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+        
+        // If user is admin, allow access to all invitations
+        if (Auth::user()->role === 'admin') {
+            return $invitation;
+        }
+        
+        // If invitation has no owner, only admin can access it
+        if ($invitation->user_id === null) {
+            abort(403, 'This invitation has not been assigned to any user yet');
+        }
+        
+        // If user is regular user, only allow access to their own invitation
+        if (Auth::user()->role === 'user') {
+            if ($invitation->user_id !== Auth::id()) {
+                abort(403, 'You do not have permission to access this invitation');
+            }
+        }
+        
+        return $invitation;
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        // User-specific invitation flow
+        if (Auth::user()->role === 'user') {
+            // Check if user already has an invitation
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if ($userInvitation) {
+                // User has invitation, redirect to show page
+                return redirect()->route('invitation.show', $userInvitation->invitation_id);
+            } else {
+                // User doesn't have invitation, redirect to create page
+                return redirect()->route('invitation.create');
+            }
+        }
+
+        // Admin flow - show index page with all invitations
         $title = 'Invitation';
 
         $breadcrumb = (object)[
@@ -31,7 +80,7 @@ class InvitationController extends Controller
 
         $activeMenu = 'invitation';
 
-        // Ambil semua data invitation dengan relasi guests untuk counting
+        // Admin bisa lihat semua invitation
         $invitations = Invitation::withCount('guests')->get();
 
         return view('invitation.index', [
@@ -45,20 +94,48 @@ class InvitationController extends Controller
 
     public function list(Request $request)
     {
-        $invitation = Invitation::select(
-            'invitation_id',
-            'wedding_name',
-            'slug',
-            'wedding_date',
-            'wedding_time_start',
-            'wedding_time_end',
-            'wedding_venue',
-            'wedding_location',
-            'wedding_maps',
-        );
+        // Role-based filtering query
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation dengan info user
+            $invitation = Invitation::with('user:user_id,name')
+                ->select(
+                    'invitation_id',
+                    'user_id',
+                    'wedding_name',
+                    'slug',
+                    'wedding_date',
+                    'wedding_time_start',
+                    'wedding_time_end',
+                    'wedding_venue',
+                    'wedding_location',
+                    'wedding_maps',
+                );
+        } else {
+            // User hanya bisa lihat invitation milik sendiri
+            $invitation = Invitation::where('user_id', Auth::id())
+                ->select(
+                    'invitation_id',
+                    'user_id',
+                    'wedding_name',
+                    'slug',
+                    'wedding_date',
+                    'wedding_time_start',
+                    'wedding_time_end',
+                    'wedding_venue',
+                    'wedding_location',
+                    'wedding_maps',
+                );
+        }
 
         return DataTables::of($invitation)
             ->addIndexColumn()
+            ->addColumn('owner_info', function ($event) {
+                if ($event->user) {
+                    return '<span class="badge badge-success">' . $event->user->name . '</span>';
+                } else {
+                    return '<span class="badge badge-warning">Unassigned</span>';
+                }
+            })
             ->addColumn('action', function ($event) {
                 $btn = '<a href="' . url('/invitation/' . $event->invitation_id) . '/show' . '" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</a> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/invitation/' . $event->invitation_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit </button> ';
@@ -67,7 +144,7 @@ class InvitationController extends Controller
 
                 return $btn;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'owner_info'])
             ->make(true);
     }
 
@@ -168,6 +245,15 @@ class InvitationController extends Controller
             $data['wedding_image'] = 'invitations/wedding-image/' . $filename;
         }
 
+        // Set user_id based on role
+        if (Auth::user()->role === 'admin') {
+            // Admin can create invitation without owner (can be assigned later)
+            $data['user_id'] = null;
+        } else {
+            // Regular user creates invitation for themselves
+            $data['user_id'] = Auth::id();
+        }
+
         Invitation::create($data);
 
         return response()->json(['success' => 'Invitation created successfully.']);
@@ -246,14 +332,33 @@ class InvitationController extends Controller
             $data['wedding_image'] = 'invitations/wedding-image/' . $filename;
         }
 
-        Invitation::create($data);
+        // Set user_id based on role
+        if (Auth::user()->role === 'admin') {
+            // Admin can create invitation without owner (can be assigned later)
+            $data['user_id'] = null;
+        } else {
+            // Regular user creates invitation for themselves
+            $data['user_id'] = Auth::id();
+        }
 
-        return redirect()->route('invitation.index')
-            ->with('success', 'Invitation created successfully.');
+        $invitation = Invitation::create($data);
+
+        // Role-based redirect
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('invitation.index')
+                ->with('success', 'Invitation created successfully.');
+        } else {
+            // User langsung diarahkan ke invitation mereka
+            return redirect()->route('invitation.show', $invitation->invitation_id)
+                ->with('success', 'Invitation created successfully.');
+        }
     }
 
     public function show($id)
     {
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
+
         $invitation = Invitation::with(['guests' => function ($query) {
             $query->orderBy('guest_name');
         }])->find($id);
@@ -280,9 +385,17 @@ class InvitationController extends Controller
 
         // Get statistics
         $totalGuests = $invitation->guests->count();
+        $notSentGuests = $invitation->guests->where('guest_invitation_status', '-')->count();
+        $sentGuests = $invitation->guests->where('guest_invitation_status', 'Sent')->count();
+
+        $unconfirmedGuests = $invitation->guests
+            ->where('guest_invitation_status', 'Opened')
+            ->where('guest_attendance_status', '-')
+            ->count();
+
         $attendedGuests = $invitation->guests->where('guest_attendance_status', 'Yes')->count();
-        $pendingGuests = $invitation->guests->where('guest_attendance_status', 'Pending')->count();
         $notAttendedGuests = $invitation->guests->where('guest_attendance_status', 'No')->count();
+       
 
         // Get guest categories
         $guestCategories = $invitation->guests->groupBy('guest_category')->map->count();
@@ -295,15 +408,19 @@ class InvitationController extends Controller
             'invitation' => $invitation,
             'totalGuests' => $totalGuests,
             'attendedGuests' => $attendedGuests,
-            'pendingGuests' => $pendingGuests,
             'notAttendedGuests' => $notAttendedGuests,
-            'guestCategories' => $guestCategories
+            'unconfirmedGuests' => $unconfirmedGuests,
+            'guestCategories' => $guestCategories,
+            'notSentGuests' => $notSentGuests,
+            'sentGuests' => $sentGuests
         ]);
     }
 
     public function show_ajax($id)
     {
-        $invitation = Invitation::find($id);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
+
         if ($invitation) {
             $invitation->wedding_time_start = Carbon::parse($invitation->wedding_time_start)->format('H:i');
             $invitation->wedding_time_end = Carbon::parse($invitation->wedding_time_end)->format('H:i');
@@ -313,7 +430,8 @@ class InvitationController extends Controller
 
     public function edit_ajax($id)
     {
-        $invitation = Invitation::find($id);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
 
         // Format waktu menjadi hh:mm
         if ($invitation) {
@@ -329,12 +447,8 @@ class InvitationController extends Controller
      */
     public function edit($id)
     {
-        $invitation = Invitation::find($id);
-
-        if (!$invitation) {
-            return redirect()->route('invitation.index')
-                ->with('error', 'Invitation not found');
-        }
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
 
         // Format waktu menjadi hh:mm
         $invitation->wedding_time_start = Carbon::parse($invitation->wedding_time_start)->format('H:i');
@@ -393,13 +507,8 @@ class InvitationController extends Controller
             ], 422);
         }
 
-        $invitation = Invitation::find($id);
-        if (!$invitation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invitation not found'
-            ], 404);
-        }
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
 
         try {
             $data = $request->all();
@@ -497,11 +606,8 @@ class InvitationController extends Controller
             'bride_mother' => 'nullable|max:100',
         ]);
 
-        $invitation = Invitation::find($id);
-        if (!$invitation) {
-            return redirect()->route('invitation.index')
-                ->with('error', 'Invitation not found');
-        }
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
 
         try {
             $data = $request->all();
@@ -567,47 +673,83 @@ class InvitationController extends Controller
 
     public function confirm_ajax($id)
     {
-        $invitation = Invitation::find($id);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
+
         return view('invitation.confirm_ajax')->with('invitation', $invitation);
     }
 
     public function delete_ajax($id)
     {
-        $invitation = Invitation::find($id);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($id);
 
-        if ($invitation) {
-            // Cek apakah invitation memiliki guests
-            $guestCount = $invitation->guests()->count();
+        // Cek apakah invitation memiliki guests
+        $guestCount = $invitation->guests()->count();
 
-            if ($guestCount > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Cannot delete invitation. This invitation has {$guestCount} guest(s). Please delete all guests first."
-                ], 422);
-            }
-
-            // Hapus file gambar jika ada
-            if ($invitation->groom_image && file_exists(public_path($invitation->groom_image))) {
-                unlink(public_path($invitation->groom_image));
-            }
-            if ($invitation->bride_image && file_exists(public_path($invitation->bride_image))) {
-                unlink(public_path($invitation->bride_image));
-            }
-            if ($invitation->wedding_image && file_exists(public_path($invitation->wedding_image))) {
-                unlink(public_path($invitation->wedding_image));
-            }
-
-            $invitation->delete();
-
+        if ($guestCount > 0) {
             return response()->json([
-                'success' => true,
-                'message' => 'Invitation deleted successfully.'
+                'success' => false,
+                'message' => "Cannot delete invitation. This invitation has {$guestCount} guest(s). Please delete all guests first."
+            ], 422);
+        }
+
+        // Hapus file gambar jika ada
+        if ($invitation->groom_image && file_exists(public_path($invitation->groom_image))) {
+            unlink(public_path($invitation->groom_image));
+        }
+        if ($invitation->bride_image && file_exists(public_path($invitation->bride_image))) {
+            unlink(public_path($invitation->bride_image));
+        }
+        if ($invitation->wedding_image && file_exists(public_path($invitation->wedding_image))) {
+            unlink(public_path($invitation->wedding_image));
+        }
+
+        $invitation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invitation deleted successfully.'
+        ]);
+    }
+
+    /**
+     * Check slug availability for real-time validation
+     */
+    public function checkSlugAvailability(Request $request)
+    {
+        $slug = $request->input('slug');
+        
+        if (empty($slug)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Slug cannot be empty'
             ]);
         }
 
+        // Check if slug already exists
+        $exists = Invitation::where('slug', $slug)->exists();
+        
+        if ($exists) {
+            // Generate suggestions
+            $suggestions = [];
+            for ($i = 1; $i <= 3; $i++) {
+                $suggestionSlug = $slug . '-' . $i;
+                if (!Invitation::where('slug', $suggestionSlug)->exists()) {
+                    $suggestions[] = $suggestionSlug;
+                }
+            }
+            
+            return response()->json([
+                'available' => false,
+                'message' => 'Slug already taken',
+                'suggestions' => $suggestions
+            ]);
+        }
+        
         return response()->json([
-            'success' => false,
-            'message' => 'Invitation not found.'
-        ], 404);
+            'available' => true,
+            'message' => 'Slug is available'
+        ]);
     }
 }

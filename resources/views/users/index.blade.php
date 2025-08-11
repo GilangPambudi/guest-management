@@ -24,6 +24,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Invitation</th>
                         <th>Created At</th>
                         <th>Action</th>
                     </tr>
@@ -47,6 +48,51 @@
         function modalAction(url = '') {
             $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
+            });
+        }
+
+        function unassignInvitation(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will unassign the invitation from the user.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, unassign it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/users/${userId}/unassign_invitation_ajax`,
+                        type: 'POST',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: response.message
+                                });
+                                $('#users-table').DataTable().ajax.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: xhr.responseJSON ? xhr.responseJSON.message : 'Something went wrong'
+                            });
+                        }
+                    });
+                }
             });
         }
 
@@ -85,6 +131,12 @@
                         name: 'role',
                         orderable: true,
                         searchable: true
+                    },
+                    {
+                        data: 'invitation_info',
+                        name: 'invitation_info',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'created_at_formatted',

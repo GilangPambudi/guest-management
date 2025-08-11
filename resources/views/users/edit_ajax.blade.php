@@ -39,6 +39,21 @@
                     <input value="" type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Confirm new password">
                     <small id="error-password_confirmation" class="error-text form-text text-danger"></small>
                 </div>
+                
+                <div class="form-group">
+                    <label>Assigned Invitation</label>
+                    <select name="invitation_id" id="invitation_id" class="form-control">
+                        <option value="">-- No Invitation --</option>
+                        @foreach($unassignedInvitations as $invitation)
+                            <option value="{{ $invitation->invitation_id }}">{{ $invitation->wedding_name }}</option>
+                        @endforeach
+                        @if($user->invitation)
+                            <option value="{{ $user->invitation->invitation_id }}" selected>{{ $user->invitation->wedding_name }} (Current)</option>
+                        @endif
+                    </select>
+                    <small id="error-invitation_id" class="error-text form-text text-danger"></small>
+                    <small class="form-text text-muted">Select an invitation to assign to this user, or leave blank for no assignment.</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-warning">Cancel</button>

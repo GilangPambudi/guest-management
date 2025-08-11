@@ -141,10 +141,10 @@
                     <div class="card card-outline card-warning">
                         <div class="card-body text-center">
                             <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                            <h5>Belum Ada Undangan</h5>
-                            <p class="text-muted">Silakan buat undangan pertama untuk melihat dashboard.</p>
+                            <h5>No Invitations Yet</h5>
+                            <p class="text-muted">Please create your first invitation to view the dashboard.</p>
                             <a href="{{ url('/invitation') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Buat Undangan
+                                <i class="fas fa-plus"></i> Create Invitation
                             </a>
                         </div>
                     </div>

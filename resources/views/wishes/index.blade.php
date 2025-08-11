@@ -25,6 +25,9 @@
                     <a href="{{ url('/invitation/' . $invitation->invitation_id . '/show') }}" class="btn btn-info">
                         <i class="fa fa-eye"></i> View Invitation
                     </a>
+                    <a href="{{ route('wishes.export', $invitation->invitation_id) }}" class="btn btn-warning">
+                        <i class="fa fa-file-excel"></i> Download Excel
+                    </a>
                 @endif
                 <button id="refresh-table" class="btn btn-info">
                     <i class="fa fa-sync"></i> Refresh

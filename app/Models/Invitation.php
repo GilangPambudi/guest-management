@@ -11,6 +11,7 @@ class Invitation extends Model
     protected $primaryKey = 'invitation_id';
 
     protected $fillable = [
+        'user_id',
         'wedding_name',
         'slug',
         'groom_name',
@@ -79,5 +80,11 @@ class Invitation extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class, 'invitation_id', 'invitation_id');
+    }
+
+    // Relasi ke User (pemilik invitation)
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

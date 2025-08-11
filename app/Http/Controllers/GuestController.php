@@ -25,6 +25,31 @@ class GuestController extends Controller
     }
 
     /**
+     * Check invitation access permissions for current user
+     * Returns invitation object if accessible, otherwise aborts with 403/404
+     */
+    private function checkInvitationAccess($invitation_id)
+    {
+        // Find invitation or return 404
+        $invitation = Invitation::find($invitation_id);
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+
+        // Admin can access all invitations
+        if (Auth::user()->role === 'admin') {
+            return $invitation;
+        }
+
+        // User can only access their own invitation
+        if ($invitation->user_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this invitation');
+        }
+
+        return $invitation;
+    }
+
+    /**
      * Normalize phone number to 62XXX format for WhatsApp compatibility
      */
     private function normalizePhoneNumber($phoneNumber)
@@ -63,7 +88,8 @@ class GuestController extends Controller
      */
     public function index($invitation_id)
     {
-        $invitation = Invitation::findOrFail($invitation_id);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($invitation_id);
 
         // Get dynamic filter data from database
         $categories = Guest::where('invitation_id', $invitation_id)
@@ -122,6 +148,9 @@ class GuestController extends Controller
 
     public function list(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guests = Guest::select(
             'guest_id', // Tambahkan guest_id untuk checkbox
             'guest_id_qr_code',
@@ -180,6 +209,9 @@ class GuestController extends Controller
     // Method untuk bulk actions
     public function bulkAction(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $validator = Validator::make($request->all(), [
             'action' => 'required|in:delete,mark_sent,mark_pending',
             'guest_ids' => 'required|array|min:1',
@@ -300,13 +332,29 @@ class GuestController extends Controller
 
     public function create_ajax($invitation_id)
     {
-        $invitation = Invitation::findOrFail($invitation_id);
-        return view('guests.create_ajax', ['invitation' => $invitation]);
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($invitation_id);
+        
+        // Get existing categories for this invitation
+        $categories = Guest::where('invitation_id', $invitation_id)
+            ->distinct()
+            ->pluck('guest_category')
+            ->filter()
+            ->sort()
+            ->values();
+        
+        return view('guests.create_ajax', [
+            'invitation' => $invitation,
+            'categories' => $categories
+        ]);
     }
 
     // Mengecek apakah nomor sudah terdaftar atau belum
     public function check_contact(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guest_contact = $request->input('guest_contact');
         $guest_id = $request->input('guest_id'); // For edit mode
 
@@ -333,6 +381,9 @@ class GuestController extends Controller
 
     public function store_ajax(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         // Normalize phone number before validation
         $normalizedPhone = $this->normalizePhoneNumber($request->input('guest_contact'));
         if ($normalizedPhone === false) {
@@ -403,6 +454,9 @@ class GuestController extends Controller
 
     public function show_ajax($invitation_id, $id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
         $invitation = Invitation::find($invitation_id);
         return view('guests.show_ajax', ['guest' => $guest, 'invitation' => $invitation]);
@@ -410,12 +464,30 @@ class GuestController extends Controller
 
     public function edit_ajax($invitation_id, $id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
-        return view('guests.edit_ajax', ['guest' => $guest]);
+        
+        // Get existing categories for this invitation
+        $categories = Guest::where('invitation_id', $invitation_id)
+            ->distinct()
+            ->pluck('guest_category')
+            ->filter()
+            ->sort()
+            ->values();
+        
+        return view('guests.edit_ajax', [
+            'guest' => $guest,
+            'categories' => $categories
+        ]);
     }
 
     public function update_ajax(Request $request, $invitation_id, $id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         // Normalize phone number before validation
         $normalizedPhone = $this->normalizePhoneNumber($request->input('guest_contact'));
         if ($normalizedPhone === false) {
@@ -529,12 +601,18 @@ class GuestController extends Controller
 
     public function confirm_ajax($invitation_id, $id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guest = Guest::where('invitation_id', $invitation_id)->findOrFail($id);
         return view('guests.confirm_ajax', ['guest' => $guest]);
     }
 
     public function delete_ajax($invitation_id, $id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         if (request()->ajax()) {
             $guest = Guest::where('invitation_id', $invitation_id)->find($id);
             if ($guest) {
@@ -566,12 +644,18 @@ class GuestController extends Controller
 
     public function import($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $invitation = Invitation::findOrFail($invitation_id);
         return view('guests.import', ['invitation' => $invitation]);
     }
 
     public function import_process(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'file_guests' => ['required', 'mimes:xlsx']
@@ -752,6 +836,9 @@ class GuestController extends Controller
      */
     public function template($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $invitation = Invitation::findOrFail($invitation_id);
 
         // Path ke template file yang ada
@@ -815,58 +902,91 @@ class GuestController extends Controller
 
     public function scannerSelect()
     {
-        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
-            ->withCount('guests')
-            ->orderBy('wedding_date', 'desc')
-            ->get();
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation dengan select page
+            $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+                ->withCount('guests')
+                ->orderBy('wedding_date', 'desc')
+                ->get();
 
-        $title = 'Scanner';
-        $breadcrumb = (object)[
-            'title' => 'QR Scanner - Select Invitation',
-            'list' => ['Home', 'Scanner']
-        ];
-        $page = (object)[
-            'title' => 'QR Scanner'
-        ];
-        $activeMenu = 'scanner';
+            $title = 'Scanner';
+            $breadcrumb = (object)[
+                'title' => 'QR Scanner - Select Invitation',
+                'list' => ['Home', 'Scanner']
+            ];
+            $page = (object)[
+                'title' => 'QR Scanner'
+            ];
+            $activeMenu = 'scanner';
 
-        return view('scanner.select', [
-            'title' => $title,
-            'breadcrumb' => $breadcrumb,
-            'page' => $page,
-            'activeMenu' => $activeMenu,
-            'invitations' => $invitations
-        ]);
+            return view('scanner.select', [
+                'title' => $title,
+                'breadcrumb' => $breadcrumb,
+                'page' => $page,
+                'activeMenu' => $activeMenu,
+                'invitations' => $invitations
+            ]);
+        } else {
+            // User logic: direct redirect to their invitation scanner
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation) {
+                // User belum punya invitation -> redirect dengan notifikasi
+                return redirect('/invitation')
+                    ->with('error', 'Please create your invitation first!');
+            }
+
+            // User punya invitation -> langsung redirect ke scanner (URL yang benar)
+            return redirect("/scanner/{$userInvitation->invitation_id}");
+        }
     }
 
     public function guestSelect()
     {
-        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
-            ->withCount('guests')
-            ->orderBy('wedding_date', 'desc')
-            ->get();
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation dengan select page
+            $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+                ->withCount('guests')
+                ->orderBy('wedding_date', 'desc')
+                ->get();
 
-        $title = 'Guest Management';
-        $breadcrumb = (object)[
-            'title' => 'Guest Management - Select Invitation',
-            'list' => ['Home', 'Guests']
-        ];
-        $page = (object)[
-            'title' => 'Guest Management'
-        ];
-        $activeMenu = 'guests';
+            $title = 'Guest Management';
+            $breadcrumb = (object)[
+                'title' => 'Guest Management - Select Invitation',
+                'list' => ['Home', 'Guests']
+            ];
+            $page = (object)[
+                'title' => 'Guest Management'
+            ];
+            $activeMenu = 'guests';
 
-        return view('guests.select', [
-            'title' => $title,
-            'breadcrumb' => $breadcrumb,
-            'page' => $page,
-            'activeMenu' => $activeMenu,
-            'invitations' => $invitations
-        ]);
+            return view('guests.select', [
+                'title' => $title,
+                'breadcrumb' => $breadcrumb,
+                'page' => $page,
+                'activeMenu' => $activeMenu,
+                'invitations' => $invitations
+            ]);
+        } else {
+            // User logic: direct redirect to their invitation
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation) {
+                // User belum punya invitation -> redirect dengan notifikasi
+                return redirect('/invitation')
+                    ->with('error', 'Please create your invitation first!');
+            }
+
+            // User punya invitation -> langsung redirect ke guest management
+            return redirect("/invitation/{$userInvitation->invitation_id}/guests");
+        }
     }
 
     public function scanner($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $invitation = Invitation::findOrFail($invitation_id);
 
         $title = 'Guest Scanner';
@@ -948,6 +1068,9 @@ class GuestController extends Controller
 
     public function sendWhatsapp($invitation_id, $guest_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         try {
             $guest = Guest::find($guest_id);
             if (!$guest) {
@@ -1047,6 +1170,9 @@ class GuestController extends Controller
 
     public function sendWhatsappBulk(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         try {
             $guestIds = $request->input('guest_ids', []);
 
@@ -1182,11 +1308,36 @@ class GuestController extends Controller
      */
     public function getGuestsList($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $guests = Guest::where('invitation_id', $invitation_id)
             ->select('guest_id', 'guest_name', 'guest_category')
             ->orderBy('guest_name')
             ->get();
 
         return response()->json($guests);
+    }
+
+    /**
+     * Export guests to Excel file
+     */
+    public function export($invitation_id)
+    {
+        // Check invitation access permission
+        $invitation = $this->checkInvitationAccess($invitation_id);
+
+        try {
+            // Get invitation details for filename
+            $invitation = Invitation::findOrFail($invitation_id);
+            $filename = 'data_tamu_' . str_replace([' ', '&', '/'], ['_', 'and', '_'], $invitation->wedding_name) . '_' . date('Y-m-d') . '.xlsx';
+
+            // Create and download export
+            $export = new \App\Exports\GuestsExport($invitation_id);
+            $export->download($filename);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
+        }
     }
 }

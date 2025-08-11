@@ -15,17 +15,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
-    return redirect('/dashboard');
+    return view('landing');
 });
 
-// Auth routes without register
-Auth::routes(['register' => false]);
-
-// Custom register route with /auth prefix for security
-// Route::group(['prefix' => 'auth'], function () {
-//     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-//     Route::post('/register', [RegisterController::class, 'register']);
-// });
+// Auth routes with register enabled (Laravel UI default)
+Auth::routes();
 
 Route::get('/dashboard', [HomeController::class, 'index']);
 
@@ -46,9 +40,10 @@ Route::group(['prefix' => 'qr'], function () {
 Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
     Route::get('/', [InvitationController::class, 'index'])->name('invitation.index');
     Route::post('/list', [InvitationController::class, 'list']);
-    // Route::get('/create', [InvitationController::class, 'create'])->name('invitation.create'); // Halaman create baru
-    // Route::post('/store', [InvitationController::class, 'store'])->name('invitation.store'); // Store untuk halaman
-    Route::get('/{id}/show', [InvitationController::class, 'show']);
+    Route::get('/create', [InvitationController::class, 'create'])->name('invitation.create'); // Halaman create untuk user flow
+    Route::post('/store', [InvitationController::class, 'store'])->name('invitation.store'); // Store untuk halaman
+    Route::post('/check-slug', [InvitationController::class, 'checkSlugAvailability'])->name('invitation.check-slug'); // Slug validation
+    Route::get('/{id}/show', [InvitationController::class, 'show'])->name('invitation.show');
     // Route::get('/{id}/edit', [InvitationController::class, 'edit'])->name('invitation.edit'); // Halaman edit baru
     // Route::put('/{id}/update', [InvitationController::class, 'update'])->name('invitation.update'); // Update untuk halaman
     Route::get('/{id}/show_ajax', [InvitationController::class, 'show_ajax']);
@@ -73,6 +68,7 @@ Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'aut
     Route::get('/import', [GuestController::class, 'import']);
     Route::post('/import_process', [GuestController::class, 'import_process']);
     Route::get('/template', [GuestController::class, 'template']);
+    Route::get('/export', [GuestController::class, 'export'])->name('guests.export');
     Route::get('/create_ajax', [GuestController::class, 'create_ajax']);
     Route::post('/check-contact', [GuestController::class, 'check_contact']);
     Route::post('/store_ajax', [GuestController::class, 'store_ajax']);
@@ -90,7 +86,8 @@ Route::get('/scanner', [GuestController::class, 'scannerSelect'])->name('scanner
 Route::get('/scanner/{invitation_id}', [GuestController::class, 'scanner'])->name('scanner.index');
 
 // User Management Routes - moved up to avoid conflicts
-Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function () {
+Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
+    // Add role check in controller or create admin middleware
     Route::get('/', [UserController::class, 'index']);
     Route::post('/list', [UserController::class, 'list']);
     Route::get('/create_ajax', [UserController::class, 'create_ajax']);
@@ -103,14 +100,17 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth', 'admin']], function 
 });
 
 // Gift Management Routes
-Route::get('/gifts', [GiftController::class, 'select'])->name('gifts.select');
-Route::get('/gifts/{invitation_id}', [GiftController::class, 'index'])->name('gifts.index');
-Route::get('/gifts/{invitation_id}/data', [GiftController::class, 'data'])->name('gifts.data');
-Route::get('/gifts/{invitation_id}/summary', [GiftController::class, 'summary'])->name('gifts.summary');
-Route::get('/gifts/payment/{payment_id}/detail', [GiftController::class, 'detail'])->name('gifts.detail');
-Route::post('/gifts/{invitation_id}/sync-all-status', [GiftController::class, 'syncAllStatus'])->name('gifts.sync-all-status');
-Route::post('/gifts/payment/{payment_id}/check-status', [GiftController::class, 'checkStatus'])->name('gifts.check-status');
-Route::post('/gifts/{invitation_id}/auto-expire', [GiftController::class, 'autoExpirePayments'])->name('gifts.auto-expire');
+Route::middleware('auth')->group(function () {
+    Route::get('/gifts', [GiftController::class, 'select'])->name('gifts.select');
+    Route::get('/gifts/{invitation_id}', [GiftController::class, 'index'])->name('gifts.index');
+    Route::get('/gifts/{invitation_id}/data', [GiftController::class, 'data'])->name('gifts.data');
+    Route::get('/gifts/{invitation_id}/summary', [GiftController::class, 'summary'])->name('gifts.summary');
+    Route::get('/gifts/{invitation_id}/export', [GiftController::class, 'export'])->name('gifts.export');
+    Route::get('/gifts/payment/{payment_id}/detail', [GiftController::class, 'detail'])->name('gifts.detail');
+    Route::post('/gifts/{invitation_id}/sync-all-status', [GiftController::class, 'syncAllStatus'])->name('gifts.sync-all-status');
+    Route::post('/gifts/payment/{payment_id}/check-status', [GiftController::class, 'checkStatus'])->name('gifts.check-status');
+    Route::post('/gifts/{invitation_id}/auto-expire', [GiftController::class, 'autoExpirePayments'])->name('gifts.auto-expire');
+});
 
 Route::post('/payment/create/{slug}/{guest_id_qr_code}', [PaymentController::class, 'createPayment']);
 Route::get('/payment/check/{slug}/{guest_id_qr_code}', [PaymentController::class, 'checkPaymentStatus']);
@@ -121,6 +121,7 @@ Route::prefix('wishes')->middleware('auth')->group(function () {
     Route::get('/', [WishController::class, 'wishSelect'])->name('wishes.select');
     Route::get('/invitation/{invitation_id}', [WishController::class, 'index'])->name('wishes.index');
     Route::post('/invitation/{invitation_id}/list', [WishController::class, 'list'])->name('wishes.list');
+    Route::get('/invitation/{invitation_id}/export', [WishController::class, 'export'])->name('wishes.export');
     Route::get('/{id}/show_ajax', [WishController::class, 'show_ajax']);
     Route::delete('/{id}/delete_ajax', [WishController::class, 'delete_ajax']);
     Route::post('/bulk-action', [WishController::class, 'bulkAction']);

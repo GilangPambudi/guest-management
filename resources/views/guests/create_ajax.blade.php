@@ -37,7 +37,20 @@
                 <div class="form-group row">
                     <label class="col-sm-3 col-form-label">Guest Category</label>
                     <div class="col-sm-9">
-                        <input value="" type="text" name="guest_category" id="guest_category" class="form-control" placeholder="e.g. Family, Friend, VIP" required>
+                        <select name="guest_category_select" id="guest_category_select" class="form-control mb-2">
+                            <option value="">-- Select existing category --</option>
+                            @if(isset($categories))
+                                @foreach($categories as $category)
+                                    <option value="{{ $category }}">{{ $category }}</option>
+                                @endforeach
+                            @endif
+                            <option value="custom">+ Add new category</option>
+                        </select>
+                        <input value="" type="text" name="guest_category" id="guest_category" class="form-control d-none" placeholder="Enter new category" required>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Select from existing categories or choose "Add new category" to create a custom one
+                        </small>
                         <small id="error-guest_category" class="error-text form-text text-danger"></small>
                     </div>
                 </div>
@@ -101,6 +114,7 @@ $(document).ready(function() {
         const formData = {
             guest_name: $('#guest_name').val(),
             guest_gender: $('#guest_gender').val(),
+            guest_category_select: $('#guest_category_select').val(),
             guest_category: $('#guest_category').val(),
             guest_contact: $('#guest_contact').val(),
             guest_address: $('#guest_address').val()
@@ -116,9 +130,13 @@ $(document).ready(function() {
                 const formData = JSON.parse(savedData);
                 $('#guest_name').val(formData.guest_name || '');
                 $('#guest_gender').val(formData.guest_gender || '');
+                $('#guest_category_select').val(formData.guest_category_select || '');
                 $('#guest_category').val(formData.guest_category || '');
                 $('#guest_contact').val(formData.guest_contact || '');
                 $('#guest_address').val(formData.guest_address || '');
+                
+                // Handle category dropdown/input visibility
+                handleCategorySelection();
                 
                 // Show info if data was restored
                 if (formData.guest_name || formData.guest_gender || formData.guest_category || formData.guest_contact || formData.guest_address) {
@@ -135,6 +153,24 @@ $(document).ready(function() {
     function clearFormData() {
         localStorage.removeItem(formStorageKey);
     }
+    
+    // Function to handle category selection
+    function handleCategorySelection() {
+        const selectedValue = $('#guest_category_select').val();
+        if (selectedValue === 'custom') {
+            $('#guest_category').removeClass('d-none').val('').focus();
+        } else if (selectedValue === '') {
+            $('#guest_category').addClass('d-none').val('');
+        } else {
+            $('#guest_category').addClass('d-none').val(selectedValue);
+        }
+    }
+    
+    // Category dropdown change handler
+    $('#guest_category_select').on('change', function() {
+        handleCategorySelection();
+        saveFormData();
+    });
     
     // Restore form data when modal opens
     restoreFormData();

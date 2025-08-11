@@ -48,6 +48,15 @@
                         </a>
                     </div>
                 @endif
+
+                @if (Route::has('register'))
+                    <div class="mt-2 text-center">
+                        <span class="text-muted">{{ __("Don't have an account?") }}</span>
+                        <a class="text-decoration-none ms-1" href="{{ route('register') }}">
+                            {{ __('Register') }}
+                        </a>
+                    </div>
+                @endif
             </form>
         </div>
     </div>

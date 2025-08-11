@@ -11,6 +11,9 @@
                 <a href="{{ url('/invitation/' . $invitation->invitation_id . '/guests') }}" class="btn btn-info">
                     <i class="fa fa-users"></i> Manage Guests
                 </a>
+                <a href="{{ route('gifts.export', $invitation->invitation_id) }}" class="btn btn-warning">
+                    <i class="fa fa-file-excel"></i> Download Excel
+                </a>
             </div>
         </div>
         <div class="card-body">

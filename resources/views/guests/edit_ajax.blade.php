@@ -61,8 +61,22 @@
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Guest Category</label>
                         <div class="col-sm-9">
-                            <input value="{{ $guest->guest_category }}" type="text" name="guest_category"
-                                id="guest_category" class="form-control" required>
+                            <select name="guest_category_select" id="guest_category_select" class="form-control mb-2">
+                                <option value="">-- Select existing category --</option>
+                                @if(isset($categories))
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category }}" {{ $guest->guest_category == $category ? 'selected' : '' }}>{{ $category }}</option>
+                                    @endforeach
+                                @endif
+                                <option value="custom" {{ !$categories->contains($guest->guest_category) ? 'selected' : '' }}>+ Add new category</option>
+                            </select>
+                            <input value="{{ $guest->guest_category }}" type="text" name="guest_category" id="guest_category" 
+                                   class="form-control {{ $categories->contains($guest->guest_category) ? 'd-none' : '' }}" 
+                                   placeholder="Enter new category" required>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Select from existing categories or choose "Add new category" to create a custom one
+                            </small>
                             <small id="error-guest_category" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
@@ -224,6 +238,27 @@
             
             // Trigger format check for existing value
             $('#guest_contact').trigger('input');
+
+            // Handle category dropdown
+            $('#guest_category_select').on('change', function() {
+                var value = $(this).val();
+                var customInput = $('#guest_category');
+                
+                if (value === 'custom') {
+                    customInput.show().removeClass('d-none');
+                    customInput.prop('required', true);
+                } else {
+                    customInput.hide().addClass('d-none');
+                    customInput.prop('required', false);
+                    // Set the selected category value to the hidden input
+                    if (value !== '') {
+                        customInput.val(value);
+                    }
+                }
+            });
+            
+            // Trigger change event on page load to set initial state
+            $('#guest_category_select').trigger('change');
 
             $("#form-edit-guest").validate({
                 rules: {

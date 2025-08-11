@@ -13,6 +13,33 @@ use Midtrans\Transaction;
 
 class GiftController extends Controller
 {
+    /**
+     * Check if the current user has access to the specified invitation
+     * Returns 404 if invitation doesn't exist, 403 if user doesn't have access
+     */
+    private function checkInvitationAccess($invitation_id)
+    {
+        $invitation = Invitation::find($invitation_id);
+        
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+        
+        // If user is admin, allow access to all invitations
+        if (Auth::user()->role === 'admin') {
+            return;
+        }
+        
+        // If user is regular user, only allow access to their own invitation
+        if (Auth::user()->role === 'user') {
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation || $userInvitation->invitation_id != $invitation_id) {
+                abort(403, 'You do not have permission to access this invitation');
+            }
+        }
+    }
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,28 +56,43 @@ class GiftController extends Controller
      */
     public function select()
     {
-        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
-            ->withCount('guests')
-            ->orderBy('wedding_date', 'desc')
-            ->get();
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation dengan select page
+            $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+                ->withCount('guests')
+                ->orderBy('wedding_date', 'desc')
+                ->get();
 
-        $title = 'Gift Management';
-        $breadcrumb = (object)[
-            'title' => 'Gift Management - Select Invitation',
-            'list' => ['Home', 'Gifts']
-        ];
-        $page = (object)[
-            'title' => 'Select Invitation for Gift Management'
-        ];
-        $activeMenu = 'gifts';
+            $title = 'Gift Management';
+            $breadcrumb = (object)[
+                'title' => 'Gift Management - Select Invitation',
+                'list' => ['Home', 'Gifts']
+            ];
+            $page = (object)[
+                'title' => 'Select Invitation for Gift Management'
+            ];
+            $activeMenu = 'gifts';
 
-        return view('gifts.select', [
-            'title' => $title,
-            'breadcrumb' => $breadcrumb,
-            'page' => $page,
-            'activeMenu' => $activeMenu,
-            'invitations' => $invitations
-        ]);
+            return view('gifts.select', [
+                'title' => $title,
+                'breadcrumb' => $breadcrumb,
+                'page' => $page,
+                'activeMenu' => $activeMenu,
+                'invitations' => $invitations
+            ]);
+        } else {
+            // User logic: direct redirect to their invitation gifts
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation) {
+                // User belum punya invitation -> redirect dengan notifikasi
+                return redirect('/invitation')
+                    ->with('error', 'Please create your invitation first!');
+            }
+
+            // User punya invitation -> langsung redirect ke gift management (URL yang benar)
+            return redirect("/gifts/{$userInvitation->invitation_id}");
+        }
     }
 
     /**
@@ -58,6 +100,9 @@ class GiftController extends Controller
      */
     public function index($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $invitation = Invitation::findOrFail($invitation_id);
 
         // Get dynamic filter data from payments
@@ -101,6 +146,9 @@ class GiftController extends Controller
      */
     public function data(Request $request, $invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $payments = Payment::leftJoin('guests', 'payments.guest_id', '=', 'guests.guest_id')
             ->where('payments.invitation_id', $invitation_id)
             ->select(
@@ -188,6 +236,9 @@ class GiftController extends Controller
      */
     public function summary($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         $payments = Payment::where('invitation_id', $invitation_id)->get();
 
         $totalPayments = $payments->count();
@@ -214,6 +265,9 @@ class GiftController extends Controller
      */
     public function syncAllStatus($invitation_id)
     {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
         try {
             $payments = Payment::where('invitation_id', $invitation_id)->get();
 
@@ -298,6 +352,28 @@ class GiftController extends Controller
                 'success' => false,
                 'message' => 'Check failed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Export gifts/payments to Excel file
+     */
+    public function export($invitation_id)
+    {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
+        try {
+            // Get invitation details for filename
+            $invitation = \App\Models\Invitation::findOrFail($invitation_id);
+            $filename = 'data_kado_' . str_replace([' ', '&', '/'], ['_', 'and', '_'], $invitation->wedding_name) . '_' . date('Y-m-d') . '.xlsx';
+
+            // Create and download export
+            $export = new \App\Exports\GiftsExport($invitation_id);
+            $export->download($filename);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
         }
     }
 }

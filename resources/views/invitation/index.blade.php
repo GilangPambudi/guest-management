@@ -22,6 +22,9 @@
                     <tr>
                         <th>No</th>
                         <th>Wedding Name</th>
+                        @if(Auth::user()->role === 'admin')
+                        <th>Owner</th>
+                        @endif
                         <th>Date</th>
                         <th>Start</th>
                         <th>End</th>
@@ -78,6 +81,14 @@
                         data: 'wedding_name',
                         name: 'wedding_name'
                     },
+                    @if(Auth::user()->role === 'admin')
+                    {
+                        data: 'owner_info',
+                        name: 'owner_info',
+                        orderable: false,
+                        searchable: false
+                    },
+                    @endif
                     {
                         data: 'wedding_date',
                         name: 'wedding_date',

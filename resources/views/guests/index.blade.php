@@ -106,6 +106,10 @@
                     onclick="window.location.href='{{ url('/invitation/' . $invitation->invitation_id . '/scanner') }}'">
                     <i class="fa fa-qrcode"></i> QR Scanner
                 </button>
+                <a href="{{ url('/invitation/' . $invitation->invitation_id . '/guests/export') }}" 
+                   class="btn btn-warning">
+                    <i class="fa fa-file-excel"></i> Download Excel
+                </a>
                 <button onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/guests/import') }}')"
                     class="btn btn-success">
                     <i class="fa fa-upload"></i> Import Guests
@@ -306,7 +310,7 @@
                         <th>Contact</th>
                         <th>Address</th>
                         <th>Invitation Status</th>
-                        <th>RSVP</th>
+                        <th>RVSP</th>
                         <th>Arrival Time</th>
                         <th class="text-center">Action</th>
                     </tr>

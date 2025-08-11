@@ -68,4 +68,20 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+
+    /**
+     * Relasi ke Invitation (invitation yang dimiliki user) - hasOne karena 1 user max 1 invitation
+     */
+    public function invitation()
+    {
+        return $this->hasOne(Invitation::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Relasi ke Invitation (semua invitations yang dimiliki user)
+     */
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class, 'user_id', 'user_id');
+    }
 }

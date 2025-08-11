@@ -193,7 +193,7 @@
         }        function markAsAttended(guestIdQrCode) {
             Swal.fire({
                 title: 'Mark as Attended?',
-                text: 'This will update the guest RSVP status to "Yes".',
+                text: 'This will update the guest RVSP status to "Yes".',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',

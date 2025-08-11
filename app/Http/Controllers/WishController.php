@@ -9,15 +9,46 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class WishController extends Controller
 {
+    /**
+     * Check if the current user has access to the specified invitation
+     * Returns 404 if invitation doesn't exist, 403 if user doesn't have access
+     */
+    private function checkInvitationAccess($invitation_id)
+    {
+        $invitation = Invitation::find($invitation_id);
+        
+        if (!$invitation) {
+            abort(404, 'Invitation not found');
+        }
+        
+        // If user is admin, allow access to all invitations
+        if (Auth::user()->role === 'admin') {
+            return;
+        }
+        
+        // If user is regular user, only allow access to their own invitation
+        if (Auth::user()->role === 'user') {
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation || $userInvitation->invitation_id != $invitation_id) {
+                abort(403, 'You do not have permission to access this invitation');
+            }
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index($invitation_id = null)
     {
         if ($invitation_id) {
+            // Check invitation access permission
+            $this->checkInvitationAccess($invitation_id);
+
             // Specific invitation wishes management
             $invitation = Invitation::findOrFail($invitation_id);
 
@@ -46,6 +77,11 @@ class WishController extends Controller
 
     public function list(Request $request, $invitation_id = null)
     {
+        // Check invitation access permission if invitation_id is provided
+        if ($invitation_id) {
+            $this->checkInvitationAccess($invitation_id);
+        }
+
         $query = Wish::with(['guest', 'invitation'])->select('wishes.*');
 
         // Filter by specific invitation if provided
@@ -116,30 +152,45 @@ class WishController extends Controller
 
     public function wishSelect()
     {
-        $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
-            ->withCount(['wishes' => function ($query) {
-                // Count only wishes, not guests
-            }])
-            ->orderBy('wedding_date', 'desc')
-            ->get();
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation dengan select page
+            $invitations = Invitation::select('invitation_id', 'wedding_name', 'groom_name', 'bride_name', 'wedding_date', 'wedding_venue')
+                ->withCount(['wishes' => function ($query) {
+                    // Count only wishes, not guests
+                }])
+                ->orderBy('wedding_date', 'desc')
+                ->get();
 
-        $title = 'Wish Management';
-        $breadcrumb = (object)[
-            'title' => 'Wish Management - Select Invitation',
-            'list' => ['Home', 'Wishes']
-        ];
-        $page = (object)[
-            'title' => 'Wish Management'
-        ];
-        $activeMenu = 'wishes';
+            $title = 'Wish Management';
+            $breadcrumb = (object)[
+                'title' => 'Wish Management - Select Invitation',
+                'list' => ['Home', 'Wishes']
+            ];
+            $page = (object)[
+                'title' => 'Wish Management'
+            ];
+            $activeMenu = 'wishes';
 
-        return view('wishes.select', [
-            'title' => $title,
-            'breadcrumb' => $breadcrumb,
-            'page' => $page,
-            'activeMenu' => $activeMenu,
-            'invitations' => $invitations
-        ]);
+            return view('wishes.select', [
+                'title' => $title,
+                'breadcrumb' => $breadcrumb,
+                'page' => $page,
+                'activeMenu' => $activeMenu,
+                'invitations' => $invitations
+            ]);
+        } else {
+            // User logic: direct redirect to their invitation wishes
+            $userInvitation = Invitation::where('user_id', Auth::id())->first();
+            
+            if (!$userInvitation) {
+                // User belum punya invitation -> redirect dengan notifikasi
+                return redirect('/invitation')
+                    ->with('error', 'Please create your invitation first!');
+            }
+
+            // User punya invitation -> langsung redirect ke wish management (URL yang benar)
+            return redirect("/wishes/invitation/{$userInvitation->invitation_id}");
+        }
     }
 
     public function show_ajax($id)
@@ -461,6 +512,28 @@ class WishController extends Controller
                 'success' => false,
                 'message' => 'Gagal memperbarui ucapan. Silakan coba lagi.'
             ], 500);
+        }
+    }
+
+    /**
+     * Export wishes to Excel file
+     */
+    public function export($invitation_id)
+    {
+        // Check invitation access permission
+        $this->checkInvitationAccess($invitation_id);
+
+        try {
+            // Get invitation details for filename
+            $invitation = \App\Models\Invitation::findOrFail($invitation_id);
+            $filename = 'ucapan_doa_' . str_replace([' ', '&', '/'], ['_', 'and', '_'], $invitation->wedding_name) . '_' . date('Y-m-d') . '.xlsx';
+
+            // Create and download export
+            $export = new \App\Exports\WishesExport($invitation_id);
+            $export->download($filename);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
         }
     }
 }

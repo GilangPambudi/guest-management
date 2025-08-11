@@ -363,59 +363,107 @@
         </svg>
     </div>
 
-    <!-- RSVP -->
-    <section class="bg-body-tertiary py-5 animate-section" id="rsvp" data-animation="zoom-in">
+    <!-- RVSP -->
+    <section class="bg-body-tertiary py-5 animate-section" id="rvsp" data-animation="zoom-in">
         <div class="container text-center">
             <h2 class="font-esthetic mb-4" style="font-size: 2rem;">Konfirmasi Kehadiran</h2>
             <p class="mb-2" style="font-size: 0.95rem;">Mohon konfirmasi kehadiran Anda pada acara pernikahan kami:</p>
             
-            <!-- Default RSVP Buttons -->
-            <div id="rsvp-buttons" class="d-flex justify-content-center gap-3 {{ $guest->guest_attendance_status !== '-' ? 'd-none' : '' }}">
-                <button class="btn btn-sm btn-outline-danger btn-lg rounded-pill px-4" type="button" onclick="confirmAttendance('No')">
-                    <i class="fa-solid fa-xmark me-2"></i>Tidak Hadir
-                </button>
-                <button class="btn btn-sm btn-outline-primary btn-lg rounded-pill px-4" type="button" onclick="confirmAttendance('Yes')">
-                    <i class="fa-solid fa-check me-2"></i>Hadir
-                </button>
-            </div>
+            @php
+                $weddingDate = \Carbon\Carbon::parse($wedding_date);
+                $today = \Carbon\Carbon::now();
+                $daysUntilWedding = $today->diffInDays($weddingDate, false);
+                $isDeadlinePassed = $daysUntilWedding < 3;
+                $deadlineDate = $weddingDate->copy()->subDays(3);
+                $deadlineDateFormatted = $deadlineDate->locale('id')->translatedFormat('l, j F Y \p\u\k\u\l H:i');
+            @endphp
 
-            <!-- RSVP Status Display (Hidden by default) -->
-            <div id="rsvp-status" class="{{ $guest->guest_attendance_status !== '-' ? '' : 'd-none' }}">
-                <div class="mb-3">
-                    <h4 class="mb-2" id="rsvp-status-title">
-                        @if ($guest->guest_attendance_status === 'Yes')
-                            <button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RSVP: Hadir</button>
-                        @elseif($guest->guest_attendance_status === 'No')
-                            <button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RSVP: Tidak Hadir</button>
-                        @endif
-                    </h4>
-                    <p class="mb-3" id="rsvp-status-message">
-                        @if ($guest->guest_attendance_status === 'Yes')
-                            Terima kasih sudah konfirmasi!<br>Kami sangat senang bisa merayakan hari istimewa kami bersama Anda.
-                        @elseif($guest->guest_attendance_status === 'No')
-                            Kami akan merindukan Anda!<br>Terima kasih sudah memberitahu kami. Kami mengerti dan berharap bisa merayakan bersama di lain waktu.
-                        @endif
+            @if($isDeadlinePassed)
+                <!-- Deadline Passed Message -->
+                <div class="alert alert-warning rounded-4 mb-4">
+                    <h5 class="mb-2"><i class="fa-solid fa-clock me-2"></i>Konfirmasi RVSP Ditutup</h5>
+                    <p class="mb-2">
+                        <small class="text-muted">Konfirmasi RVSP ditutup 3 hari sebelum acara dimulai.</small>
                     </p>
                 </div>
-                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" onclick="editRSVP()">
-                    <i class="fa-solid fa-pen-to-square me-2"></i>Ubah Konfirmasi
-                </button>
-            </div>
-
-            <!-- Edit RSVP Options (Hidden by default) -->
-            <div id="rsvp-edit" class="d-none">
-                <div class="d-flex justify-content-center gap-2 mb-3">
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="confirmAttendance('No')">
+                
+                @if($guest->guest_attendance_status !== '-')
+                    <!-- Show existing RVSP status -->
+                    <div class="mb-3">
+                        <h4 class="mb-2">
+                            @if ($guest->guest_attendance_status === 'Yes')
+                                <button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RVSP: Hadir</button>
+                            @elseif($guest->guest_attendance_status === 'No')
+                                <button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RVSP: Tidak Hadir</button>
+                            @endif
+                        </h4>
+                        <p class="mb-0">
+                            @if ($guest->guest_attendance_status === 'Yes')
+                                Terima kasih sudah konfirmasi! Kami sangat senang bisa merayakan hari istimewa kami bersama Anda.
+                            @elseif($guest->guest_attendance_status === 'No')
+                                Kami akan merindukan Anda! Terima kasih sudah memberitahu kami.
+                            @endif
+                        </p>
+                    </div>
+                @endif
+            @else
+                <!-- Normal RVSP Functionality (if deadline not passed) -->
+                <!-- Default RVSP Buttons -->
+                <div id="rvsp-buttons" class="d-flex justify-content-center gap-3 {{ $guest->guest_attendance_status !== '-' ? 'd-none' : '' }}">
+                    <button class="btn btn-sm btn-outline-danger btn-lg rounded-pill px-4" type="button" onclick="confirmAttendance('No')">
                         <i class="fa-solid fa-xmark me-2"></i>Tidak Hadir
                     </button>
-                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" onclick="confirmAttendance('Yes')">
+                    <button class="btn btn-sm btn-outline-primary btn-lg rounded-pill px-4" type="button" onclick="confirmAttendance('Yes')">
                         <i class="fa-solid fa-check me-2"></i>Hadir
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" onclick="cancelEdit()">
-                        <i class="fa-solid fa-times me-2"></i>Batal
+                </div>
+
+                <!-- RVSP Status Display (Hidden by default) -->
+                <div id="rvsp-status" class="{{ $guest->guest_attendance_status !== '-' ? '' : 'd-none' }}">
+                    <div class="mb-3">
+                        <h4 class="mb-2" id="rvsp-status-title">
+                            @if ($guest->guest_attendance_status === 'Yes')
+                                <button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RVSP: Hadir</button>
+                            @elseif($guest->guest_attendance_status === 'No')
+                                <button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RVSP: Tidak Hadir</button>
+                            @endif
+                        </h4>
+                        <p class="mb-3" id="rvsp-status-message">
+                            @if ($guest->guest_attendance_status === 'Yes')
+                                Terima kasih sudah konfirmasi!<br>Kami sangat senang bisa merayakan hari istimewa kami bersama Anda.
+                            @elseif($guest->guest_attendance_status === 'No')
+                                Kami akan merindukan Anda!<br>Terima kasih sudah memberitahu kami. Kami mengerti dan berharap bisa merayakan bersama di lain waktu.
+                            @endif
+                        </p>
+                    </div>
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" onclick="editRVSP()">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>Ubah Konfirmasi
                     </button>
                 </div>
-            </div>
+
+                <!-- Edit RVSP Options (Hidden by default) -->
+                <div id="rvsp-edit" class="d-none">
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="confirmAttendance('No')">
+                            <i class="fa-solid fa-xmark me-2"></i>Tidak Hadir
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" onclick="confirmAttendance('Yes')">
+                            <i class="fa-solid fa-check me-2"></i>Hadir
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" onclick="cancelEdit()">
+                            <i class="fa-solid fa-times me-2"></i>Batal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RVSP Deadline Info -->
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fa-solid fa-info-circle me-1"></i>
+                        Konfirmasi kehadiran ditutup pada {{ $deadlineDateFormatted }} WIB
+                    </small>
+                </div>
+            @endif
         </div>
     </section>
 
@@ -870,7 +918,7 @@
             });
         });
 
-        // RSVP Functions
+        // RVSP Functions
         function confirmAttendance(status) {
             // Show loading in SweetAlert
             Swal.fire({
@@ -897,18 +945,18 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Hide all RSVP sections first
-                        document.getElementById('rsvp-buttons').classList.add('d-none');
-                        document.getElementById('rsvp-edit').classList.add('d-none');
+                        // Hide all RVSP sections first
+                        document.getElementById('rvsp-buttons').classList.add('d-none');
+                        document.getElementById('rvsp-edit').classList.add('d-none');
 
                         // Show status section
-                        document.getElementById('rsvp-status').classList.remove('d-none');
+                        document.getElementById('rvsp-status').classList.remove('d-none');
 
                         if (status === 'Yes') {
                             // Attending
-                            document.getElementById('rsvp-status-title').innerHTML =
-                                '<button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RSVP: Hadir</button>';
-                            document.getElementById('rsvp-status-message').innerHTML =
+                            document.getElementById('rvsp-status-title').innerHTML =
+                                '<button class="btn btn-success btn-sm px-3 rounded-pill" disabled>Status RVSP: Hadir</button>';
+                            document.getElementById('rvsp-status-message').innerHTML =
                                 'Terima kasih sudah konfirmasi!<br>Kami sangat senang bisa merayakan hari istimewa kami bersama Anda.';
 
                             // Show QR Code section
@@ -923,9 +971,9 @@
                             });
                         } else {
                             // Not attending
-                            document.getElementById('rsvp-status-title').innerHTML =
-                                '<button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RSVP: Tidak Hadir</button>';
-                            document.getElementById('rsvp-status-message').innerHTML =
+                            document.getElementById('rvsp-status-title').innerHTML =
+                                '<button class="btn btn-danger btn-sm px-3 rounded-pill" disabled>Status RVSP: Tidak Hadir</button>';
+                            document.getElementById('rvsp-status-message').innerHTML =
                                 'Kami akan merindukan Anda!<br>Terima kasih sudah memberitahu kami. Kami mengerti dan berharap bisa merayakan bersama di lain waktu.';
 
                             // Hide QR Code section
@@ -940,12 +988,25 @@
                             });
                         }
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: data.message || 'Gagal menyimpan konfirmasi kehadiran.',
-                            confirmButtonColor: '#dc3545'
-                        });
+                        // Check if it's a deadline error
+                        if (data.deadline_reached) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Konfirmasi RVSP Ditutup',
+                                text: data.message || 'Konfirmasi RVSP sudah ditutup.',
+                                confirmButtonColor: '#ffc107'
+                            }).then(() => {
+                                // Reload page to show deadline message
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: data.message || 'Gagal menyimpan konfirmasi kehadiran.',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
                     }
                 })
                 .catch(error => {
@@ -959,16 +1020,16 @@
                 });
         }
 
-        function editRSVP() {
+        function editRVSP() {
             // Hide status section and show edit options
-            document.getElementById('rsvp-status').classList.add('d-none');
-            document.getElementById('rsvp-edit').classList.remove('d-none');
+            document.getElementById('rvsp-status').classList.add('d-none');
+            document.getElementById('rvsp-edit').classList.remove('d-none');
         }
 
         function cancelEdit() {
             // Hide edit options and show status section
-            document.getElementById('rsvp-edit').classList.add('d-none');
-            document.getElementById('rsvp-status').classList.remove('d-none');
+            document.getElementById('rvsp-edit').classList.add('d-none');
+            document.getElementById('rvsp-status').classList.remove('d-none');
         }
 
         // ==========================================

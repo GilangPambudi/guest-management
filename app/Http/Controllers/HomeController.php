@@ -6,6 +6,7 @@ use App\Models\Guest;
 use App\Models\Invitation;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -39,8 +40,17 @@ class HomeController extends Controller
 
         $activeMenu = 'dashboard';
         
-        // Get all invitations with their statistics
-        $invitations = Invitation::with(['guests.payments'])->get()->map(function ($invitation) {
+        // Role-based filtering for invitations
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa lihat semua invitation
+            $invitationsQuery = Invitation::with(['guests.payments']);
+        } else {
+            // User hanya bisa lihat invitation milik sendiri
+            $invitationsQuery = Invitation::where('user_id', Auth::id())
+                ->with(['guests.payments']);
+        }
+        
+        $invitations = $invitationsQuery->get()->map(function ($invitation) {
             $guests = $invitation->guests;
             $totalGuests = $guests->count();
             $confirmedAttendance = $guests->where('guest_attendance_status', 'Yes')->count();

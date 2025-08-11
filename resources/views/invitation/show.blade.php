@@ -12,9 +12,15 @@
 
         <div class="card-header">
             <div class="card-tools">
-                <a href="{{ url('/invitation') }}" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> Back to Invitations
-                </a>
+                @if(Auth::user()->role === 'admin')
+                    <a href="{{ url('/invitation') }}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Back to Invitations
+                    </a>
+                @else
+                    <a href="{{ url('/dashboard') }}" class="btn btn-secondary">
+                        <i class="fa fa-home"></i> Dashboard
+                    </a>
+                @endif
                 <button onclick="modalAction('{{ url('/invitation/' . $invitation->invitation_id . '/edit_ajax') }}')"
                     class="btn btn-warning">
                     <i class="fa fa-edit"></i> Edit Invitation
@@ -237,6 +243,8 @@
                 </div>
             </div>
 
+            
+
             <!-- Statistics Cards -->
             <div class="row mb-4">
                 <div class="col-lg-3 col-6">
@@ -251,6 +259,39 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3>{{ $notSentGuests }}</h3>
+                            <p>Not Sent</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ $sentGuests }}</h3>
+                            <p>Sent - Unopened</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ $unconfirmedGuests }}</h3>
+                            <p>Opened - Unconfirmed</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
                             <h3>{{ $attendedGuests }}</h3>
@@ -261,18 +302,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-warning">
-                        <div class="inner">
-                            <h3>{{ $pendingGuests }}</h3>
-                            <p>Pending</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
+                <div class="col-lg-6 col-6">
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ $notAttendedGuests }}</h3>
@@ -285,7 +315,6 @@
                 </div>
             </div>
 
-            <!-- Guest Categories -->
             @if ($guestCategories->count() > 0)
                 <div class="row mb-4">
                     <div class="col-md-6">
