@@ -21,6 +21,8 @@ class Guest extends Model
         'invitation_id',
         'invitation_sent_at',
         'invitation_opened_at',
+        'h4_reminder_sent_at',
+        'h1_info_sent_at',
     ];
 
     protected $primaryKey = 'guest_id';
