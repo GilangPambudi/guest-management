@@ -589,6 +589,19 @@ class GuestController extends Controller
             ]);
         }
 
+        // Handle reset reminder status
+        if ($request->input('reset_h4_reminder') == '1') {
+            $request->merge([
+                'h4_reminder_sent_at' => null,
+            ]);
+        }
+
+        if ($request->input('reset_h1_info') == '1') {
+            $request->merge([
+                'h1_info_sent_at' => null,
+            ]);
+        }
+
         // Perbarui data tamu
         $guest->update($request->all());
 

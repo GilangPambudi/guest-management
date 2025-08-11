@@ -107,22 +107,6 @@
                     </div>
 
                     <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">Attendance Status</label>
-                        <div class="col-sm-9">
-                            <select name="guest_attendance_status" id="guest_attendance_status" class="form-control"
-                                required>
-                                <option value="-" {{ $guest->guest_attendance_status == '-' ? 'selected' : '' }}>Not
-                                    Set</option>
-                                <option value="Yes" {{ $guest->guest_attendance_status == 'Yes' ? 'selected' : '' }}>Yes
-                                </option>
-                                <option value="No" {{ $guest->guest_attendance_status == 'No' ? 'selected' : '' }}>No
-                                </option>
-                            </select>
-                            <small id="error-guest_attendance_status" class="error-text form-text text-danger"></small>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
                         <label class="col-sm-3 col-form-label">Invitation Status</label>
                         <div class="col-sm-9">
                             <select name="guest_invitation_status" id="guest_invitation_status" class="form-control"
@@ -137,6 +121,22 @@
                                     {{ $guest->guest_invitation_status == 'Pending' ? 'selected' : '' }}>Pending</option>
                             </select>
                             <small id="error-guest_invitation_status" class="error-text form-text text-danger"></small>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Attendance Status</label>
+                        <div class="col-sm-9">
+                            <select name="guest_attendance_status" id="guest_attendance_status" class="form-control"
+                                required>
+                                <option value="-" {{ $guest->guest_attendance_status == '-' ? 'selected' : '' }}>Not
+                                    Set</option>
+                                <option value="Yes" {{ $guest->guest_attendance_status == 'Yes' ? 'selected' : '' }}>Yes
+                                </option>
+                                <option value="No" {{ $guest->guest_attendance_status == 'No' ? 'selected' : '' }}>No
+                                </option>
+                            </select>
+                            <small id="error-guest_attendance_status" class="error-text form-text text-danger"></small>
                         </div>
                     </div>
 
@@ -156,6 +156,55 @@
                         <div class="col-sm-9">
                             <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($guest->invitation_opened_at)->format('d/m/Y H:i:s') }}" readonly>
                             <small class="form-text text-muted">When the guest opened the invitation letter</small>
+                        </div>
+                    </div>
+                    @endif
+
+                    <hr>
+                    <h6 class="text-primary"><i class="fas fa-bell"></i> Reminder Status</h6>
+                    
+                    @if($guest->h4_reminder_sent_at)
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">H-4 Reminder</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control mb-2" value="Sent at: {{ \Carbon\Carbon::parse($guest->h4_reminder_sent_at)->format('d/m/Y H:i:s') }}" readonly>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="reset_h4_reminder" name="reset_h4_reminder" value="1">
+                                <label class="form-check-label text-warning" for="reset_h4_reminder">
+                                    <i class="fas fa-undo"></i> Reset H-4 reminder status (allow resend)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">H-4 Reminder</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="Not sent yet" readonly>
+                            <small class="form-text text-muted">H-4 confirmation reminder will be sent automatically</small>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($guest->h1_info_sent_at)
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">H-1 Info</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control mb-2" value="Sent at: {{ \Carbon\Carbon::parse($guest->h1_info_sent_at)->format('d/m/Y H:i:s') }}" readonly>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="reset_h1_info" name="reset_h1_info" value="1">
+                                <label class="form-check-label text-warning" for="reset_h1_info">
+                                    <i class="fas fa-undo"></i> Reset H-1 info status (allow resend)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">H-1 Info</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="Not sent yet" readonly>
+                            <small class="form-text text-muted">H-1 event info will be sent automatically</small>
                         </div>
                     </div>
                     @endif
