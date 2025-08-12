@@ -467,10 +467,12 @@
                                             <th>Contact</th>
                                             <th>Attendance</th>
                                             <th>Invitation Status</th>
+                                            <th>Created</th>
+                                            <th>Last Modified</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($invitation->guests->take(10) as $guest)
+                                        @foreach ($invitation->guests->sortByDesc('updated_at')->take(10) as $guest)
                                             <tr>
                                                 <td>{{ $guest->guest_name }}</td>
                                                 <td>{{ $guest->guest_category }}</td>
@@ -478,27 +480,27 @@
                                                 <td>{{ $guest->guest_contact ?: '-' }}</td>
                                                 <td>
                                                     @if ($guest->guest_attendance_status === 'Yes')
-                                                        <span
-                                                            class="badge badge-success">{{ $guest->guest_attendance_status }}</span>
+                                                        <span class="badge badge-success">{{ $guest->guest_attendance_status }}</span>
                                                     @elseif($guest->guest_attendance_status === 'No')
-                                                        <span
-                                                            class="badge badge-danger">{{ $guest->guest_attendance_status }}</span>
+                                                        <span class="badge badge-danger">{{ $guest->guest_attendance_status }}</span>
                                                     @else
-                                                        <span
-                                                            class="badge badge-secondary">{{ $guest->guest_attendance_status }}</span>
+                                                        <span class="badge badge-secondary">{{ $guest->guest_attendance_status }}</span>
                                                     @endif
                                                 </td>
                                                 <td>
                                                     @if ($guest->guest_invitation_status === 'Sent')
-                                                        <span
-                                                            class="badge badge-success">{{ $guest->guest_invitation_status }}</span>
+                                                        <span class="badge badge-success">{{ $guest->guest_invitation_status }}</span>
                                                     @elseif($guest->guest_invitation_status === 'Pending')
-                                                        <span
-                                                            class="badge badge-warning">{{ $guest->guest_invitation_status }}</span>
+                                                        <span class="badge badge-warning">{{ $guest->guest_invitation_status }}</span>
                                                     @else
-                                                        <span
-                                                            class="badge badge-secondary">{{ $guest->guest_invitation_status }}</span>
+                                                        <span class="badge badge-secondary">{{ $guest->guest_invitation_status }}</span>
                                                     @endif
+                                                </td>
+                                                <td>
+                                                    {{ $guest->created_at ? $guest->created_at->setTimezone('Asia/Jakarta')->format('d M Y H:i') : '-' }}
+                                                </td>
+                                                <td>
+                                                    {{ $guest->updated_at ? $guest->updated_at->setTimezone('Asia/Jakarta')->format('d M Y H:i') : '-' }}
                                                 </td>
                                             </tr>
                                         @endforeach
