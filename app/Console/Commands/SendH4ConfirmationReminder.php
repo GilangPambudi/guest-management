@@ -32,8 +32,8 @@ class SendH4ConfirmationReminder extends Command
     {
         $this->info('🚀 Starting H-4 Confirmation Reminder Job...');
         
-        // Find invitations with wedding date = today + 4 days
-        $targetDate = now()->addDays(4)->toDateString();
+        // Find invitations with wedding date = today + 4 days (using Asia/Jakarta timezone)
+        $targetDate = now('Asia/Jakarta')->addDays(4)->toDateString();
         $invitations = Invitation::where('wedding_date', $targetDate)->get();
         
         if ($invitations->isEmpty()) {

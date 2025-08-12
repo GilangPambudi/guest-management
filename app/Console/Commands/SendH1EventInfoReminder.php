@@ -32,8 +32,8 @@ class SendH1EventInfoReminder extends Command
     {
         $this->info('🚀 Starting H-1 Event Info Reminder Job...');
         
-        // Find invitations with wedding date = today + 1 day
-        $targetDate = now()->addDays(1)->toDateString();
+        // Find invitations with wedding date = today + 1 day (using Asia/Jakarta timezone)
+        $targetDate = now('Asia/Jakarta')->addDays(1)->toDateString();
         $invitations = Invitation::where('wedding_date', $targetDate)->get();
         
         if ($invitations->isEmpty()) {
