@@ -518,7 +518,7 @@
         <div class="d-flex justify-content-center">
           <div class="lux-card p-4">
             @if (!empty($guest) && $guest->guest_id_qr_code)
-              <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code Tamu" class="img-fluid"
+              <img src="{{ asset($guest->guest_qr_code) }}" alt="QR Code Tamu" class="img-fluid text-center"
                    style="max-width:220px; cursor:pointer"
                    id="qr-code-img" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
             @else
@@ -526,9 +526,6 @@
                 <i class="fa-solid fa-qrcode fa-3x text-secondary"></i>
               </div>
             @endif
-            <div class="mt-2 text-center">
-              <small class="text-secondary">ID: {{ $guest->guest_id_qr_code ?? 'QR Tamu Undangan' }}</small>
-            </div>
           </div>
         </div>
       </div>

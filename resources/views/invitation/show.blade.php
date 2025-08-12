@@ -173,7 +173,8 @@
                                             <div class="row m-0 py-2">
                                                 <div class="col-sm-4 font-weight-bold">Last Updated</div>
                                                 <div class="col-sm-8">
-                                                    {{ $invitation->updated_at->format('d M Y H:i') }}</div>
+                                                    {{ $invitation->updated_at->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -371,7 +372,7 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Last Updated:</strong></td>
-                                        <td class="text-right">{{ $invitation->updated_at->format('d M Y H:i') }}</td>
+                                        <td class="text-right">{{ $invitation->updated_at->setTimezone('Asia/Jakarta')->format('d M Y H:i') }}</td>
                                     </tr>
                                 </table>
                             </div>

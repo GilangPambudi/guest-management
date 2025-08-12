@@ -31,9 +31,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        <i class="icon fas fa-info"></i> <strong>Current Guest ID:</strong>
-                        <code>{{ $guest->guest_id_qr_code }}</code>
-                        <br><small class="text-muted">Note: QR Code will be regenerated if name is changed</small>
+                        <strong>Current Guest ID:</strong>
+                        <code class="text-light">{{ $guest->guest_id_qr_code }}</code>
+                        <br><small class="">Note: QR Code will be regenerated if name is changed</small>
                     </div>
 
                     <div class="form-group row">
