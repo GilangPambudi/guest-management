@@ -429,8 +429,8 @@ class GuestController extends Controller
         $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
         // Generate QR Code
-        $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
-        $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
+        $qrCodePath = "qr/guests/{$guestIdQrCode}.svg";
+        $qrCodeContent = QrCode::format('svg')->size(300)->generate($guestIdQrCode);
 
         // Simpan QR Code ke storage
         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
@@ -547,8 +547,8 @@ class GuestController extends Controller
             $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
             // Generate QR Code baru
-            $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
-            $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
+            $qrCodePath = "qr/guests/{$guestIdQrCode}.svg";
+            $qrCodeContent = QrCode::format('svg')->size(300)->generate($guestIdQrCode);
             Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
             // Tambahkan guest_id_qr_code dan guest_qr_code ke request
@@ -791,8 +791,8 @@ class GuestController extends Controller
                         $guestIdQrCode = "{$nanoId}-{$guestNameSlug}";
 
                         // Generate QR Code
-                        $qrCodePath = "qr/guests/{$guestIdQrCode}.png";
-                        $qrCodeContent = QrCode::format('png')->size(300)->generate($guestIdQrCode);
+                        $qrCodePath = "qr/guests/{$guestIdQrCode}.svg";
+                        $qrCodeContent = QrCode::format('svg')->size(300)->generate($guestIdQrCode);
                         Storage::disk('public')->put($qrCodePath, $qrCodeContent);
 
                         $insert[] = [

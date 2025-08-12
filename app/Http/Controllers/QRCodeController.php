@@ -23,8 +23,8 @@ class QRCodeController extends Controller
         
         $code = time();
 
-        $qr = QrCode::format('png')->generate($request->link);
-        $qrImageName = $code . '.png';
+        $qr = QrCode::format('svg')->generate($request->link);
+        $qrImageName = $code . '.svg';
 
         // simpan ke local storage
         Storage::disk('public')->put('qr/' . $qrImageName, $qr);
