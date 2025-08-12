@@ -527,6 +527,51 @@
                 </div>
             </div>
         </div>
+
+        <!-- Template Mapping Modal -->
+        <div class="modal fade" id="templateMappingModal" tabindex="-1" role="dialog" aria-labelledby="templateMappingModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="templateMappingModalLabel">Set Template Mapping</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="templateMappingForm">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="templateCategory">Guest Category</label>
+                                <select class="form-control" id="templateCategory" name="guest_category" required>
+                                    <option value="">Select Category</option>
+                                    @foreach ($guestCategories as $category => $count)
+                                        <option value="{{ $category }}">{{ $category }} ({{ $count }} guests)</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="templateName">Template</label>
+                                <select class="form-control" id="templateName" name="template_name" required>
+                                    <option value="">Select Template</option>
+                                    @foreach ($availableTemplates as $template => $label)
+                                        <option value="{{ $template }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Info:</strong> Template mapping determines which invitation design guests will see based on their category. 
+                                If no mapping is set, guests will see the default template (invitation_1).
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Template Mapping</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -554,6 +599,13 @@
                 let url = form.attr('action');
                 let method = form.attr('method') || 'POST';
 
+                // Add debug logging
+                console.log('Form submission:', {
+                    url: url,
+                    method: method,
+                    formId: form.attr('id')
+                });
+
                 $.ajax({
                     url: url,
                     type: method,
@@ -561,6 +613,8 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        console.log('AJAX Success:', response);
+                        
                         if (response.success) {
                             $('#myModal').modal('hide');
 
@@ -568,16 +622,25 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Success!',
-                                text: response.success,
+                                text: response.message || response.success,
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
                                 // Auto refresh page after edit success
                                 window.location.reload();
                             });
+                        } else {
+                            console.log('Response not successful:', response);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'An error occurred'
+                            });
                         }
                     },
                     error: function(xhr) {
+                        console.log('AJAX Error:', xhr);
+                        
                         if (xhr.status === 422) {
                             // Validation errors
                             let errors = xhr.responseJSON.errors;
@@ -590,8 +653,7 @@
                             $.each(errors, function(key, value) {
                                 let input = $('[name="' + key + '"]');
                                 input.addClass('is-invalid');
-                                input.after('<div class="invalid-feedback">' + value[
-                                    0] + '</div>');
+                                input.after('<div class="invalid-feedback">' + value[0] + '</div>');
                             });
                         } else {
                             // Other errors
@@ -720,11 +782,15 @@
                 template_name: $('#templateName').val()
             };
 
+            console.log('Template mapping submission:', formData);
+
             $.ajax({
                 url: '{{ url("/invitation/" . $invitation->invitation_id . "/template-mapping") }}',
                 type: 'POST',
                 data: formData,
                 success: function(response) {
+                    console.log('Template mapping success:', response);
+                    
                     if (response.success) {
                         $('#templateMappingModal').modal('hide');
                         Swal.fire({
@@ -736,9 +802,17 @@
                         }).then(() => {
                             window.location.reload();
                         });
+                    } else {
+                        console.log('Template mapping response not successful:', response);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message || 'An error occurred'
+                        });
                     }
                 },
                 error: function(xhr) {
+                    console.log('Template mapping error:', xhr);
                     let message = xhr.responseJSON?.message || 'An error occurred';
                     Swal.fire({
                         icon: 'error',
@@ -749,49 +823,4 @@
             });
         });
     </script>
-
-    <!-- Template Mapping Modal -->
-    <div class="modal fade" id="templateMappingModal" tabindex="-1" role="dialog" aria-labelledby="templateMappingModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="templateMappingModalLabel">Set Template Mapping</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="templateMappingForm">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="templateCategory">Guest Category</label>
-                            <select class="form-control" id="templateCategory" name="guest_category" required>
-                                <option value="">Select Category</option>
-                                @foreach ($guestCategories as $category => $count)
-                                    <option value="{{ $category }}">{{ $category }} ({{ $count }} guests)</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="templateName">Template</label>
-                            <select class="form-control" id="templateName" name="template_name" required>
-                                <option value="">Select Template</option>
-                                @foreach ($availableTemplates as $template => $label)
-                                    <option value="{{ $template }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Info:</strong> Template mapping determines which invitation design guests will see based on their category. 
-                            If no mapping is set, guests will see the default template (invitation_1).
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Template Mapping</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 @endsection
