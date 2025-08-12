@@ -26,7 +26,13 @@
                             <div class="info-box mb-2">
                                 <span class="info-box-icon bg-info"><i class="fas fa-envelope"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Total Invitations</span>
+                                    <span class="info-box-text">
+                                        @if(Auth::user()->role === 'admin')
+                                            Total Invitations (All)
+                                        @else
+                                            My Invitations
+                                        @endif
+                                    </span>
                                     <span class="info-box-number">{{ $stats['total_invitations'] }}</span>
                                 </div>
                             </div>
@@ -35,7 +41,13 @@
                             <div class="info-box">
                                 <span class="info-box-icon bg-success"><i class="fas fa-users"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Total Guests</span>
+                                    <span class="info-box-text">
+                                        @if(Auth::user()->role === 'admin')
+                                            Total Guests (All)
+                                        @else
+                                            My Guests
+                                        @endif
+                                    </span>
                                     <span class="info-box-number">{{ $stats['total_guests'] }}</span>
                                 </div>
                             </div>

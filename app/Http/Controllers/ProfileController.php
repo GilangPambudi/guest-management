@@ -31,12 +31,25 @@ class ProfileController extends Controller
         $activeMenu = 'profile';
         $user = Auth::user();
 
-        // Get user statistics
-        $stats = [
-            'total_invitations' => Invitation::count(),
-            'total_guests' => Guest::count(),
-            'recent_invitations' => Invitation::latest()->limit(5)->get(),
-        ];
+        // Get role-based statistics
+        if ($user->role === 'admin') {
+            // Admin dapat melihat semua data sistem
+            $stats = [
+                'total_invitations' => Invitation::count(),
+                'total_guests' => Guest::count(),
+                'recent_invitations' => Invitation::with('user')->latest()->limit(5)->get(),
+            ];
+        } else {
+            // User biasa hanya melihat data miliknya sendiri
+            $userInvitations = Invitation::where('user_id', $user->user_id);
+            $stats = [
+                'total_invitations' => $userInvitations->count(),
+                'total_guests' => Guest::whereHas('invitation', function($query) use ($user) {
+                    $query->where('user_id', $user->user_id);
+                })->count(),
+                'recent_invitations' => $userInvitations->latest()->limit(5)->get(),
+            ];
+        }
 
         return view('profile.index', [
             'title' => $title,
