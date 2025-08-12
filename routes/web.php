@@ -59,6 +59,10 @@ Route::group(['prefix' => 'invitation', 'middleware' => 'auth'], function () {
     Route::get('/{invitation_id}/guests/list', [GuestController::class, 'getGuestsList'])->name('guests.list');
     Route::post('/{invitation}/guests/{guest}/send-wa', [GuestController::class, 'sendWhatsapp'])->name('guests.send-wa');
     Route::post('/{invitation}/guests/send-wa-bulk', [GuestController::class, 'sendWhatsappBulk'])->name('guests.send-wa-bulk');
+    
+    // Template Mapping Routes
+    Route::post('/{id}/template-mapping', [InvitationController::class, 'storeTemplateMapping'])->name('invitation.template-mapping.store');
+    Route::delete('/{id}/template-mapping', [InvitationController::class, 'deleteTemplateMapping'])->name('invitation.template-mapping.delete');
 });
 
 Route::group(['prefix' => 'invitation/{invitation}/guests', 'middleware' => 'auth'], function () {
@@ -144,7 +148,7 @@ Route::get('/{slug}/preview', [PublicInvitationController::class, 'preview'])
     ->name('public.invitation-preview');
 
 // Invitation route with constraints to avoid conflicts
-Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'letter'])
+Route::get('/{slug}/{guest_id_qr_code}', [PublicInvitationController::class, 'invitation'])
     ->where([
         'slug' => '[a-z0-9\-]+',  // Only lowercase letters, numbers, and hyphens
         'guest_id_qr_code' => '[a-zA-Z0-9_\-]+' // Letters, numbers, underscore, hyphens

@@ -258,8 +258,8 @@
             </div>
 
             <div class="bg-theme-auto mt-4 p-3 shadow rounded-4" data-aos="fade-down" data-aos-duration="2000">
-                <p class="p-1 mb-2" style="font-size: 0.95rem;">dan sesungguhnya Dialah yang menciptakan pasangan
-                    laki-laki dan perempuan,</p>
+                <p class="p-1 mb-2" style="font-size: 0.95rem;">Dan sesungguhnya Dialah yang menciptakan pasangan
+                    laki-laki dan perempuan</p>
                 <p class="m-0 p-0 text-theme-auto" style="font-size: 0.95rem;">QS. An-Najm: 45</p>
             </div>
         </div>

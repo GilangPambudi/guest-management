@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\Invitation;
+use App\Models\InvitationTemplateMapping;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -400,6 +401,17 @@ class InvitationController extends Controller
         // Get guest categories
         $guestCategories = $invitation->guests->groupBy('guest_category')->map->count();
 
+        // Get existing template mappings
+        $templateMappings = InvitationTemplateMapping::where('invitation_id', $invitation->invitation_id)
+            ->get()
+            ->keyBy('guest_category');
+
+        // Available templates
+        $availableTemplates = [
+            'invitation_1' => 'Template Standard',
+            'invitation_2' => 'Template Luxury'
+        ];
+
         return view('invitation.show', [
             'title' => $title,
             'breadcrumb' => $breadcrumb,
@@ -412,7 +424,9 @@ class InvitationController extends Controller
             'unconfirmedGuests' => $unconfirmedGuests,
             'guestCategories' => $guestCategories,
             'notSentGuests' => $notSentGuests,
-            'sentGuests' => $sentGuests
+            'sentGuests' => $sentGuests,
+            'templateMappings' => $templateMappings,
+            'availableTemplates' => $availableTemplates
         ]);
     }
 
@@ -751,5 +765,114 @@ class InvitationController extends Controller
             'available' => true,
             'message' => 'Slug is available'
         ]);
+    }
+
+    /**
+     * Store template mapping for guest category
+     */
+    public function storeTemplateMapping(Request $request, $id)
+    {
+        try {
+            // Check invitation access permission
+            $invitation = $this->checkInvitationAccess($id);
+
+            $validator = Validator::make($request->all(), [
+                'guest_category' => 'required|string|max:255',
+                'template_name' => 'required|string|in:invitation_1,invitation_2'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Check if guest category exists for this invitation
+            $categoryExists = Guest::where('invitation_id', $invitation->invitation_id)
+                ->where('guest_category', $request->guest_category)
+                ->exists();
+
+            if (!$categoryExists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guest category not found for this invitation'
+                ], 404);
+            }
+
+            // Update or create template mapping
+            $templateMapping = InvitationTemplateMapping::updateOrCreate(
+                [
+                    'invitation_id' => $invitation->invitation_id,
+                    'guest_category' => $request->guest_category
+                ],
+                [
+                    'template_name' => $request->template_name
+                ]
+            );
+
+            $action = $templateMapping->wasRecentlyCreated ? 'created' : 'updated';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Template mapping {$action} successfully",
+                'data' => $templateMapping
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete template mapping for guest category
+     */
+    public function deleteTemplateMapping(Request $request, $id)
+    {
+        try {
+            // Check invitation access permission
+            $invitation = $this->checkInvitationAccess($id);
+
+            $validator = Validator::make($request->all(), [
+                'guest_category' => 'required|string|max:255'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Find and delete template mapping
+            $templateMapping = InvitationTemplateMapping::where('invitation_id', $invitation->invitation_id)
+                ->where('guest_category', $request->guest_category)
+                ->first();
+
+            if (!$templateMapping) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Template mapping not found'
+                ], 404);
+            }
+
+            $templateMapping->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Template mapping reset to default successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

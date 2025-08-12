@@ -190,7 +190,7 @@ class GuestController extends Controller
                 return $guest->guest_arrival_time;
             })
             ->addColumn('action', function ($guest) use ($invitation_id) {
-                // Get invitation slug for invitation letter link
+                // Get invitation slug for invitation link
                 $invitation = Invitation::find($invitation_id);
                 $slug = $invitation ? $invitation->slug : '';
 

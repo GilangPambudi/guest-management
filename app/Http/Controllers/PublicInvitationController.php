@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\Invitation;
+use App\Models\InvitationTemplateMapping;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -14,10 +15,10 @@ class PublicInvitationController extends Controller
     // Tidak ada middleware auth - semua method bisa diakses publik
 
     /**
-     * Display invitation letter for guest
+     * Display invitation for guest
      */
 
-    public function old_invitation_letter($slug, $guest_id_qr_code)
+    public function old_invitation($slug, $guest_id_qr_code)
     {
         // Cari invitation berdasarkan slug
         $invitation = Invitation::where('slug', $slug)->first();
@@ -38,7 +39,7 @@ class PublicInvitationController extends Controller
         // Biarkan JavaScript di frontend yang handle update status setelah user interaction
         
         // Log untuk debugging
-        Log::info('Guest accessed invitation letter', [
+        Log::info('Guest accessed invitation', [
             'guest_id' => $guest->guest_id,
             'guest_name' => $guest->guest_name,
             'invitation_id' => $invitation->invitation_id,
@@ -59,7 +60,7 @@ class PublicInvitationController extends Controller
         $weddingMaps = $invitation->wedding_maps;
         $weddingImage = $invitation->wedding_image;
 
-        return view('guests.old_invitation_letter', [
+        return view('guests.old_invitation', [
             'guest' => $guest,
             'invitation' => $invitation,
             'groomName' => $groomName,
@@ -109,7 +110,7 @@ class PublicInvitationController extends Controller
         
     }
     
-    public function letter($slug, $guest_id_qr_code)
+    public function invitation($slug, $guest_id_qr_code)
     {
         // Cari invitation berdasarkan slug
         $invitation = Invitation::where('slug', $slug)->first();
@@ -130,7 +131,7 @@ class PublicInvitationController extends Controller
         // Biarkan JavaScript di frontend yang handle update status setelah user interaction
         
         // Log untuk debugging
-        Log::info('Guest accessed invitation letter', [
+        Log::info('Guest accessed invitation', [
             'guest_id' => $guest->guest_id,
             'guest_name' => $guest->guest_name,
             'invitation_id' => $invitation->invitation_id,
@@ -140,8 +141,43 @@ class PublicInvitationController extends Controller
             'timestamp' => now()
         ]);
 
+        // Tentukan template berdasarkan kategori tamu
+        $templateName = 'invitation_1'; // Default template
+        
+        if (!empty($guest->guest_category)) {
+            // Cari template mapping untuk kategori tamu ini
+            $templateMapping = InvitationTemplateMapping::where('invitation_id', $invitation->invitation_id)
+                ->where('guest_category', $guest->guest_category)
+                ->first();
+            
+            if ($templateMapping) {
+                $templateName = $templateMapping->template_name;
+                Log::info('Template selected based on guest category', [
+                    'guest_category' => $guest->guest_category,
+                    'template_name' => $templateName,
+                    'guest_id' => $guest->guest_id
+                ]);
+            } else {
+                Log::info('No template mapping found for guest category, using default', [
+                    'guest_category' => $guest->guest_category,
+                    'default_template' => $templateName,
+                    'guest_id' => $guest->guest_id
+                ]);
+            }
+        }
+
+        // Pastikan template view ada, jika tidak fallback ke invitation_1
+        $templatePath = "guests.{$templateName}";
+        if (!view()->exists($templatePath)) {
+            Log::warning('Template not found, falling back to default', [
+                'requested_template' => $templatePath,
+                'fallback_template' => 'guests.invitation_1'
+            ]);
+            $templatePath = 'guests.invitation_1';
+        }
+
         // Kirim semua data invitation ke template
-        return view('guests.letter', [
+        return view($templatePath, [
             'guest' => $guest,
             'invitation' => $invitation,
             // Data yang sesuai dengan migration fields

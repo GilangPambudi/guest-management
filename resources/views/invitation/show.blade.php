@@ -378,6 +378,67 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Template Mapping -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-palette"></i> Template Mapping
+                                </h3>
+                                <div class="card-tools">
+                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#templateMappingModal">
+                                        <i class="fa fa-plus"></i> Set Template Mapping
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @if ($guestCategories->count() > 0)
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Guest Category</th>
+                                                <th>Guest Count</th>
+                                                <th>Template</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($guestCategories as $category => $count)
+                                                <tr>
+                                                    <td>{{ $category }}</td>
+                                                    <td>{{ $count }} guests</td>
+                                                    <td>
+                                                        @if (isset($templateMappings[$category]))
+                                                            <span class="badge badge-success">
+                                                                {{ $availableTemplates[$templateMappings[$category]->template_name] ?? $templateMappings[$category]->template_name }}
+                                                            </span>
+                                                        @else
+                                                            <span class="badge badge-secondary">Default (invitation_1)</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-warning btn-xs" onclick="editTemplateMapping('{{ $category }}', '{{ $templateMappings[$category]->template_name ?? '' }}')">
+                                                            <i class="fa fa-edit"></i> Edit
+                                                        </button>
+                                                        @if (isset($templateMappings[$category]))
+                                                            <button class="btn btn-danger btn-xs" onclick="deleteTemplateMapping('{{ $category }}')">
+                                                                <i class="fa fa-trash"></i> Reset
+                                                            </button>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <p class="text-muted">No guest categories found. Add guests with categories to set template mappings.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <!-- Recent Guests -->
@@ -595,5 +656,140 @@
                 });
             });
         });
+
+        // Template Mapping Functions
+        function editTemplateMapping(category, currentTemplate) {
+            $('#templateCategory').val(category);
+            $('#templateName').val(currentTemplate);
+            $('#templateMappingModalLabel').text('Edit Template for ' + category);
+            $('#templateMappingModal').modal('show');
+        }
+
+        function deleteTemplateMapping(category) {
+            Swal.fire({
+                title: 'Reset Template Mapping?',
+                text: `This will reset template for category "${category}" to default.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, reset it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{ url("/invitation/" . $invitation->invitation_id . "/template-mapping") }}',
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            guest_category: category
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: xhr.responseJSON?.message || 'An error occurred'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Handle template mapping form submission
+        $('#templateMappingForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                _token: '{{ csrf_token() }}',
+                guest_category: $('#templateCategory').val(),
+                template_name: $('#templateName').val()
+            };
+
+            $.ajax({
+                url: '{{ url("/invitation/" . $invitation->invitation_id . "/template-mapping") }}',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        $('#templateMappingModal').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let message = xhr.responseJSON?.message || 'An error occurred';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: message
+                    });
+                }
+            });
+        });
     </script>
+
+    <!-- Template Mapping Modal -->
+    <div class="modal fade" id="templateMappingModal" tabindex="-1" role="dialog" aria-labelledby="templateMappingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="templateMappingModalLabel">Set Template Mapping</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="templateMappingForm">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="templateCategory">Guest Category</label>
+                            <select class="form-control" id="templateCategory" name="guest_category" required>
+                                <option value="">Select Category</option>
+                                @foreach ($guestCategories as $category => $count)
+                                    <option value="{{ $category }}">{{ $category }} ({{ $count }} guests)</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="templateName">Template</label>
+                            <select class="form-control" id="templateName" name="template_name" required>
+                                <option value="">Select Template</option>
+                                @foreach ($availableTemplates as $template => $label)
+                                    <option value="{{ $template }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Info:</strong> Template mapping determines which invitation design guests will see based on their category. 
+                            If no mapping is set, guests will see the default template (invitation_1).
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Template Mapping</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
